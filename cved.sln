@@ -1,0 +1,67 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CvedLib", "CvedLib.vcproj", "{9226AE14-739E-447B-B9A7-823302188BBF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B3700153-DFF1-4949-B602-B8AD2191A4C0} = {B3700153-DFF1-4949-B602-B8AD2191A4C0}
+		{741E748B-9997-48EE-8446-5ED2F10BE603} = {741E748B-9997-48EE-8446-5ED2F10BE603}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gendyncap", "tools\gendyncap\gendyncap.vcproj", "{95F1EA94-E944-426E-8655-C5BD90ADA302}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9226AE14-739E-447B-B9A7-823302188BBF} = {9226AE14-739E-447B-B9A7-823302188BBF}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lricc", "lricc.vcproj", "{2F23A144-FD73-40C2-A46E-E9E5971343D6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B3700153-DFF1-4949-B602-B8AD2191A4C0} = {B3700153-DFF1-4949-B602-B8AD2191A4C0}
+		{741E748B-9997-48EE-8446-5ED2F10BE603} = {741E748B-9997-48EE-8446-5ED2F10BE603}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qrycved", "tools\qrycved\qrycved.vcproj", "{C462E9DA-2C64-46FC-9058-EEBFA7C3026E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9226AE14-739E-447B-B9A7-823302188BBF} = {9226AE14-739E-447B-B9A7-823302188BBF}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "misclib", "..\misc\misclib.vcproj", "{741E748B-9997-48EE-8446-5ED2F10BE603}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "solgen", "..\solgen\solgen.vcproj", "{B3700153-DFF1-4949-B602-B8AD2191A4C0}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{9226AE14-739E-447B-B9A7-823302188BBF}.Debug.ActiveCfg = Debug|Win32
+		{9226AE14-739E-447B-B9A7-823302188BBF}.Debug.Build.0 = Debug|Win32
+		{9226AE14-739E-447B-B9A7-823302188BBF}.Release.ActiveCfg = Release|Win32
+		{9226AE14-739E-447B-B9A7-823302188BBF}.Release.Build.0 = Release|Win32
+		{95F1EA94-E944-426E-8655-C5BD90ADA302}.Debug.ActiveCfg = Debug|Win32
+		{95F1EA94-E944-426E-8655-C5BD90ADA302}.Debug.Build.0 = Debug|Win32
+		{95F1EA94-E944-426E-8655-C5BD90ADA302}.Release.ActiveCfg = Release|Win32
+		{95F1EA94-E944-426E-8655-C5BD90ADA302}.Release.Build.0 = Release|Win32
+		{2F23A144-FD73-40C2-A46E-E9E5971343D6}.Debug.ActiveCfg = Debug|Win32
+		{2F23A144-FD73-40C2-A46E-E9E5971343D6}.Debug.Build.0 = Debug|Win32
+		{2F23A144-FD73-40C2-A46E-E9E5971343D6}.Release.ActiveCfg = Release|Win32
+		{2F23A144-FD73-40C2-A46E-E9E5971343D6}.Release.Build.0 = Release|Win32
+		{C462E9DA-2C64-46FC-9058-EEBFA7C3026E}.Debug.ActiveCfg = Debug|Win32
+		{C462E9DA-2C64-46FC-9058-EEBFA7C3026E}.Debug.Build.0 = Debug|Win32
+		{C462E9DA-2C64-46FC-9058-EEBFA7C3026E}.Release.ActiveCfg = Release|Win32
+		{C462E9DA-2C64-46FC-9058-EEBFA7C3026E}.Release.Build.0 = Release|Win32
+		{741E748B-9997-48EE-8446-5ED2F10BE603}.Debug.ActiveCfg = Debug|Win32
+		{741E748B-9997-48EE-8446-5ED2F10BE603}.Debug.Build.0 = Debug|Win32
+		{741E748B-9997-48EE-8446-5ED2F10BE603}.Release.ActiveCfg = Release|Win32
+		{741E748B-9997-48EE-8446-5ED2F10BE603}.Release.Build.0 = Release|Win32
+		{B3700153-DFF1-4949-B602-B8AD2191A4C0}.Debug.ActiveCfg = Debug|Win32
+		{B3700153-DFF1-4949-B602-B8AD2191A4C0}.Debug.Build.0 = Debug|Win32
+		{B3700153-DFF1-4949-B602-B8AD2191A4C0}.Release.ActiveCfg = Release|Win32
+		{B3700153-DFF1-4949-B602-B8AD2191A4C0}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
