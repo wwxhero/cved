@@ -1,7 +1,7 @@
 #include "CvedEDOCtrl.h"
 namespace CVED {
 
-CCvedEDOCtrl::CCvedEDOCtrl(void)
+CCvedEDOCtrl::CCvedEDOCtrl(IExternalObjectControl* pCtrl) : CCvedDistri(pCtrl)
 {
 }
 

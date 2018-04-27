@@ -8,7 +8,7 @@ class CCvedEDOCtrl :
 	public CCvedDistri
 {
 public:
-	CCvedEDOCtrl(void);
+	CCvedEDOCtrl(IExternalObjectControl* pCtrl);
 	virtual ~CCvedEDOCtrl(void);
 };
 
