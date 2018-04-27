@@ -464,6 +464,8 @@ call ..\mcopy include\*.inl ..\include
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="libsrc\CvedDistri.cpp" />
+    <ClCompile Include="libsrc\CvedEDOCtrl.cpp" />
     <ClCompile Include="libsrc\dynobj.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug_Small_BLI|Win32'">Disabled</Optimization>
@@ -2118,6 +2120,8 @@ call ..\mcopy include\*.inl ..\include
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\CvedDistri.h" />
+    <ClInclude Include="include\CvedEDOCtrl.h" />
     <ClInclude Include="include\ExternalControlInterface.h" />
     <ClInclude Include="include\objmask.h" />
     <ClInclude Include="include\attr.h" />

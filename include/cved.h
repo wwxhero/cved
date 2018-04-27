@@ -45,7 +45,6 @@ class CODEObject;
 class CVED::CCved;
 
 namespace CVED {
-	class IExternalObjectControl;
 // the CVED shared memory key
 #define cCVED_SHARED_MEM_KEY_ENV  "CvedMem"
 	class CTrafLightData;
@@ -128,7 +127,7 @@ public:
 	bool		Init(const string& cLriName, string& errMsg);
 	void		ReInit(void);
 	void		Maintainer(void);
-	void		ExecuteDynamicModels(IExternalObjectControl* ctrl = NULL);
+	virtual void		ExecuteDynamicModels(void);
 	void		SetDebug(int level);
 
 	// SOL related
@@ -501,12 +500,7 @@ public:
 						);
 	void        SetEnviron(CEnvArea&, vector<cvTEnviroInfo>& info);
 	void        SetGlobalEnviron(vector<cvTEnviroInfo>& info);
-	CExternalDriverObj*	CreatePeerExternalObj(
-					const string&     cName,
-					const cvTObjAttr& cAttr,
-					const CPoint3D*   cpInitPos,
-					const CVector3D*  cpInitTan,
-					const CVector3D*  cpInitLat);
+
 	CDynObj*	CreateDynObj(
 					const string&		cName,
 					cvEObjType			type,
@@ -533,9 +527,8 @@ public:
 
 	// Object access functions
 	bool		IsObjValid( int objId ) const;
-	//fix me: shall we do it in derived class?
-	cvEObjType	GetObjType( int objId, bool singleExt ) const;
-	cvEObjType	GetObjType( int objId ) const;
+
+	virtual cvEObjType	GetObjType( int objId ) const;
 	int			GetObjHcsmTypeId( int objId ) const;
 	TS32b		GetObjSolId( int objId ) const;
 	TS32b		GetObjHcsmId( int objId ) const;
