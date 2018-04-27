@@ -113,7 +113,7 @@ extern "C" {
  * reduces the number of slots available for dynamic objects
  * as specified in cNUM_DYN_OBJS
  */
-#define cMAX_EXT_CNTRL_OBJS 10
+#define cMAX_EXT_CNTRL_OBJS 1
 
 
 /*

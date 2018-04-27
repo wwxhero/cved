@@ -1770,7 +1770,7 @@ CCved::GetNumDynamicObjs(CObjTypeMask mask) const
 
 	for (i=0, pO = BindObj(0); i<cNUM_DYN_OBJS; i++, pO++) {
 		if ( pO->phase == eALIVE || pO->phase == eDYING ) {
-			if ( mask.Has(pO->type, i) ) count++;
+			if ( mask.Has(pO->type) ) count++;
 		}
 	}
 
