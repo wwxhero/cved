@@ -127,7 +127,7 @@ public:
 	bool		Init(const string& cLriName, string& errMsg);
 	void		ReInit(void);
 	void		Maintainer(void);
-	virtual void		ExecuteDynamicModels(void);
+	virtual void ExecuteDynamicModels(void);
 	void		SetDebug(int level);
 
 	// SOL related
@@ -528,7 +528,7 @@ public:
 	// Object access functions
 	bool		IsObjValid( int objId ) const;
 
-	virtual cvEObjType	GetObjType( int objId ) const;
+	cvEObjType	GetObjType( int objId ) const;
 	int			GetObjHcsmTypeId( int objId ) const;
 	TS32b		GetObjSolId( int objId ) const;
 	TS32b		GetObjHcsmId( int objId ) const;

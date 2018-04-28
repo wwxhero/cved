@@ -10,6 +10,7 @@ class CCvedEDOCtrl :
 public:
 	CCvedEDOCtrl(IExternalObjectControl* pCtrl);
 	virtual ~CCvedEDOCtrl(void);
+	virtual void ExecuteDynamicModels(void);
 };
 
 };
