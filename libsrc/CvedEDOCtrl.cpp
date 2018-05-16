@@ -131,7 +131,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					CVED::CObj* obj = BindObjIdToClass2(id);
 					if ( !peerSim
 					 ||	(NULL == ctrl
-					 ||	!ctrl->OnPeerSimUpdating(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
 					{
 						if (!localSim
 						 || m_haveFakeExternalDriver) //local simulator has its own dynamic
@@ -146,7 +146,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					}
 					if (localSim
 						&& NULL != ctrl)
-						ctrl->OnOwnSimUpdated(pCurrContInp, pFutState);
+						ctrl->OnPushUpdate(pCurrContInp, pFutState);
 
 				}
 			}
@@ -156,7 +156,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 				CVED::CObj* obj = BindObjIdToClass2(id);
 				if ( !peerSim
 					 ||	(NULL == ctrl
-					 ||	!ctrl->OnPeerSimUpdating(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
 				{
 					if (!localSim
 					 || m_haveFakeExternalDriver) //local simulator has its own dynamic
@@ -171,7 +171,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 				}
 				if (localSim
 					&& NULL != ctrl)
-						ctrl->OnOwnSimUpdated(pCurrContInp, pFutState);
+						ctrl->OnPushUpdate(pCurrContInp, pFutState);
 			}
 
 			// This is an optimization.
@@ -227,7 +227,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					&& pO->type == eCV_EXTERNAL_DRIVER);
 		if ( !peerSim
 		||	(NULL == ctrl
-		||	!ctrl->OnPeerSimUpdating(attachedObjIds[i], const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+		||	!ctrl->OnGetUpdate(attachedObjIds[i], const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
 		{
 			if (!localSim
 			 || m_haveFakeExternalDriver) //local simulator has its own dynamic
@@ -242,7 +242,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 		}
 		if (localSim
 		&& NULL != ctrl)
-			ctrl->OnOwnSimUpdated(pCurrContInp, pFutState);
+			ctrl->OnPushUpdate(pCurrContInp, pFutState);
 	}
 
 	// execute ode dynamics from objects in free motion mode

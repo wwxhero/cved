@@ -20,11 +20,12 @@
 namespace CVED {
 	class IExternalObjectControl {
 	public:
+		enum Type {edo_controller = 0, ado_controller};
 		virtual void PreUpdateDynamicModels() = 0;
 		virtual void PostUpdateDynamicModels() = 0;
-		virtual bool OnPeerSimUpdating(TObjectPoolIdx id, cvTObjContInp* curInput, cvTObjState* curState) = 0;
-		virtual void OnOwnSimUpdated(const cvTObjContInp* nextInput, const cvTObjState* nextState) = 0;
-		virtual bool Initialize(CHeaderDistriParseBlock& hBlk, CCved* pCved) = 0;
+		virtual bool OnGetUpdate(TObjectPoolIdx id, cvTObjContInp* curInput, cvTObjState* curState) = 0;
+		virtual void OnPushUpdate(const cvTObjContInp* nextInput, const cvTObjState* nextState) = 0;
+		virtual bool Initialize(CHeaderDistriParseBlock& blk, CVED::CCved* pCved, Type runAs) = 0;
 		virtual void UnInitialize(CCved* pCved) = 0;
 		// virtual bool CreateAndDeleteObjects(CVED::CCved&) = 0;
 		// virtual bool Shutdown() = 0;
