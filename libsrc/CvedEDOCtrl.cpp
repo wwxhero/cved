@@ -77,7 +77,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					( pO->phase == eALIVE || pO->phase == eDYING )
 					);
 		bool localSim = (0 == id);
-		bool peerSim = (0 != id
+		bool RemoteOwn = (0 != id
 					&& (pO->type == eCV_VEHICLE));
 
 //		if ( pO->type == eCV_TRAJ_FOLLOWER )
@@ -129,7 +129,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 				else{
 					CVED::CCved &me = *this;
 					CVED::CObj* obj = BindObjIdToClass2(id);
-					if ( !peerSim
+					if ( !RemoteOwn
 					 ||	(NULL == ctrl
 					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
 					{
@@ -146,7 +146,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					}
 					if (localSim
 						&& NULL != ctrl)
-						ctrl->OnPushUpdate(pCurrContInp, pFutState);
+						ctrl->OnPushUpdate(0, pCurrContInp, pFutState);
 
 				}
 			}
@@ -154,7 +154,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 			{
 				CVED::CCved &me = *this;
 				CVED::CObj* obj = BindObjIdToClass2(id);
-				if ( !peerSim
+				if ( !RemoteOwn
 					 ||	(NULL == ctrl
 					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
 				{
@@ -171,7 +171,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 				}
 				if (localSim
 					&& NULL != ctrl)
-						ctrl->OnPushUpdate(pCurrContInp, pFutState);
+						ctrl->OnPushUpdate(0, pCurrContInp, pFutState);
 			}
 
 			// This is an optimization.
@@ -223,9 +223,9 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 
 		CVED::CCved &me = *this;
 		bool localSim = (0 == attachedObjIds[i]);
-		bool peerSim = (0 != attachedObjIds[i]
+		bool RemoteOwn = (0 != attachedObjIds[i]
 					&& pO->type == eCV_EXTERNAL_DRIVER);
-		if ( !peerSim
+		if ( !RemoteOwn
 		||	(NULL == ctrl
 		||	!ctrl->OnGetUpdate(attachedObjIds[i], const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
 		{
@@ -242,7 +242,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 		}
 		if (localSim
 		&& NULL != ctrl)
-			ctrl->OnPushUpdate(pCurrContInp, pFutState);
+			ctrl->OnPushUpdate(0, pCurrContInp, pFutState);
 	}
 
 	// execute ode dynamics from objects in free motion mode
