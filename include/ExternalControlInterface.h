@@ -18,14 +18,15 @@
 #include "SnoParserDistri.h"
 #include "HeaderDistriParseBlock.h"
 namespace CVED {
+	class CCvedDistri;
 	class IExternalObjectControl {
 	public:
 		virtual void PreUpdateDynamicModels() = 0;
 		virtual void PostUpdateDynamicModels() = 0;
 		virtual bool OnGetUpdate(TObjectPoolIdx id_local, cvTObjContInp* curInput, cvTObjState* curState) = 0;
 		virtual void OnPushUpdate(TObjectPoolIdx id_local, const cvTObjContInp* nextInput, const cvTObjState* nextState) = 0;
-		virtual bool Initialize(CHeaderDistriParseBlock& blk, CVED::CCved* pCved) = 0;
-		virtual void UnInitialize(CCved* pCved) = 0;
+		virtual bool Initialize(CHeaderDistriParseBlock& blk, CVED::CCvedDistri* pCved) = 0;
+		virtual void UnInitialize() = 0;
 	};
 };
 #endif
