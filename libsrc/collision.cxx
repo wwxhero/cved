@@ -215,7 +215,7 @@ CCved::CollisionDetection(
 #if DEBUG_COLLISION >= 5
 			printf("Checking LRI obj %d type %d, ", *soIter, GetObjType(*soIter, *soIter));
 #endif
-			if (mask.Has(GetObjType(*soIter), *soIter)){
+			if (mask.Has(GetObjType(*soIter))){
 				if (IfOverlap(objId, *soIter)){
 #if DEBUG_COLLISION >= 5
 					printf("overlapping, added to the list\n");
@@ -242,7 +242,7 @@ CCved::CollisionDetection(
 #if DEBUG_COLLISION >= 6
 		printf("Checking non-LRI static obj %d type %d, ", soIdx, GetObjType(soIdx, *soIter));
 #endif
-		if (mask.Has(GetObjType(soIdx), soIdx)){
+		if (mask.Has(GetObjType(soIdx))){
 			if (IfOverlap(objId, soIdx)){
 				objIdVec.push_back(soIdx);
 #if DEBUG_COLLISION >= 6

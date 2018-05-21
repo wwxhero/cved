@@ -17,7 +17,7 @@
 #include "EnvVar.h"
 #include <algorithm>
 #include "hcsmobject.h"
-#include "ExternalControlInterface.h"
+
 #include "polygon2d.h"
 
 #include <filename.h>
@@ -1050,7 +1050,7 @@ CCved::SetExternalDriverHcsmId( int hcsmId )
 //
 //////////////////////////////////////////////////////////////////////////////
 void
-CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
+CCved::ExecuteDynamicModels( void )
 {
 	TObjectPoolIdx id;
 	TObj*          pO;
@@ -1079,10 +1079,8 @@ CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
 	printf("ExecDyna: current sec %f simstep size %f\n",
 		hrt_timer_currentsecs( timer ), m_pHdr->deltaT / m_pHdr->dynaMult * 2);
 	*/
-	if (NULL != ctrl)
-		ctrl->PreUpdateDynamicModels();
-	if( m_haveFakeExternalDriver
-	|| NULL != ctrl )
+
+	if( m_haveFakeExternalDriver ) 
 	{
 		id = 0;
 	}
@@ -1103,9 +1101,6 @@ CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
 					&&
 					( pO->phase == eALIVE || pO->phase == eDYING )
 					);
-		bool localSim = (0 == id);
-		bool peerSim = (0 != id
-					&& (pO->type == eCV_EXTERNAL_DRIVER || pO->type == eCV_VEHICLE)); //fixme: pO->type == eCV_VEHICLE
 
 //		if ( pO->type == eCV_TRAJ_FOLLOWER )
 //			fprintf(stdout, " traj follower %d phase %d\n", id, pO->phase);
@@ -1153,15 +1148,7 @@ CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
 					attachedObjIds[attachedObjCount] = id;
 					++attachedObjCount;
 				}
-				else{
-					CVED::CCved &me = *this;
-					CVED::CObj* obj = BindObjIdToClass2(id);
-					if ( !peerSim
-					 ||	(NULL == ctrl
-					 ||	!ctrl->OnPeerSimUpdating(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
-					{
-						if (!localSim
-						 || m_haveFakeExternalDriver) //local simulator has its own dynamic
+				else
 						DynamicModel(
 							id,
 							pO->type,
@@ -1171,22 +1158,7 @@ CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
 							pFutState
 							);
 					}
-					if (localSim
-						&& NULL != ctrl)
-						ctrl->OnOwnSimUpdated(pCurrContInp, pFutState);
-
-				}
-			}
 			else
-			{
-				CVED::CCved &me = *this;
-				CVED::CObj* obj = BindObjIdToClass2(id);
-				if ( !peerSim
-					 ||	(NULL == ctrl
-					 ||	!ctrl->OnPeerSimUpdating(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
-				{
-					if (!localSim
-					 || m_haveFakeExternalDriver) //local simulator has its own dynamic
 					DynamicModel(
 						id,
 						pO->type,
@@ -1195,11 +1167,6 @@ CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
 						pCurrContInp,
 						pFutState
 						);
-				}
-				if (localSim
-					&& NULL != ctrl)
-						ctrl->OnOwnSimUpdated(pCurrContInp, pFutState);
-			}
 
 			// This is an optimization.
 			// We know the total number of dynamic objects because
@@ -1248,16 +1215,6 @@ CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
 			pFutState    = &pO->stateBufA.state;
 		}
 
-		CVED::CCved &me = *this;
-		bool localSim = (0 == attachedObjIds[i]);
-		bool peerSim = (0 != attachedObjIds[i]
-					&& pO->type == eCV_EXTERNAL_DRIVER);
-		if ( !peerSim
-		||	(NULL == ctrl
-		||	!ctrl->OnPeerSimUpdating(attachedObjIds[i], const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
-		{
-			if (!localSim
-			 || m_haveFakeExternalDriver) //local simulator has its own dynamic
 			DynamicModel(
 				attachedObjIds[i],
 				pO->type,
@@ -1267,10 +1224,6 @@ CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
 				pFutState
 				);
 		}
-		if (localSim
-		&& NULL != ctrl)
-			ctrl->OnOwnSimUpdated(pCurrContInp, pFutState);
-	}
 
 	// execute ode dynamics from objects in free motion mode
 	m_pOde->SimStep( (float)m_pHdr->deltaT / m_pHdr->dynaMult );
@@ -1326,8 +1279,6 @@ CCved::ExecuteDynamicModels( IExternalObjectControl* ctrl )
 
 
 	}
-	if (NULL != ctrl)
-		ctrl->PostUpdateDynamicModels();
 
 } // end of ExecuteDynamicModels
 
@@ -1819,7 +1770,7 @@ CCved::GetNumDynamicObjs(CObjTypeMask mask) const
 
 	for (i=0, pO = BindObj(0); i<cNUM_DYN_OBJS; i++, pO++) {
 		if ( pO->phase == eALIVE || pO->phase == eDYING ) {
-			if ( mask.Has(pO->type, i) ) count++;
+			if ( mask.Has(pO->type) ) count++;
 		}
 	}
 
@@ -1925,7 +1876,7 @@ CCved::GetAllDynamicObjs(TIntVec &out, CObjTypeMask mask) const
 	out.clear();
 	for (i=0, pO = BindObj(0); i<cNUM_DYN_OBJS; i++, pO++) {
 		if ( pO->phase == eALIVE || pO->phase == eDYING ) {
-			if ( mask.Has(pO->type, i) ) out.push_back(i);
+			if ( mask.Has(pO->type) ) out.push_back(i);
 		}
 	}
 } // end of GetAllDynamicObjs
@@ -2367,7 +2318,7 @@ CCved::GetObjsNear(
 	i  = 0;
 	for(; i < cNUM_DYN_OBJS; i++){
 		if ( pO->phase == eALIVE || pO->phase == eDYING ) {
-			if ( mask.Has(pO->type, i) ) {
+			if ( mask.Has(pO->type) ) {
 				objPos = GetObjPos(i);
 				if ( bbox.Encloses(objPos) ) {
 					out.push_back(i);
@@ -2684,7 +2635,7 @@ CCved::GetAllDynObjsOnRoad(
 			 (lanes.to_ulong() == 0))) {
 
 			type = GetObjType(m_pDynObjRefPool[curIdx].objId);
-			if (cMask.Has(type, m_pDynObjRefPool[curIdx].objId))
+			if (cMask.Has(type))
 				result.push_back(m_pDynObjRefPool[curIdx].objId);
 		}
 		curIdx = m_pDynObjRefPool[curIdx].next;
@@ -2732,7 +2683,7 @@ CCved::GetAllDynObjsOnLane (CLane lane,
 	{
 		int objId = m_pDynObjRefPool[curIdx].objId;
 		cvEObjType objType = GetObjType( m_pDynObjRefPool[curIdx].objId );
-		bool inObjMask = m.Has( objType, m_pDynObjRefPool[curIdx].objId );
+		bool inObjMask = m.Has( objType );
 		double objDist = m_pDynObjRefPool[curIdx].distance;
 
 #ifdef DEBUG_GET_ALL_DYNOBJS_ON_LANE
@@ -2849,7 +2800,7 @@ CCved::GetAllDynObjsOnRoadRange(int roadId,
 				 (lanes.to_ulong() == 0))) {
 
 				type = GetObjType(m_pDynObjRefPool[curIdx].objId);
-				if (cMask.Has(type, m_pDynObjRefPool[curIdx].objId))
+				if (cMask.Has(type))
 
 				//	gout << " *** checking inserted obj id = ";
 				//	gout << m_pDynObjRefPool[curIdx].objId << endl;
@@ -2922,7 +2873,7 @@ CCved::GetAllDynObjsOnRoadRange(int roadId,
 				  (lanes.to_ulong() == 0) ) ) {
 
 				type = GetObjType(m_pDynObjRefPool[curIdx].objId);
-				if (cMask.Has(type, m_pDynObjRefPool[curIdx].objId))
+				if (cMask.Has(type))
 					result.push_back(m_pDynObjRefPool[curIdx].objId);
 			}
 		}
@@ -3004,7 +2955,7 @@ CCved::GetAllDynObjsOnIntrsctn (int intrsctnId,
 			 (crdrs.to_ulong() == 0))) {
 
 				type = GetObjType(m_pDynObjRefPool[curIdx].objId);
-				if (m.Has(type, m_pDynObjRefPool[curIdx].objId))
+				if (m.Has(type))
 				{
 					// If an object appears more than once in the internal list,
 					// only insert it once.
@@ -3094,7 +3045,7 @@ CCved::GetAllDynObjsOnIntrsctnRange (
 
 						// If the object's type is in the mask
 						type = GetObjType(m_pDynObjRefPool[curIdx].objId);
-						if (m.Has(type, m_pDynObjRefPool[curIdx].objId)) {
+						if (m.Has(type)) {
 							// Add the object id to the list
 
 						//	gout << " *** checking inserted obj id = ";
@@ -3217,7 +3168,7 @@ CCved::GetAllDynObjsOnIntrsctnRange (
 
 						// If the object's type is in the mask
 						type = GetObjType(m_pDynObjRefPool[curIdx].objId);
-						if (m.Has(type, m_pDynObjRefPool[curIdx].objId)) {
+						if (m.Has(type)) {
 							// Add the object id to the list
 							result.push_back(m_pDynObjRefPool[curIdx].objId);
 
@@ -3292,7 +3243,7 @@ CCved::GetAllDynObjsOnCrdr (int intrsctnId,
 
 			// If the object's type is in the mask
 			type = GetObjType(m_pDynObjRefPool[curIdx].objId);
-			if (m.Has(type, m_pDynObjRefPool[curIdx].objId)) {
+			if (m.Has(type)) {
 
 			// Add the object id to the list
 			TObjWithDist node;
@@ -3362,7 +3313,7 @@ CCved::GetAllDynObjsOnCrdrRange (int intrsctnId,
 
 				// If the object's type is in the mask
 				type = GetObjType(m_pDynObjRefPool[curIdx].objId);
-				if (m.Has(type, m_pDynObjRefPool[curIdx].objId)) {
+				if (m.Has(type)) {
 					// Add the object id to the list
 
 				//	gout << " *** checking inserted obj id = ";
@@ -3496,176 +3447,6 @@ CCved::CreateDynObj(
 	return pObj;
 }
 
-CExternalDriverObj *
-CCved::CreatePeerExternalObj(
-	const string&     cName,
-	const cvTObjAttr& cAttr,
-	const CPoint3D*   cpInitPos,
-	const CVector3D*  cpInitTan,
-	const CVector3D*  cpInitLat
-	)
-{
-	// Search for an empty slot; We use the lastObjAlloc field of
-	// the header to remember which was the last allocated id.  That
-	// way, we keep advancing identifiers so we don't return the
-	// same id as soon as they are freed.
-	// In searching for an empty slot, we ignore identifiers less
-	// than cMAX_EXT_CNTRL_OBJS, which are reserved for the own
-	// driver (and any other externallyd driven objects).
-	// Also, we have to lock the whole header to ensure that we don't
-	// end up competing for the same slot from a concurrently
-	// running process that also is trying to create an object
-	//
-	// When creating an "ownship" driver, we simply allocate a slot
-	// between 0 and cMAX_EXT_CNTRL_OBJS.  We don't expect frequent
-	// allocation/deallocation so we don't keep track of which id
-	// was allocated
-	int    objId;
-	TObj  *pO;
-
-	if ( m_debug > 0 ) {
-		gout << "->Enter CCved::CreatePeerExternalObj("
-			<< cName << ", )" << endl;
-		gout << "header addr is " << (int) m_pHdr << endl << flush;
-	}
-
-	LockObjectPool();
-
-	objId = 1;
-	pO    = BindObj(objId);
-	while ( pO->phase != eDEAD && objId != cMAX_EXT_CNTRL_OBJS )  {
-		objId++;
-		pO = BindObj(objId);
-	}
-	if ( pO->phase != eDEAD ) {
-		if ( m_debug ) {
-			gout << "  no slot for externally driven obj" << endl;
-		}
-		return 0;
-	}
-	pO->phase = eBORN;
-
-	UnlockObjectPool();
-
-	if( m_debug > 1 )
-	{
-		gout << "  Object id is " << objId << endl;
-	}
-
-	//
-	// insert information into the slot
-	//
-	pO->myId = objId;
-	pO->type = eCV_EXTERNAL_DRIVER;
-	strncpy_s(pO->name, cName.c_str(), cOBJ_NAME_LEN-1);
-
-	pair<string, int> pairToInsert;
-	pairToInsert.first = cName;
-	pairToInsert.second = objId;
-	m_objNameToId.insert( pairToInsert );
-
-	// set up the cAttributes; we simply copy whatever
-	// the user provided into the allocated slot.
-	// Dynamic objects can't have multiple cAttributes
-	// so the cAttribute slot is the same the object id.
-	pO->attr = cAttr;
-
-	cvTObjStateBuf initVals = { 0 }; // make everything 0 to start with
-
-	if( cpInitPos )
-	{
-		initVals.state.anyState.position.x = cpInitPos->m_x;
-		initVals.state.anyState.position.y = cpInitPos->m_y;
-		initVals.state.anyState.position.z = cpInitPos->m_z;
-	}
-
-	// If the user specified tangent or lateral = (0,0,0),
-	//	then the tangent/lateral must be set to the proper
-	//	default value.  This is to insure that the object's
-	//	bounding box never has a length/width = 0.  Also,
-	//	it's important to insure that the tangent/lateral
-	//	vectors are normalized.
-	if( cpInitTan )
-	{
-		CVector3D tang( *cpInitTan );
-
-		if( tang.Normalize() != 0.0 )
-		{
-			initVals.state.anyState.tangent.i = tang.m_i;
-			initVals.state.anyState.tangent.j = tang.m_j;
-			initVals.state.anyState.tangent.k = tang.m_k;
-		}
-		else
-		{
-			initVals.state.anyState.tangent.i = 1.0;
-			initVals.state.anyState.tangent.j = 0.0f;
-			initVals.state.anyState.tangent.k = 0.0f;
-		}
-	}
-	else
-	{
-		initVals.state.anyState.tangent.i = 1.0f;
-		initVals.state.anyState.tangent.j = 0.0f;
-		initVals.state.anyState.tangent.k = 0.0f;
-	}
-
-	if( cpInitLat )
-	{
-		CVector3D lat( *cpInitLat );
-
-		if( lat.Normalize() != 0.0 )
-		{
-			initVals.state.anyState.lateral.i = lat.m_i;
-			initVals.state.anyState.lateral.j = lat.m_j;
-			initVals.state.anyState.lateral.k = lat.m_k;
-		}
-		else
-		{
-			initVals.state.anyState.lateral.i = 0.0f;
-			initVals.state.anyState.lateral.j = -1.0f;
-			initVals.state.anyState.lateral.k = 0.0f;
-		}
-	}
-	else
-	{
-		initVals.state.anyState.lateral.i = 0.0f;
-		initVals.state.anyState.lateral.j = -1.0f;
-		initVals.state.anyState.lateral.k = 0.0f;
-	}
-
-	// Initialize the bounding box, based on the
-	//	tangent, lateral, and position calculated
-	//	above.
-	CPoint3D ll, ur;
-	CCved::UpdateBBox(
-				&pO->attr,
-				CVector3D( initVals.state.anyState.tangent ),
-				CVector3D( initVals.state.anyState.lateral ),
-				CPoint3D( initVals.state.anyState.position ),
-				ll,
-				ur
-				);
-	initVals.state.anyState.boundBox[0].x = ll.m_x;
-	initVals.state.anyState.boundBox[0].y = ll.m_y;
-	initVals.state.anyState.boundBox[1].x = ur.m_x;
-	initVals.state.anyState.boundBox[1].y = ur.m_y;
-
-	pO->stateBufA = initVals;
-	pO->stateBufB = initVals;
-
-	// select the appropriate derived class (based on the type)
-	// and create the object in the specified slot
-	CDynObj* pTheObj = CreateTypedObject( eCV_EXTERNAL_DRIVER, objId );
-
-	m_pHdr->dynObjectCount++;
-
-	if( m_debug > 0 )
-	{
-		gout << "->Exit CCved::CreateDynObj, ptr is"  << (int)pTheObj << endl;
-	}
-
-	return static_cast<CExternalDriverObj*>(pTheObj);
-}
 CDynObj *
 CCved::CreateDynObj(
 			const string&     cName,
@@ -4539,19 +4320,6 @@ CCved::GetObjType( int objId ) const
 	cvEObjType t = pO->type;
 	return t;
 } // end of GetObjType
-
-
-cvEObjType
-CCved::GetObjType( int objId, bool singleExt ) const
-{
-	TObj* pO = BindObj( objId );
-	cvEObjType t = pO->type;
-	if (singleExt
-		&& eCV_EXTERNAL_DRIVER == t
-		&& 0 != objId)
-		t = eCV_VEHICLE;
-	return t;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -7707,7 +7475,7 @@ CCved::BuildFwdObjList(
 				int objId = m_pDynObjRefPool[curIdx].objId;
 				bool notOwnerObj = ownerObjId != objId;
 				cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-				bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+				bool inObjMask = objMask.Has( type );
 //				bool withinDist = (
 //							m_pDynObjRefPool[curIdx].distance >= startDist &&
 //							m_pDynObjRefPool[curIdx].distance <= endDist
@@ -7906,7 +7674,7 @@ CCved::BuildFwdObjList(
 				int objId = m_pDynObjRefPool[curIdx].objId;
 				bool notOwnerObj = ownerObjId != objId;
 				cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-				bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+				bool inObjMask = objMask.Has( type );
 				bool passedFirstTest = notOwnerObj && inObjMask;
 
 
@@ -8276,7 +8044,7 @@ CCved::BuildBackObjList(
 		int objId = m_pDynObjRefPool[curIdx].objId;
 		bool notOwnerObj = ownerObjId != objId;
 		cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-		bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+		bool inObjMask = objMask.Has( type );
 		bool withinDist = (
 					m_pDynObjRefPool[curIdx].distance >= startDist &&
 					m_pDynObjRefPool[curIdx].distance <= endDist
@@ -8641,7 +8409,7 @@ CCved::BuildOncomingObjList(
 				int objId = m_pDynObjRefPool[curIdx].objId;
 				bool notOwnerObj = ownerObjId != objId;
 				cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-				bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+				bool inObjMask = objMask.Has( type );
 				bool passedFirstTest = notOwnerObj && inObjMask;
 
 #ifdef DEBUG_BUILD_ONCOM_OBJ_LIST
@@ -9163,7 +8931,7 @@ CCved::BuildOncomingObjList(
 				int objId = m_pDynObjRefPool[curIdx].objId;
 				bool notOwnerObj = ownerObjId != objId;
 				cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-				bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+				bool inObjMask = objMask.Has( type );
 				bool passedFirstTest = notOwnerObj && inObjMask;
 
 #ifdef DEBUG_BUILD_ONCOM_OBJ_LIST
@@ -9551,7 +9319,7 @@ CCved::BuildApprchObjList(
 		int objId = m_pDynObjRefPool[curIdx].objId;
 		bool notOwnerObj = ownerObjId != objId;
 		cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-		bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+		bool inObjMask = objMask.Has( type );
 		bool passedFirstTest = notOwnerObj && inObjMask;
 
 #ifdef DEBUG_BUILD_APPRCH_OBJ_LIST
@@ -9639,7 +9407,7 @@ CCved::BuildApprchObjList(
 		int objId = m_pDynObjRefPool[curIdx].objId;
 		bool notOwnerObj = ownerObjId != objId;
 		cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-		bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+		bool inObjMask = objMask.Has( type );
 		bool passedFirstTest = notOwnerObj && inObjMask;
 
 #ifdef DEBUG_BUILD_APPRCH_OBJ_LIST
@@ -9985,7 +9753,7 @@ CCved::BuildBackObjList2(
 				int objId = m_pDynObjRefPool[curIdx].objId;
 				bool notOwnerObj = ownerObjId != objId;
 				cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-				bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+				bool inObjMask = objMask.Has( type );
 
 				//
 				// An object should be placed on the owner's back list as long
@@ -10334,7 +10102,7 @@ CCved::BuildBackObjList2(
 				int objId = m_pDynObjRefPool[curIdx].objId;
 				bool notOwnerObj = ownerObjId != objId;
 				cvEObjType type = GetObjType( m_pDynObjRefPool[curIdx].objId );
-				bool inObjMask = objMask.Has( type, m_pDynObjRefPool[curIdx].objId );
+				bool inObjMask = objMask.Has( type );
 
 				bool passedFirstTest = notOwnerObj && inObjMask;
 

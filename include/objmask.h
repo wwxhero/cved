@@ -5,7 +5,7 @@
 //
 // Version: 		$Id: objmask.h,v 1.11 1999/12/30 18:25:18 jvogel Exp $
 //
-// Author(s):	
+// Author(s):
 // Date:		September, 1998
 //
 // Description:	Declaration of the object type mask
@@ -19,7 +19,7 @@
 namespace CVED {
 
 //
-// This class provides an efficient representation of a set of object 
+// This class provides an efficient representation of a set of object
 // types.  It also provides convenient converstions from/to
 // integer types.  It is meant to allow filtering of the type
 // of objects returned from the various object interrogation
@@ -27,14 +27,12 @@ namespace CVED {
 //
 // Note that the class is designed explicitly for object
 // types and makes key assumptions regarding the maximum number
-// of objects.  
+// of objects.
 //
 class CObjTypeMask {
 public:
 	CObjTypeMask();					// creates empty mask
 	CObjTypeMask(const CObjTypeMask&);
-	//fixme: shall it be done in derived class
-	CObjTypeMask(bool singleExtern);
 	virtual ~CObjTypeMask();
 	const CObjTypeMask&	operator=(const CObjTypeMask&);
 	CObjTypeMask(TU32b bits);
@@ -45,16 +43,13 @@ public:
 	void			Clear(void);		// clears all types
 	void			Clear(cvEObjType);	// removes specified type
 	void			Set(cvEObjType);	// add specified type to the set
-	bool			Has(cvEObjType) const;	// queries existense of type 
+	bool			Has(cvEObjType) const;	// queries existense of type
 											// in set
-	virtual bool	Has(cvEObjType, int objID) const;
-
 protected:
 	void			SelfTest(void);		// {secret} provides basic self tests
 
 protected:
 	TU8b			m_data[cNUM_OBJECT_TYPES/8+1];
-	bool			m_bSingleExtern;
 };
 
 #include "objmask.inl"
