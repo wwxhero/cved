@@ -464,6 +464,7 @@ call ..\mcopy include\*.inl ..\include
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="libsrc\CvedADOCtrl.cpp" />
     <ClCompile Include="libsrc\CvedDistri.cpp" />
     <ClCompile Include="libsrc\CvedEDOCtrl.cpp" />
     <ClCompile Include="libsrc\dynobj.cxx">
@@ -2120,6 +2121,7 @@ call ..\mcopy include\*.inl ..\include
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\CvedADOCtrl.h" />
     <ClInclude Include="include\CvedDistri.h" />
     <ClInclude Include="include\CvedEDOCtrl.h" />
     <ClInclude Include="include\ExternalControlInterface.h" />
