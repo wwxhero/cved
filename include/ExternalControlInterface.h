@@ -25,6 +25,13 @@ namespace CVED {
 		virtual void PostUpdateDynamicModels() = 0;
 		virtual bool OnGetUpdate(TObjectPoolIdx id_local, cvTObjContInp* curInput, cvTObjState* curState) = 0;
 		virtual void OnPushUpdate(TObjectPoolIdx id_local, const cvTObjContInp* nextInput, const cvTObjState* nextState) = 0;
+		virtual void OnCreateADO(TObjectPoolIdx id_local
+							, const char* szName
+							, const cvTObjAttr& cAttr
+							, const CPoint3D& pos
+							, const CVector3D& t
+							, const CVector3D& l) = 0;
+		virtual void OnDeleteADO(TObjectPoolIdx id_local) = 0;
 		virtual bool Initialize(CHeaderDistriParseBlock& blk, CVED::CCvedDistri* pCved) = 0;
 		virtual void UnInitialize() = 0;
 	};
