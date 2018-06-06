@@ -134,15 +134,8 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
 					{
 						if (!localSim
-						 || m_haveFakeExternalDriver) //local simulator has its own dynamic
-						DynamicModel(
-							id,
-							pO->type,
-							&pO->attr,
-							pCurrState,
-							pCurrContInp,
-							pFutState
-							);
+					 		|| m_haveFakeExternalDriver) //local simulator has its own dynamic
+							*pFutState = *pCurrState;
 					}
 					if (localSim
 						&& NULL != ctrl)
@@ -160,14 +153,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 				{
 					if (!localSim
 					 || m_haveFakeExternalDriver) //local simulator has its own dynamic
-					DynamicModel(
-						id,
-						pO->type,
-						&pO->attr,
-						pCurrState,
-						pCurrContInp,
-						pFutState
-						);
+						*pFutState = *pCurrState;
 				}
 				if (localSim
 					&& NULL != ctrl)
@@ -231,14 +217,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 		{
 			if (!localSim
 			 || m_haveFakeExternalDriver) //local simulator has its own dynamic
-			DynamicModel(
-				attachedObjIds[i],
-				pO->type,
-				&pO->attr,
-				pCurrState,
-				pCurrContInp,
-				pFutState
-				);
+				*pFutState = *pCurrState;
 		}
 		if (localSim
 		&& NULL != ctrl)
