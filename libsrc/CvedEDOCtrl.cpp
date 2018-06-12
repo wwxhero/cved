@@ -22,6 +22,11 @@ CCvedEDOCtrl::~CCvedEDOCtrl(void)
 {
 }
 
+CDynObj* CCvedEDOCtrl::CreatePeerDriver(CHeaderDistriParseBlock& blk)
+{
+	return CCvedDistri::CreatePeerDriver(blk, eCV_VEHICLE);
+}
+
 void CCvedEDOCtrl::ExecuteDynamicModels(void)
 {
 	TObjectPoolIdx id;

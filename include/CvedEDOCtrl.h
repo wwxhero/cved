@@ -11,6 +11,7 @@ public:
 	CCvedEDOCtrl(IExternalObjectControl* pCtrl);
 	virtual ~CCvedEDOCtrl(void);
 	virtual void ExecuteDynamicModels(void);
+	virtual CVED::CDynObj* CreatePeerDriver(CHeaderDistriParseBlock& blk);
 };
 
 };
