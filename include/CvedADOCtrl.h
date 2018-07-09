@@ -12,13 +12,13 @@ public:
 	CCvedADOCtrl(IExternalObjectControl* pCtrl);
 	virtual ~CCvedADOCtrl(void);
 	virtual void ExecuteDynamicModels(void);
-	virtual CVED::CDynObj* CreatePeerDriver(CHeaderDistriParseBlock& blk);
-	CDynObj*	DistriCreateDynObj(const string&		cName,
+	virtual CVED::CDynObj* LocalCreatePeerDriver(CHeaderDistriParseBlock& blk);
+	virtual CDynObj*	DistriCreateDynObj(const string&		cName,
 								const cvTObjAttr&	cAttr,
 								const CPoint3D*		cpInitPos=0,
 								const CVector3D*	cpInitTan=0,
 								const CVector3D*	cpInitLat=0);
-	void		DistriDeleteDynObj( CDynObj* );
+	virtual void		DistriDeleteDynObj( CDynObj* );
 };
 
 };

@@ -320,9 +320,9 @@ void CCvedADOCtrl::DistriDeleteDynObj( CDynObj* obj )
 }
 
 
-CVED::CDynObj* CCvedADOCtrl::CreatePeerDriver(CHeaderDistriParseBlock& blk)
+CVED::CDynObj* CCvedADOCtrl::LocalCreatePeerDriver(CHeaderDistriParseBlock& blk)
 {
-	return CCvedDistri::CreatePeerDriver(blk, eCV_EXTERNAL_DRIVER);
+	return CCvedDistri::LocalCreatePeerDriver(blk, eCV_EXTERNAL_DRIVER);
 }
 
 }

@@ -22,9 +22,23 @@ CCvedEDOCtrl::~CCvedEDOCtrl(void)
 {
 }
 
-CDynObj* CCvedEDOCtrl::CreatePeerDriver(CHeaderDistriParseBlock& blk)
+CDynObj* CCvedEDOCtrl::LocalCreatePeerDriver(CHeaderDistriParseBlock& blk)
 {
-	return CCvedDistri::CreatePeerDriver(blk, eCV_VEHICLE);
+	return CCvedDistri::LocalCreatePeerDriver(blk, eCV_VEHICLE);
+}
+
+CDynObj*	CCvedEDOCtrl::DistriCreateDynObj(const string&		cName,
+								const cvTObjAttr&	cAttr,
+								const CPoint3D*		cpInitPos,
+								const CVector3D*	cpInitTan,
+								const CVector3D*	cpInitLat)
+{
+	assert(0); //edo ctrl should not create a distributed driving object currently
+	return NULL;
+}
+void		CCvedEDOCtrl::DistriDeleteDynObj( CDynObj* )
+{
+	assert(0); //edo ctrl should not create a distributed driving object currently
 }
 
 void CCvedEDOCtrl::ExecuteDynamicModels(void)

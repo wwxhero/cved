@@ -11,7 +11,7 @@ CCvedDistri::~CCvedDistri(void)
 {
 }
 
-CVED::CDynObj* CCvedDistri::CreatePeerDriver(CHeaderDistriParseBlock& blk, cvEObjType type)
+CVED::CDynObj* CCvedDistri::LocalCreatePeerDriver(CHeaderDistriParseBlock& blk, cvEObjType type)
 {
 	const double cMETER_TO_FEET = 3.2808; // feet
 	//
@@ -235,5 +235,20 @@ CVED::CDynObj* CCvedDistri::CreatePeerDriver(CHeaderDistriParseBlock& blk, cvEOb
 	return pObj;
 }
 
+void CCvedDistri::LocalDeleteDynObj( CDynObj* dynObj )
+{
+	CCved::DeleteDynObj(dynObj);
+}
+
+CDynObj* CCvedDistri::LocalCreateDynObj(
+					const string&		cName,
+					cvEObjType			type,
+					const cvTObjAttr&	cAttr,
+					const CPoint3D*		cpInitPos,
+					const CVector3D*	cpInitTan,
+					const CVector3D*	cpInitLat)
+{
+	return CCved::CreateDynObj(cName, type, cAttr, cpInitPos, cpInitTan, cpInitLat);
+}
 
 };

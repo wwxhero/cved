@@ -18,7 +18,7 @@
 #include "SnoParserDistri.h"
 #include "HeaderDistriParseBlock.h"
 namespace CVED {
-	class CCvedDistri;
+	class ICvedDistri;
 	class IExternalObjectControl {
 	public:
 		virtual void PreUpdateDynamicModels() = 0;
@@ -32,7 +32,7 @@ namespace CVED {
 							, const CVector3D& t
 							, const CVector3D& l) = 0;
 		virtual void OnDeleteADO(TObjectPoolIdx id_local) = 0;
-		virtual bool Initialize(CHeaderDistriParseBlock& blk, CVED::CCvedDistri* pCved) = 0;
+		virtual bool Initialize(CHeaderDistriParseBlock& blk, CVED::ICvedDistri* pCvedDistri) = 0;
 		virtual void UnInitialize() = 0;
 	};
 };
