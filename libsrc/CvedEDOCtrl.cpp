@@ -22,9 +22,9 @@ CCvedEDOCtrl::~CCvedEDOCtrl(void)
 {
 }
 
-CDynObj* CCvedEDOCtrl::LocalCreatePeerDriver(CHeaderDistriParseBlock& blk)
+CDynObj* CCvedEDOCtrl::LocalCreateDynObj(CHeaderDistriParseBlock& blk)
 {
-	return CCvedDistri::LocalCreatePeerDriver(blk, eCV_VEHICLE);
+	return CCvedDistri::LocalCreateDynObj(blk, eCV_VEHICLE);
 }
 
 CDynObj*	CCvedEDOCtrl::DistriCreateDynObj(const string&		cName,

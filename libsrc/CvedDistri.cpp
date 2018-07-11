@@ -11,7 +11,7 @@ CCvedDistri::~CCvedDistri(void)
 {
 }
 
-CVED::CDynObj* CCvedDistri::LocalCreatePeerDriver(CHeaderDistriParseBlock& blk, cvEObjType type)
+CVED::CDynObj* CCvedDistri::LocalCreateDynObj(CHeaderDistriParseBlock& blk, cvEObjType type)
 {
 	const double cMETER_TO_FEET = 3.2808; // feet
 	//
@@ -64,7 +64,7 @@ CVED::CDynObj* CCvedDistri::LocalCreatePeerDriver(CHeaderDistriParseBlock& blk, 
 		//
 		// Create the CVED object.
 		//
-		pObj = this->CreateDynObj(
+		pObj = this->LocalCreateDynObj(
 							blk.GetSimName()
 							, type
 							, attr
@@ -135,7 +135,7 @@ CVED::CDynObj* CCvedDistri::LocalCreatePeerDriver(CHeaderDistriParseBlock& blk, 
 		//
 		// Create the CVED object.
 		//
-		pObj = this->CreateDynObj(
+		pObj = this->LocalCreateDynObj(
 							blk.GetSimName()
 							, type
 							, attr

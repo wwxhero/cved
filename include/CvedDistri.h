@@ -8,7 +8,7 @@ class IExternalObjectControl;
 class ICvedDistri
 {
 public:
-	virtual CDynObj* LocalCreatePeerDriver(CHeaderDistriParseBlock& blk) = 0;
+	virtual CDynObj* LocalCreateDynObj(CHeaderDistriParseBlock& blk) = 0;
 	virtual void LocalDeleteDynObj( CDynObj* ) = 0;
 	virtual CDynObj* LocalCreateDynObj(
 					const string&		cName,
@@ -40,7 +40,7 @@ public:
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
 protected:
-	CDynObj* LocalCreatePeerDriver(CHeaderDistriParseBlock& blk, cvEObjType type);
+	CDynObj* LocalCreateDynObj(CHeaderDistriParseBlock& blk, cvEObjType type);
 	IExternalObjectControl* m_pCtrl;
 };
 
