@@ -319,10 +319,14 @@ void CCvedADOCtrl::DistriDeleteDynObj( CDynObj* obj )
 	CCvedDistri::DeleteDynObj(obj);
 }
 
-
-CVED::CDynObj* CCvedADOCtrl::LocalCreateDynObj(CHeaderDistriParseBlock& blk)
+CDynObj* CCvedADOCtrl::LocalCreatePedObj(
+					const string&		cName,
+					const cvTObjAttr&	cAttr,
+					const CPoint3D*		cpInitPos,
+					const CVector3D*	cpInitTan,
+					const CVector3D*	cpInitLat)
 {
-	return CCvedDistri::LocalCreateDynObj(blk, eCV_EXTERNAL_DRIVER);
+	return CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
 }

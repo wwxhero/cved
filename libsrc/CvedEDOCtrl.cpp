@@ -17,14 +17,8 @@ CCvedEDOCtrl::CCvedEDOCtrl(IExternalObjectControl* pCtrl) : CCvedDistri(pCtrl)
 {
 }
 
-
 CCvedEDOCtrl::~CCvedEDOCtrl(void)
 {
-}
-
-CDynObj* CCvedEDOCtrl::LocalCreateDynObj(CHeaderDistriParseBlock& blk)
-{
-	return CCvedDistri::LocalCreateDynObj(blk, eCV_VEHICLE);
 }
 
 CDynObj*	CCvedEDOCtrl::DistriCreateDynObj(const string&		cName,
@@ -299,6 +293,16 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 	}
 	if (NULL != ctrl)
 		ctrl->PostUpdateDynamicModels();
+}
+
+CDynObj* CCvedEDOCtrl::LocalCreatePedObj(
+					const string&		cName,
+					const cvTObjAttr&	cAttr,
+					const CPoint3D*		cpInitPos,
+					const CVector3D*	cpInitTan,
+					const CVector3D*	cpInitLat)
+{
+	return CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
 };
