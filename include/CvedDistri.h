@@ -41,8 +41,14 @@ public:
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
+	virtual CDynObj* LocalCreateEDO(CHeaderDistriParseBlock& blk);
 	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk);
 protected:
+	virtual CDynObj* LocalCreateEDO(const string&		cName,
+					const cvTObjAttr&	cAttr,
+					const CPoint3D*		cpInitPos=0,
+					const CVector3D*	cpInitTan=0,
+					const CVector3D*	cpInitLat=0) = 0;
 	virtual CDynObj* LocalCreatePDO(
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
