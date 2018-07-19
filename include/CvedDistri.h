@@ -8,25 +8,24 @@ class IExternalObjectControl;
 class ICvedDistri
 {
 public:
-	virtual CDynObj* LocalCreateExtObj(CHeaderDistriParseBlock& blk) = 0;
-	virtual void LocalDeleteDynObj( CDynObj* ) = 0;
-	virtual CDynObj* LocalCreateDynObj(
+	virtual CDynObj* LocalCreateEDO(CHeaderDistriParseBlock& blk) = 0;
+	virtual CDynObj* LocalCreateADO(
 					const string&		cName,
-					cvEObjType			type,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0) = 0;
+	virtual void LocalDeleteDynObj( CDynObj* ) = 0;
 
-	virtual CDynObj*	DistriCreateDynObj(const string&		cName,
+	virtual CDynObj*	DistriCreateADO(const string&		cName,
 								const cvTObjAttr&	cAttr,
 								const CPoint3D*		cpInitPos=0,
 								const CVector3D*	cpInitTan=0,
 								const CVector3D*	cpInitLat=0) = 0;
-	virtual void		DistriDeleteDynObj( CDynObj* ) = 0;
+	virtual void		DistriDeleteADO( CDynObj* ) = 0;
 
-	virtual CDynObj* LocalCreatePedObj(CHeaderDistriParseBlock& blk) = 0;
-	virtual void LocalDeletePedObj(CDynObj* ) = 0;
+	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk) = 0;
+	virtual void LocalDeletePDO(CDynObj* ) = 0;
 };
 
 class CCvedDistri :	public ICvedDistri
@@ -36,22 +35,22 @@ public:
 	CCvedDistri(IExternalObjectControl* pCtrl);
 	virtual ~CCvedDistri(void);
 	virtual void LocalDeleteDynObj( CDynObj* );
-	virtual CDynObj* LocalCreateExtObj(CHeaderDistriParseBlock& blk);
-	virtual CDynObj* LocalCreateDynObj(
+	virtual CDynObj* LocalCreateADO(
 					const string&		cName,
-					cvEObjType			type,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
-	virtual CDynObj* LocalCreatePedObj(CHeaderDistriParseBlock& blk);
-	virtual void LocalDeletePedObj(CDynObj* );
-	virtual CDynObj* LocalCreatePedObj(
+	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk);
+protected:
+	virtual CDynObj* LocalCreatePDO(
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0) = 0;
+public:
+	virtual void LocalDeletePDO(CDynObj* );
 protected:
 	IExternalObjectControl* m_pCtrl;
 };
