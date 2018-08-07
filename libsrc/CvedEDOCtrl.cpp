@@ -65,17 +65,9 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 		hrt_timer_currentsecs( timer ), m_pHdr->deltaT / m_pHdr->dynaMult * 2);
 	*/
 	IExternalObjectControl* ctrl = m_pCtrl;
-	if (NULL != ctrl)
-		ctrl->PreUpdateDynamicModels();
-	if( m_haveFakeExternalDriver
-	|| NULL != ctrl )
-	{
-		id = 0;
-	}
-	else
-	{
-		id = cMAX_EXT_CNTRL_OBJS;
-	}
+	assert(NULL != ctrl);
+	ctrl->PreUpdateDynamicModels();
+	id = 0;
 	pO = BindObj( id );
 
 	while( id < cNUM_DYN_OBJS )
@@ -89,9 +81,10 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					&&
 					( pO->phase == eALIVE || pO->phase == eDYING )
 					);
-		bool localSim = (0 == id);
+		bool localOwn = (0 == id);
 		bool RemoteOwn = (0 != id
 					&& (pO->type == eCV_VEHICLE));
+		bool psudoEdo = (0 == id && m_haveFakeExternalDriver);
 
 //		if ( pO->type == eCV_TRAJ_FOLLOWER )
 //			fprintf(stdout, " traj follower %d phase %d\n", id, pO->phase);
@@ -142,17 +135,26 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 				else{
 					CVED::CCved &me = *this;
 					CVED::CObj* obj = BindObjIdToClass2(id);
-					if ( !RemoteOwn
-					 ||	(NULL == ctrl
-					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+					//start block of distributed update
+					bool received = ( !RemoteOwn
+									|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
+					bool localCalc = (!received || psudoEdo);
+
+					if (localCalc)
 					{
-						if (!localSim
-					 		|| m_haveFakeExternalDriver) //local simulator has its own dynamic
-							*pFutState = *pCurrState;
+						DynamicModel(
+								id,
+								pO->type,
+								&pO->attr,
+								pCurrState,
+								pCurrContInp,
+								pFutState
+								);
 					}
-					if (localSim
-						&& NULL != ctrl)
+
+					if (localOwn)
 						ctrl->OnPushUpdate(0, pCurrContInp, pFutState);
+					//end block
 
 				}
 			}
@@ -160,17 +162,26 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 			{
 				CVED::CCved &me = *this;
 				CVED::CObj* obj = BindObjIdToClass2(id);
-				if ( !RemoteOwn
-					 ||	(NULL == ctrl
-					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+				//start block of distributed update
+				bool received = ( !RemoteOwn
+								|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
+				bool localCalc = (!received || psudoEdo);
+
+				if (localCalc)
 				{
-					if (!localSim
-					 || m_haveFakeExternalDriver) //local simulator has its own dynamic
-						*pFutState = *pCurrState;
+					DynamicModel(
+							id,
+							pO->type,
+							&pO->attr,
+							pCurrState,
+							pCurrContInp,
+							pFutState
+							);
 				}
-				if (localSim
-					&& NULL != ctrl)
-						ctrl->OnPushUpdate(0, pCurrContInp, pFutState);
+
+				if (localOwn)
+					ctrl->OnPushUpdate(0, pCurrContInp, pFutState);
+				//end block
 			}
 
 			// This is an optimization.
@@ -221,20 +232,30 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 		}
 
 		CVED::CCved &me = *this;
-		bool localSim = (0 == attachedObjIds[i]);
+		bool localOwn = (0 == attachedObjIds[i]);
 		bool RemoteOwn = (0 != attachedObjIds[i]
 					&& pO->type == eCV_EXTERNAL_DRIVER);
-		if ( !RemoteOwn
-		||	(NULL == ctrl
-		||	!ctrl->OnGetUpdate(attachedObjIds[i], const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+		bool psudoEdo = (0 == id && m_haveFakeExternalDriver);
+		//start block of distributed update
+		bool received = ( !RemoteOwn
+						|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
+		bool localCalc = (!received || psudoEdo);
+
+		if (localCalc)
 		{
-			if (!localSim
-			 || m_haveFakeExternalDriver) //local simulator has its own dynamic
-				*pFutState = *pCurrState;
+			DynamicModel(
+					id,
+					pO->type,
+					&pO->attr,
+					pCurrState,
+					pCurrContInp,
+					pFutState
+					);
 		}
-		if (localSim
-		&& NULL != ctrl)
+
+		if (localOwn)
 			ctrl->OnPushUpdate(0, pCurrContInp, pFutState);
+		//end block
 	}
 
 	// execute ode dynamics from objects in free motion mode
@@ -291,8 +312,7 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 
 
 	}
-	if (NULL != ctrl)
-		ctrl->PostUpdateDynamicModels();
+	ctrl->PostUpdateDynamicModels();
 }
 
 CDynObj* CCvedEDOCtrl::LocalCreateEDO(
