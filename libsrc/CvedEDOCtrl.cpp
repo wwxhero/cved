@@ -138,9 +138,10 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					//start block of distributed update
 					bool received = ( !RemoteOwn
 									|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
-					bool localCalc = (!received || psudoEdo);
+					if (!received)
+						*pFutState = *pCurrState;
 
-					if (localCalc)
+					if (psudoEdo)
 					{
 						DynamicModel(
 								id,
@@ -165,9 +166,10 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 				//start block of distributed update
 				bool received = ( !RemoteOwn
 								|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
-				bool localCalc = (!received || psudoEdo);
+				if (!received)
+					*pFutState = *pCurrState;
 
-				if (localCalc)
+				if (psudoEdo)
 				{
 					DynamicModel(
 							id,
@@ -239,9 +241,10 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 		//start block of distributed update
 		bool received = ( !RemoteOwn
 						|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
-		bool localCalc = (!received || psudoEdo);
+		if (!received)
+			*pFutState = *pCurrState;
 
-		if (localCalc)
+		if (psudoEdo)
 		{
 			DynamicModel(
 					id,
