@@ -231,7 +231,7 @@ CDynObj* CCvedDistri::LocalCreateEDO(CHeaderDistriParseBlock& blk)
 	return pObj;
 }
 
-CDynObj* CCvedDistri::LocalCreatePDO(CHeaderDistriParseBlock& blk)
+CDynObj* CCvedDistri::LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own)
 {
 	//fixme: currently using vehicle to represent a pedestrain
 	const double cMETER_TO_FEET = 3.2808; // feet
@@ -285,7 +285,8 @@ CDynObj* CCvedDistri::LocalCreatePDO(CHeaderDistriParseBlock& blk)
 	// Create the CVED object.
 	//
 	pObj = LocalCreatePDO(
-						blk.GetSimName()
+						own
+						, blk.GetSimName()
 						, attr
 						, &cartPos
 						, &tan

@@ -25,6 +25,7 @@ private:
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
 	virtual CDynObj* LocalCreatePDO(
+					bool				own,
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,

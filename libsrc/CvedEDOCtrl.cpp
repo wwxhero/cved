@@ -329,6 +329,7 @@ CDynObj* CCvedEDOCtrl::LocalCreateEDO(
 }
 
 CDynObj* CCvedEDOCtrl::LocalCreatePDO(
+					bool 				own,
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos,

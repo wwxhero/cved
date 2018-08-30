@@ -24,7 +24,7 @@ public:
 								const CVector3D*	cpInitLat=0) = 0;
 	virtual void		DistriDeleteADO( CDynObj* ) = 0;
 
-	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk) = 0;
+	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own) = 0;
 	virtual void LocalDeletePDO(CDynObj* ) = 0;
 };
 
@@ -42,7 +42,7 @@ public:
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
 	virtual CDynObj* LocalCreateEDO(CHeaderDistriParseBlock& blk);
-	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk);
+	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own);
 protected:
 	virtual CDynObj* LocalCreateEDO(const string&		cName,
 					const cvTObjAttr&	cAttr,
@@ -50,6 +50,7 @@ protected:
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0) = 0;
 	virtual CDynObj* LocalCreatePDO(
+					bool				own,
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
