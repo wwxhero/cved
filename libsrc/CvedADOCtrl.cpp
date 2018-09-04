@@ -338,7 +338,7 @@ CDynObj* CCvedADOCtrl::LocalCreatePDO(
 					const CVector3D*	cpInitLat)
 {
 	//fixme: a new type of mark for pedestrain should be added for pedestrain
-	return CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	return CCvedDistri::CreateDynObj(cName, eCV_EXTERNAL_DRIVER, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
 }
