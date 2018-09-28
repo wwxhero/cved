@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:     $Id: dynobj.h,v 1.73 2016/07/15 14:39:53 IOWA\dheitbri Exp $
+// Version:     $Id: dynobj.h,v 1.77 2018/09/12 20:06:14 IOWA\dheitbri Exp $
 //
 // Author(s):   Yiannis Papelis
 // Date:        August, 1998
@@ -30,7 +30,7 @@ namespace CVED {
 //
 // This class is an abstract class that cannot be instanced directly.
 // However, there will be one class derived per each object type
-// defined in the current version of CVED.
+// defined in the current version of CVED. 
 //
 //////////////////////////////////////////////////////////////////////////////
 class CDynObj : public CObj
@@ -41,7 +41,7 @@ public:
 	CDynObj( const CDynObj& );
 	CDynObj& operator=( const CDynObj& );
 
-	void MakeReadOnly( void );
+	void MakeReadOnly( void ); 
 
 	virtual void SetPos( const CPoint3D& cPos, bool useDoubleBuffer = true );
 	virtual void SetTan( const CVector3D& cTan, bool useDoubleBuffer = true );
@@ -67,7 +67,7 @@ class CTrajFollowerObj : public CDynObj
 {
 public:
 	CTrajFollowerObj();
-	CTrajFollowerObj( const CCved&, TObj* );
+	CTrajFollowerObj( const CCved&, TObj* ); 
 	CTrajFollowerObj( const CTrajFollowerObj& );
 	CTrajFollowerObj& operator=( const CTrajFollowerObj& );
 	virtual ~CTrajFollowerObj();
@@ -96,6 +96,9 @@ public:
 	void GetInitPosRotVel( double initPosRot[6], double initVel[6] );
 	void SetInitPosRotVel( const double initPosRot[6], const double initVel[6] );
 	void InitModeValues( void );
+
+	void SetModeType(cvEObjMode);
+	cvEObjMode GetModeType();
 };
 
 
@@ -170,6 +173,9 @@ public:
 	double   GetSteeringAngle(void) const;
     virtual double GetAccel( void ) const;
 
+    void   SetExternalDynaControlId(int);
+    void   SetExternalDynaControlIdImm(int);
+
 	float  GetTireRotation( int ) const;
 };
 
@@ -195,7 +201,7 @@ public:
 //
 // Description:
 // This class represents trailers towed by external objects outside
-// the virtual environment, while CTrailerObj are trailers towed
+// the virtual environment, while CTrailerObj are trailers towed 
 // by other entities inside the virtual environment.
 //
 class CExternalTrailerObj : public CDynObj
@@ -290,7 +296,7 @@ public:
 /////////////////////////////////////////////////////////////////////////
 //
 // Description:
-// This class represents composite signs.
+// This class represents composite signs.  
 //
 class CCompositeSignObj : public CDynObj
 {
@@ -325,7 +331,7 @@ public:
 /////////////////////////////////////////////////////////////////////////
 //
 // Description:
-// This class represents POIs (point-of-interests).
+// This class represents POIs (point-of-interests).  
 //
 class CPoiObj : public CDynObj
 {
@@ -378,7 +384,9 @@ public:
 	void SetDrawScreen(TU8b objType, bool doublebuffer = true);
 	void SetDrawSize(float x, float y, bool doublebuffer = true);
 	void SetTargetId(int id, bool doublebuffer = true);
-
+	void SetStateIndex(TU16b, bool doublebuffer = true);
+	void SetPrecreateId(TU16b, bool doublebuffer = true);
+	void SetLightTarget(TS8b, bool doublebuffer = true);
 
 	void GetColor(float &R,float &G, float &B, float &A) const;
 	void GetDrawSize(float &x, float &y) const;
@@ -389,7 +397,8 @@ public:
 	TU8b GetDrawType() const;
 	TU8b GetDrawScreen() const;
 	TU16b GetStateIndex() const;
-	void SetStateIndex(TU16b, bool doublebuffer = true);
+	TU16b GetPrecreateId() const;
+	TS8b GetLightTarget() const;
 };
 /////////////////////////////////////////////////////////////////////////
 //
@@ -415,10 +424,6 @@ public:
 
 	double GetAccel( void ) const;
 
-	//bool IsOwnVehicle() const;
-	//const cvTObjStateBuf& GetState( void ) const;
-	//void Update(const cvTObjStateBuf&);
-
 	// Note: these are redundant and should be removed.
 	CPoint3D      GetPosHighFreq( void ) const;
 	CVector3D     GetTanHighFreq( void ) const;
@@ -429,8 +434,27 @@ public:
 };
 
 
+/////////////////////////////////////////////////////////////////////////
+//
+// Description:
+// This class represents objects whose behavior is generated
+// outside the simulator's virtual environment.  It primarily
+// includes the objects controlled by other simulators, or 
+// replay sources.
+class CExternalVehObj : public CVehicleObj
+{
+public:
+	CExternalVehObj();
+	virtual ~CExternalVehObj();
+	CExternalVehObj( const CExternalVehObj& );
+	CExternalVehObj& operator=( const CExternalVehObj& );
+
+	CExternalVehObj( const CCved&, TObj*  );
 
 
+
+
+};
 /////////////////////////////////////////////////////////////////////////
 //
 // Description:
@@ -496,7 +520,7 @@ typedef CAvatarObj CExternalAvatarObj;
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Inline functions.
+// Inline functions. 
 //
 /////////////////////////////////////////////////////////////////////////////
 #include "dynobj.inl"

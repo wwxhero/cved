@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: path.cxx,v 1.92 2015/11/20 20:31:26 iowa\oahmad Exp $
+// Version: 	$Id: path.cxx,v 1.96 2018/07/16 14:06:02 IOWA\dheitbri Exp $
 //
 // Author(s):	Jillian Vogel, Omar Ahmad
 // Date:		October, 1999
@@ -681,6 +681,20 @@ CPath::GetString(vector<string>& pathStr) const
 	}
 
 } // end of GetString
+
+
+string	
+CPath::GetString() const{
+	string valOut;
+	cTPathIterator itr;
+	for (itr = m_points.begin(); itr != m_points.end(); itr++) {
+		string point = m_points[itr].GetString();
+		valOut+=point;
+        valOut+="\n";
+	}
+    return valOut;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///
 ///\brief
@@ -1538,24 +1552,24 @@ CPath::Clear()
 } // end of Clear
 
 //////////////////////////////////////////////////////////////////////////////
-//
-// Description: SetString
-// 	Sets each element in the current CPath with the strings in the parameter.
-// 	Any points previously present in the path will be cleared out. 
-//
-// Remarks:  The format of each element in the parameter is as follows:
-// 	If the node lies on a road:
-// 		R:Road_Name:Lane_Id[Start_dist:End_dist]:Lane_Id[Start_dist:...
-// 	Else if the node lies on an intersection
-// 		I:Intrsctn_Name:Crdr_Id[Start_dist:End_dist]:Crdr_Id[Start_dist:...
-//
-// Arguments:
-// 	cPathStr - (Input) Contains a string for each node desired in the current 
-// 		path.
-//
-// Returns: True if a valid CPath is created from the parameter, false 
-// 	otherwise.
-// 	
+///
+/// Description: SetString
+/// 	Sets each element in the current CPath with the strings in the parameter.
+/// 	Any points previously present in the path will be cleared out. 
+///
+/// Remarks:  The format of each element in the parameter is as follows:
+/// 	If the node lies on a road:
+/// 		R:Road_Name:Lane_Id[Start_dist:End_dist]:Lane_Id[Start_dist:...
+/// 	Else if the node lies on an intersection
+/// 		I:Intrsctn_Name:Crdr_Id[Start_dist:End_dist]:Crdr_Id[Start_dist:...
+///
+/// Arguments:
+/// 	cPathStr - (Input) Contains a string for each node desired in the current 
+/// 		path.
+///
+/// Returns: True if a valid CPath is created from the parameter, false 
+/// 	otherwise.
+/// 	
 //////////////////////////////////////////////////////////////////////////////
 bool
 CPath::SetString( const vector<string>& cPathStr ) 
@@ -1589,7 +1603,40 @@ CPath::SetString( const vector<string>& cPathStr )
 	return false;
 
 } // end of SetString
+ bool	
+ CPath::SetString( const string& cPathStr){
+	CPathPoint pathPoint( GetCved() );
+	m_points.clear();
 
+	if( !cPathStr.empty() ) 
+	{
+		bool returnValue = true;
+        stringstream ss(cPathStr);
+        string tempS;
+		vector<string>::const_iterator cItr;
+        while( !ss.eof() ) 
+		{
+            getline(ss,tempS);
+            if (ss.fail())
+                break;
+			pathPoint.SetString( tempS );
+			if( pathPoint.IsValid() )
+			{
+				m_points.push_back( pathPoint );
+			}
+			else
+			{
+				returnValue = false;
+			}
+		}
+
+		return returnValue;
+	}
+
+	// There were no strings in the vector, so return false, 
+	// indicating that the current CPath is now invalid.
+	return false;
+ }
 
 //////////////////////////////////////////////////////////////////////////////
 //		Other functions	
@@ -3481,23 +3528,29 @@ CPath::GetDistToNextHldOfs( const CRoadPos& cPos , int lookahead ) const{
 	// failed to find a suitable corridor with a haltline
 	return -1;
 }
-//////////////////////////////////////////////////////////////////////////////
-//
-// Description: Returns the next intersection from the given point.
-//
-// Remarks: If the cRoadPos lies on an intersection, then that 
-//  intersection is	returned.  Otherwise, the next intersection 
-//  on the path is returned.
-//
-// Arguments:
-// 	cRoadPos - a valid CRoadPos that lies on the path.
-//
-// Returns: A CIntrsctn that is the intersection after the 
-//  cRoadPos parameter. If cRoadPos does not lie on the path, or 
-//  if there is no next intersection on the path, an invalid 
-//  CIntrsctn instance will be returned.
-//
-//////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn CIntrsctn CPath::GetNextIntrsctn( const CRoadPos& cRoadPos ) const
+///
+/// \brief  Description: Returns the next intersection from the given point.
+///         
+///         Remarks: If the cRoadPos lies on an intersection, then that
+///          intersection is    returned.  Otherwise, the next intersection on the path is returned.
+///         
+///         Arguments:
+///             cRoadPos - a valid CRoadPos that lies on the path.
+///         
+///         Returns: A CIntrsctn that is the intersection after the
+///          cRoadPos parameter. If cRoadPos does not lie on the path, or if there is no next
+///          intersection on the path, an invalid CIntrsctn instance will be returned.
+///
+/// \author Dheitbri
+/// \date   5/30/2017
+///
+/// \param  cRoadPos    The road position.
+///
+/// \return The next intrsctn.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 CIntrsctn
 CPath::GetNextIntrsctn( const CRoadPos& cRoadPos ) const
 {
@@ -3526,23 +3579,28 @@ CPath::GetNextIntrsctn( const CRoadPos& cRoadPos ) const
 	return intrsctn;
 } // end of GetNextIntrsctn
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn bool CPath::IsIntrsctnTwoRoad( const CRoadPos& cRoadPos ) const
+///
+/// \brief  Description: Figures out if the current intersection is a two-road
+///          intersection.  If the current path point is a road then the function looks at the
+///          next intersection on the path.
+///         
+///         Remarks:
+///         
+///         Arguments:
+///             cRoadPos - A valid CRoadPos that lies on the path.
+///         
+///         Returns: A boolean indicating if the current intersection is a two-
+///          road intersection.
+///
+///
+/// \param  cRoadPos    The road position.
+///
+/// \return True if intrsctn two road, false if not.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// Description: Figures out if the current intersection is a two-road
-//  intersection.  If the current path point is a road then the function
-//  looks at the next intersection on the path.
-//
-// Remarks: 
-//
-// Arguments:
-// 	cRoadPos - A valid CRoadPos that lies on the path.
-//
-// Returns: A boolean indicating if the current intersection is a two-
-//  road intersection.
-//
-//////////////////////////////////////////////////////////////////////////////
 bool
 CPath::IsIntrsctnTwoRoad( const CRoadPos& cRoadPos ) const
 {
@@ -3571,18 +3629,18 @@ CPath::IsIntrsctnTwoRoad( const CRoadPos& cRoadPos ) const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//
-// Description: Returns the distance to the next intersection from 
-//  the given point.
-//
-// Remarks: If the given cRoadPos lies on an intersection, or if 
-//  there is no	next intersection, 0.0 will be returned.
-//
-// Arguments:
-// 	cRoadPos - A valid CRoadPos that lies on the path.
-//
-// Returns: The distance to the next intersection on the path.
-//
+///
+/// Description: Returns the distance to the next intersection from 
+///  the given point.
+///
+/// Remarks: If the given cRoadPos lies on an intersection, or if 
+///  there is no	next intersection, 0.0 will be returned.
+///
+/// Arguments:
+/// 	cRoadPos - A valid CRoadPos that lies on the path.
+///
+/// Returns: The distance to the next intersection on the path.
+///
 //////////////////////////////////////////////////////////////////////////////
 double
 CPath::GetDistToNextIntrsctn( const CRoadPos& cRoadPos ) const
@@ -3613,26 +3671,26 @@ CPath::GetDistToNextIntrsctn( const CRoadPos& cRoadPos ) const
 } // end of GetDistToNextIntrsctn
 
 //////////////////////////////////////////////////////////////////////////////
-//
-// Description: Returns the next corridor from the given point.
-//
-// Remarks: If the cRoadPos lies on an intersection, then the current 
-//   corridor is returned.  Otherwise, the next connecting corridor 
-//   on the path is returned. 
-//
-// Arguments:
-// 	 cRoadPos  - A valid CRoadPos that lies on the path.
-//   checkLane - (optional) A boolean that indicates if the function 
-//               should check to make sure if the lane in the given 
-//               cRoadPos connects to the ensuing corridor.
-//
-// Returns: A CCrdr that is on the intersection after the cRoadPos 
-//   parameter.	If the cRoadPos lies on a lane, the corridor is 
-//   connected to that lane. If cRoadPos does not lie on the path, 
-//   or if there is no next intersection on the path, an invalid 
-//   CIntrsctn instance will be returned.
-//
-//////////////////////////////////////////////////////////////////////////////
+///
+/// Description: Returns the next corridor from the given point.
+///
+/// Remarks: If the cRoadPos lies on an intersection, then the current 
+///   corridor is returned.  Otherwise, the next connecting corridor 
+///   on the path is returned. 
+///
+/// Arguments:
+/// 	 cRoadPos  - A valid CRoadPos that lies on the path.
+///   checkLane - (optional) A boolean that indicates if the function 
+///               should check to make sure if the lane in the given 
+///               cRoadPos connects to the ensuing corridor.
+///
+/// Returns: A CCrdr that is on the intersection after the cRoadPos 
+///   parameter.	If the cRoadPos lies on a lane, the corridor is 
+///   connected to that lane. If cRoadPos does not lie on the path, 
+///   or if there is no next intersection on the path, an invalid 
+///   CIntrsctn instance will be returned.
+///
+///////////////////////////////////////////////////////////////////////////////
 CCrdr
 CPath::GetNextCrdr( const CRoadPos& cRoadPos, bool checkLane ) const
 {
@@ -3746,27 +3804,90 @@ CPath::GetNextCrdr( const CRoadPos& cRoadPos, bool checkLane ) const
 	return crdr;
 } // end of GetNextCrdr
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// \fn bool CPath::GetCrdrsFromIntrscn( int cIntrsctnId, TCrds& res ) const
+///
+/// \brief  Gets crdrs from intrscn.
+///
+/// \author Dheitbri
+/// \date   5/31/2017
+///
+/// \param          cIntrsctnId Identifier for the intrsctn.
+/// \param [in,out] res         Result, crdr ids
+///
+/// \return True if it succeeds, false if it fails.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool CPath::GetCrdrsFromIntrscn(
+    int cIntrsctnId,
+    TCrds& res
+) const {
+    res.clear();
+    // 
+    // Set the path iterator either to the start of the path or to 
+    // the pathpoint associated with the given cpStart road position
+    // if it is specified.
+    //
+    cTPathIterator itr = m_points.begin();
+#ifdef _DEBUG
+    TIntrsctn temp; //for the debugger
+    temp.attrIdx = 0;
+#endif
+    //
+    // Find the intersection along the path that matches the given
+    // intersection.  Return the relative id of the first corridor
+    // on the intersection.
+    //
+    for (; itr != m_points.end(); itr++)
+    {
+        bool foundIntrsctn = (
+            !m_points[itr].m_isRoad &&
+            cIntrsctnId == m_points[itr].GetIntrsctn().GetId()
+            );
+        if (foundIntrsctn)
+        {
+            //if our starting point is in the target intersection, we want to find the intersection
+            //the passed in roadpos with the path, if one exist return the first one that satifies 
+            //this condition
+            auto inter = m_points[itr].GetIntrsctn();
+            auto bits = m_points[itr].GetLaneCrdrMask();
+            TCrdrVec crdrs;
+            inter.GetAllCrdrs(crdrs);
+            for (auto itrc = crdrs.begin(); itrc != crdrs.end(); itrc++) {
+                int id = itrc->GetRelativeId();
+                if (bits.test(id)) {
+                    res.push_back(id);
+                }
+            }
+            if (res.size()>0)
+                return true;
+            return false;
+        }
+    }
+    return false;
+}
 //////////////////////////////////////////////////////////////////////////////
-//
-// Description: Returns a corridor associated with the given intersection
-//  along the path.
-//
-// Remarks: If the cRoadPos lies on an intersection, then the current 
-//  corridor is returned.  Otherwise, the next connecting corridor 
-//  on the path is returned. 
-//
-// Arguments:
-// 	cIntrsctnId - The intersection on which to find the corridor.
-//  crdrId - (output) The corridor's identifier.
-//	cpStart - (Optional) Pointer to a valid CRoadPos instance.  Default
-//      value is 0, indicating that the path should be searched from the
-//      beginning. 
-//	srcLaneId - (Optional) Specifies the source lane, (Path may have 
-//		multiple crds) 
-//
-// Returns: A boolean indicating if the given intersection was found
-//  along the path.
-//
+///
+/// Description: Returns a corridor associated with the given intersection
+///  along the path.
+///
+/// Remarks: If the cRoadPos lies on an intersection, then the current 
+///  corridor is returned.  Otherwise, the next connecting corridor 
+///  on the path is returned. 
+///
+/// Arguments:
+/// 	cIntrsctnId - The intersection on which to find the corridor.
+///  crdrId - (output) The corridor's identifier.
+///	cpStart - (Optional) Pointer to a valid CRoadPos instance.  Default
+///      value is 0, indicating that the path should be searched from the
+///      beginning. 
+///	srcLaneId - (Optional) Specifies the source lane, (Path may have 
+///		multiple crds) 
+///
+/// Returns: A boolean indicating if the given intersection was found
+///  along the path.
+///
 //////////////////////////////////////////////////////////////////////////////
 bool
 CPath::GetCrdrFromIntrscn( 
@@ -3785,6 +3906,7 @@ CPath::GetCrdrFromIntrscn(
 	cTPathIterator itr = m_points.begin();
 #ifdef _DEBUG
 	TIntrsctn temp; //for the debugger
+    temp.attrIdx = 0;
 #endif
 	if( cpStart ) 
 	{

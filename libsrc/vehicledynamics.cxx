@@ -1,10 +1,10 @@
 /*****************************************************************************
  *
- * (C) Copyright 1998 by National Advanced Driving Simulator and
+ * (C) Copyright 1998-2018 by National Advanced Driving Simulator and
  * Simulation Center, the University of Iowa and The University
  * of Iowa. All rights reserved.
  *
- * Version: $Id: vehicledynamics.cxx,v 1.115 2016/10/18 14:21:35 IOWA\dheitbri Exp $
+ * Version: $Id: vehicledynamics.cxx,v 1.121 2018/09/13 19:32:21 IOWA\dheitbri Exp $
  *
  * Author:  Gustavo Ordaz Hernandez, Chris Schwarz
  *
@@ -45,7 +45,13 @@ typedef struct TVehInfo {
 	double    steerInput;
 } TVehInfo;
 
+enum EVehType{
+	eFourWheelVeh = 0,
+	eTwoWheelVeh =1
+};
+
 typedef struct TVehSolAttr {
+    TVehSolAttr();
 	double axleHeight;
 	double mass;
 	double tireInert;
@@ -59,8 +65,23 @@ typedef struct TVehSolAttr {
 	double maximumSpeed;
 	CDblArr vInertia;
 	CTireConfig tireLocPos;
+	EVehType type;
 } TVehSolAttr;
-
+inline TVehSolAttr::TVehSolAttr() {
+    axleHeight    = 0;
+    mass          = 0;
+    tireInert     = 0;
+    tireMass      = 0;
+    tireRadius    = 0;
+    wheelBaseForw = 0;
+    wheelBaseRear = 0;
+    wheelTrack    = 0;
+    brakeLimitMassTorqueRatio = 0;
+    horsePower    = 0;
+    maximumSpeed  = 0;
+    type          = eFourWheelVeh;
+       
+}
 typedef struct TQryTerrainEfficientInfo {
 	int            refresh;
 	cvTerQueryHint hint;
@@ -93,6 +114,7 @@ const double cMetersToFeet = 3.28083;
 const double cNEAR_ZERO = 0.001;
 const double cAlfaMult  = 100.0;
 const double cSteerRateLimit = 0.0376; // approx. 65deg/sec rate limit
+
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -721,6 +743,7 @@ FourWheelVehDyna(
 			double&				   steerWheelPos, //<current steering wheel output
             float                  percentBetweenControlInputUpdates
 			)
+
 {
 	double orientMtrx[3][3];
 
@@ -1347,6 +1370,690 @@ FourWheelVehDyna(
 	vehPosVisual.m_z = tireAvgPos - tireAvgRad;
 }  // FourWheelVehDyna
 
+static void
+	TwoWheelVehDyna(
+			int                    cvedId,
+			CCved&                 cved, 
+			const TVehicleState*   cpCurState,
+			TVehicleState*         pFutState,
+			const TVehicleContInp* cpContInp,
+			const cvTObjAttr*      cpAttr,
+			const TVehSolAttr&     cVehAttr,
+			int                    numStates,
+			double                 delta,
+			double                 time, 
+			cvTFourWheelVeh&       state, 
+			cvTFourWheelVeh&       derivs,
+			CVector3D&             vehAccelLoc,
+			CPoint3D&              vehPosVisual,
+			bool                   firstIteration,
+			TQryTerrainInfo&       qryTerrainInfo,
+			bool                   makeQryTerrainEfficient,
+			bool&                  refreshQryTerrain,
+			int&                   qryTerrainErrCount,
+			double&				   steerWheelPos, //<current steering wheel output
+            float                  percentBetweenControlInputUpdates,
+			float&                 steerRoll //<stee
+			)
+
+{
+	double orientMtrx[3][3];
+
+	//
+	// Declare variables for vehicle states.
+	//
+	CPoint3D vehPosition;
+	CPoint3D vehOrient;
+	CVector3D vehVelocity;
+	CVector3D vehVelLoc;
+	CVector3D vehAngVel;
+	CVector3D force;
+	CVector3D forceLoc;
+	CVector3D grade;
+	double tireZPos[NUM_TIRES];
+	double tireZVel[NUM_TIRES];
+	double tireOmeg[NUM_TIRES];
+	double yawMoment;
+	double suspRoll;
+	double suspPitch;
+	double terrainAvgHt;
+	bool   stopped = false;
+
+	//
+	// Mapping states.
+	//
+	vehPosition.m_x = state.state[1 ]*cFeetToMeters;
+	vehPosition.m_y = state.state[2 ]*cFeetToMeters;
+	vehPosition.m_z = state.state[3 ]*cFeetToMeters;
+	vehVelocity.m_i = state.state[4 ];
+	vehVelocity.m_j = state.state[5 ];
+	vehVelocity.m_k = state.state[6 ];
+	vehOrient.m_x   = state.state[7 ];
+	vehOrient.m_y   = state.state[8 ];
+	vehOrient.m_z   = state.state[9 ];
+	vehAngVel.m_i   = state.state[10];
+	vehAngVel.m_j   = state.state[11];
+	vehAngVel.m_k   = state.state[12];
+
+	int i;
+	for ( i=0; i<NUM_TIRES; i++ ) {
+		tireZPos[i] = state.state[12+3*i+1]*cFeetToMeters;
+		tireZVel[i] = state.state[12+3*i+2];
+		tireOmeg[i] = state.state[12+3*i+3];
+	}
+
+	//
+	// Create orientation transformation matrix.
+	//
+	OrientMatrix( vehOrient.m_x, vehOrient.m_y, vehOrient.m_z, &orientMtrx );
+
+	//
+	// Assign vehicle variables with initial values
+	//
+	vehVelLoc  = ProdMatrixVector( &orientMtrx, vehVelocity, true );
+
+	yawMoment    = 0.0;
+	suspRoll     = 0.0;
+	suspPitch    = 0.0;
+	terrainAvgHt = 0.0;
+
+	//
+	// Read the control inputs.
+	//
+	double targetVelocity = (double) cpContInp->targVel;             // m/s
+	double targetDistance = (double) cpContInp->targDist;            // m
+    CPoint3D targetPoint;//  = cpContInp->targPos;                      // ft
+   
+    targetPoint.m_x = cpContInp->targPos.x * cFeetToMeters * percentBetweenControlInputUpdates;				 // m
+	targetPoint.m_y = cpContInp->targPos.y * cFeetToMeters * percentBetweenControlInputUpdates;				 // m
+	targetPoint.m_z = cpContInp->targPos.z * cFeetToMeters * percentBetweenControlInputUpdates;				 // m
+
+    targetPoint.m_x += cpContInp->oldtargPos.x * cFeetToMeters * (1-percentBetweenControlInputUpdates);		 // m
+	targetPoint.m_y += cpContInp->oldtargPos.y * cFeetToMeters * (1-percentBetweenControlInputUpdates);		 // m
+	targetPoint.m_z += cpContInp->oldtargPos.z * cFeetToMeters * (1-percentBetweenControlInputUpdates);		 // m
+
+	//
+	// Limit minimum target distance so that there is no singularity.
+	//
+	if ( targetDistance < targetVelocity * cTargetDistLimitRel )
+		targetDistance = targetVelocity * cTargetDistLimitRel;
+	if ( targetDistance < cTargetDistLimitAbs ) 
+		targetDistance = cTargetDistLimitAbs;
+
+	// e
+	double accelDesired = cpContInp->targAccel;
+#if 0
+    fprintf(stdout, "AccelDesired : %.2f \n ", accelDesired );
+#endif
+
+	double accelFeedback;
+	double driveTorque;
+	double AccelFeedforwardGain;
+	double AccelFeedbackGain;
+
+
+	// Gains are computed based on a lookup table that provides
+	// fairly high, but realistic acceleration profiles
+	GainInterpol(vehVelLoc.m_i, cVehAttr, AccelFeedforwardGain, AccelFeedbackGain);
+
+	accelFeedback = AccelFeedbackGain*(accelDesired - cpCurState->acc);
+	driveTorque   = AccelFeedforwardGain * accelDesired + accelFeedback;
+
+	if ( vehVelLoc.m_i <= 0.04 && driveTorque <= 0.0 ) {
+		driveTorque = 0.0;
+		stopped     = true;
+	}
+	else {
+		//
+		// The bias is a torque value that ensures the vehicle
+		// does not decelerate when given 0 accel as the input.
+		// The BiasInterpol function performs linear interpolation
+		// on a table containing experimentally determined values
+		// for appropriate values of torque to maintain the vehicle
+		// running at a constant speed when the acceleration is 0.
+		double bias = BiasInterpol(vehVelLoc.m_i);
+		driveTorque += bias;
+	}
+
+#if 0
+	fprintf(stdout, "accelFeedback : %.2f driveTorque : %.2f\n ", accelFeedback, driveTorque );
+#endif
+
+	if ( 0 ) 
+	{
+		printf("\n ========================== DYNAMICS ==========================\n");
+		printf("  %d==> feedback=%.1f,  feedforw=%.1f, drag=%.1f, %s\n",
+			cvedId,	accelFeedback, AccelFeedforwardGain * accelDesired,
+			cDragCoeff * vehVelLoc.m_i * vehVelLoc.m_i,
+			stopped ? "STOPPED" : "MOVING");
+		printf("  Torque=%8.2f accDsrd=%6.2f  CrAcc=%.5f)\n", 
+			driveTorque, accelDesired, cpCurState->acc);
+
+		printf("vehPosition: %.5E, %.5E, %.5E\n", vehPosition.m_x, vehPosition.m_y, vehPosition.m_z);
+		printf("vehVelocity: %.5E, %.5E, %.5E\n", vehVelocity.m_i, vehVelocity.m_j, vehVelocity.m_k);
+		printf("vehOrient: %.5E, %.5E, %.5E\n", vehOrient.m_x, vehOrient.m_y, vehOrient.m_z);
+		printf("vehAngVel: %.5E, %.5E, %.5E\n", vehAngVel.m_i, vehAngVel.m_j, vehAngVel.m_k);
+
+	}
+
+	//
+	// Limit drive torque for more realistic vehicle performance
+	//
+	double brakeTorqueLimiter = cVehAttr.mass / cVehAttr.brakeLimitMassTorqueRatio;
+	bool limitTorque = driveTorque < -brakeTorqueLimiter;
+	if ( limitTorque ) 
+	{
+		//printf("Limiter: was %f, now is %f\n", driveTorque, -brakeTorqueLimiter);
+		driveTorque = -brakeTorqueLimiter;
+	}
+
+	//
+	// Steering controller.
+	//
+	//double steerWheelPos = 0.0; 
+	double yawDesired,yaw;
+	yawDesired = atan2((targetPoint.m_y-vehPosition.m_y),
+							(targetPoint.m_x-vehPosition.m_x));
+	yaw = fmod(vehOrient.m_z,2*cPI);
+	if( yaw > cPI + 0.1 ) yaw -= 2.0*cPI;
+	if( yaw < -cPI - 0.1 ) yaw += 2.0*cPI;
+	if( targetPoint.m_x < vehPosition.m_x && fabs(yaw) > cPI/2.0 ) 
+	{
+		if( yawDesired < 0.0 && yaw > 0.0 ) 
+		{
+			yawDesired += 2.0*cPI;
+		}
+		if( yawDesired > 0.0 && yaw < 0.0 ) 
+		{
+			yawDesired -= 2.0*cPI;
+		}
+	}
+
+	double steerGain = 10;
+	steerWheelPos = steerGain*( yawDesired - yaw -
+		0.01*(1.0-exp(-vehVelLoc.m_i/5.0))*vehAngVel.m_k -
+		0.5*(1.0-exp(-vehVelLoc.m_i/5.0))*atan2(vehVelLoc.m_j,vehVelLoc.m_i) 
+		);
+	if( vehVelLoc.m_i <= 0.5 ) steerWheelPos = 0.0;
+	if( steerWheelPos >=  cSteerLimit ) 
+        steerWheelPos =  cSteerLimit;
+	if( steerWheelPos <= -cSteerLimit ) 
+        steerWheelPos = -cSteerLimit;
+    //cpContInp
+    float steerRateLimit = cpContInp->maxSteerRateRadpS * (float)delta;
+	steerWheelPos = RateLimit(steerWheelPos,cpCurState->steeringWheelAngle,steerRateLimit/*cSteerRateLimit*/);
+
+#if 0
+	gout << "targetPoint.m_x=" << targetPoint.m_x << "vehPosition.m_x=" << vehPosition.m_x << endl;
+	gout << "targetPoint.m_y=" << targetPoint.m_y << "vehPosition.m_y=" << vehPosition.m_y << endl;
+	gout << "yawerr=" << yawDesired-yaw << "yawrateerr=" << -0.01*(1.0-exp(-vehVelLoc.m_i/5.0))*vehAngVel.m_k << "slipangle=" << -0.5*(1.0-exp(-vehVelLoc.m_i/5.0))*atan2(vehVelLoc.m_j,vehVelLoc.m_i) << endl;
+	gout << "vehVelLoc Long=" << vehVelLoc.m_i << "yawDesired=" << yawDesired << "yaw=" << yaw << "steerWheelPos=" << steerWheelPos << endl;
+#endif
+	//
+	//  Map steerWheelPos to steer of each wheel using ackerman formula
+	//
+	double a0,a1,steerTirePos[4], ackermanAngle[2];
+	a0 = ( cVehAttr.wheelTrack / 
+		   ( cVehAttr.wheelBaseForw + 
+			 cVehAttr.wheelBaseRear ) );
+	a1 = ( cVehAttr.wheelBaseRear / 
+		   ( cVehAttr.wheelBaseForw + 
+			 cVehAttr.wheelBaseRear ) );
+	ackermanAngle[0] = atan2( tan(steerWheelPos), 
+		( a1 - 0.5 * a0 * tan(steerWheelPos) ) );
+	ackermanAngle[1] = atan2( tan(steerWheelPos), 
+		( a1 + 0.5 * a0 * tan(steerWheelPos) ) );
+	if( steerWheelPos >= 0.0 ) 
+	{
+		steerTirePos[0] = ackermanAngle[0];
+		steerTirePos[1] = ackermanAngle[1];
+	}
+	else 
+	{
+		steerTirePos[0] = ackermanAngle[1];
+		steerTirePos[1] = ackermanAngle[0];
+	}
+	steerTirePos[2] = 0.0;
+	steerTirePos[3] = 0.0;
+
+	//
+	// Declare variables for tires and for vehicle forces
+	//
+	CPoint3D tirePos;
+	CVector3D suspVel;
+	CVector3D terrainNormal;
+	double suspDefl, suspDeflVel, suspFrc[NUM_TIRES];
+	double terrainHeight, tireAvgPos;
+	double tireDefl, tireDeflVel;
+	double tireEffectRad, tireAvgRad, tireTorque;
+	double tireNrmFrc[NUM_TIRES],tireLongFrc[NUM_TIRES],tireLatFrc[NUM_TIRES];
+	double a2, a3, a4, b1, b2, b3, b4;
+	double longForce[NUM_TIRES], latForce[NUM_TIRES];
+	double tireZAcc[NUM_TIRES], tireOmeD[NUM_TIRES];
+	double tpx[NUM_TIRES], tpy[NUM_TIRES];
+
+	tireAvgRad = 0.0;
+	tireAvgPos = 0.0;
+	
+	for( i=0; i<NUM_TIRES; i++ ) 
+	{
+		//
+		// Determine global tire positions
+		//
+		const CPoint3D tireLocalPos = cVehAttr.tireLocPos.m_items[i];
+
+		tirePos = ProdMatrixVector( &orientMtrx, tireLocalPos, false );
+		tirePos.m_x += vehPosition.m_x;
+		tirePos.m_y += vehPosition.m_y;
+		tirePos.m_z += vehPosition.m_z;
+		tireAvgPos = tireAvgPos + tireZPos[i]/4.0;
+
+		tpx[i] = tirePos.m_x;
+		tpy[i] = tirePos.m_y;
+
+		//
+		// Determine local suspension velocity
+		//
+		suspVel.m_i = -vehAngVel.m_k * tireLocalPos.m_x + 
+			vehAngVel.m_j * tireLocalPos.m_z;
+		suspVel.m_j = -vehAngVel.m_i * tireLocalPos.m_z + 
+			vehAngVel.m_k * tireLocalPos.m_x;
+		suspVel.m_k = -vehAngVel.m_i * tireLocalPos.m_y - 
+			vehAngVel.m_j * tireLocalPos.m_x;
+		//
+		// Calculate Suspension force
+		//
+		suspDefl = tireZPos[i] - tirePos.m_z;
+		suspDeflVel = -vehVelLoc.m_k + suspVel.m_k;
+		suspFrc[i] = ( cpCurState->suspStif * suspDefl + 
+					   cpCurState->suspDamp * suspDeflVel );
+		//
+		// Obtain terrain height and use to calculate tire normal force
+		// Assumption: Tire normal force is always in the direction of
+		// terrain normal
+		//
+		terrainHeight     = 0.0;
+		terrainNormal.m_i = 0.0;
+		terrainNormal.m_j = 0.0;
+		terrainNormal.m_k = 1.0;
+
+		//
+		// QryTerrain can be executed in 1 of 2 modes.  In the default
+		// mode, QryTerrain is executed once for every tire in the
+		// first iteration of the Runge-Kutta algorithm for a total
+		// of 4 executions in every invocation of the vehicle dynamics.
+		// In the second (efficient) mode, QryTerrain is executed once 
+		// overall.
+		//
+		// Mode 1 --> makeQryTerrainEfficient == false
+		// Mode 2 --> makeQryTerrainEfficient == true
+		//
+		bool executeQryTerrain = ( firstIteration || 
+								   makeQryTerrainEfficient ||
+								   refreshQryTerrain
+								   );
+		if ( executeQryTerrain ) 
+		{
+			CCved::EQueryCode code;
+			double tx = tirePos.m_x * cMetersToFeet;
+			double ty = tirePos.m_y * cMetersToFeet;
+			double tz = tirePos.m_z * cMetersToFeet;
+			double tzout;
+
+			//
+			// Terrain query.
+			//
+			CCved::CTerQueryHint lastRLDPosition;
+			lastRLDPosition.CopyFromStruct( cpCurState->posHint[i] );
+			code = cved.QryTerrain( 
+								tx, 
+								ty, 
+								tz, 
+								tzout, 
+								terrainNormal, 
+								&lastRLDPosition 
+								);
+			lastRLDPosition.CopyToStruct( pFutState->posHint[i] );
+
+			if ( code == CCved::eCV_OFF_ROAD ) 
+			{
+				gout << "**QryTerrain "<<__FUNCTION__ <<" returns ";
+				gout << "eTOffRoad for point (";
+				gout << tx << ", " << ty << ", " << tz << ")  zout = ";
+				gout << tzout << "  cvedId = " << cvedId;
+				gout << "  name = " << cved.GetObjName( cvedId );
+				gout << endl;
+				gout << "*** qryTerrainErrCount = " << qryTerrainErrCount << endl;
+
+				// set new z to be same as old and try to continue
+				tzout = tz;
+
+				// increment the number of times that qryTerrain is off-road
+				qryTerrainErrCount++;
+			}
+			else
+			{
+				qryTerrainErrCount = 0;
+			}
+			terrainHeight = tzout * cFeetToMeters;
+
+			if( makeQryTerrainEfficient && refreshQryTerrain ) 
+			{
+				int j;
+				for ( j = 0; j < NUM_TIRES; j++ ) 
+				{
+					qryTerrainInfo.terrainHeight[j] = terrainHeight;
+					qryTerrainInfo.terrainNormal[j] = terrainNormal;
+				}
+				refreshQryTerrain = false;
+			}
+			else if( firstIteration ) 
+			{
+				qryTerrainInfo.terrainHeight[i] = terrainHeight;
+				qryTerrainInfo.terrainNormal[i] = terrainNormal;
+			}
+		}
+		else 
+		{
+			terrainHeight = qryTerrainInfo.terrainHeight[i];
+			terrainNormal = qryTerrainInfo.terrainNormal[i];
+		}
+
+		terrainAvgHt += terrainHeight / 4.0;
+		grade.m_i    += terrainNormal.m_i / 4.0;
+		grade.m_j    += terrainNormal.m_j / 4.0;
+		grade.m_k    += terrainNormal.m_k / 4.0;
+
+		tireDefl = terrainHeight - ( tireZPos[i] - cVehAttr.tireRadius );
+		tireDeflVel = -tireZVel[i];
+#if 0
+		fprintf(stdout,"i=%d.  tireDefl=%.2f.  terrainHeight=%.2f.  tireZPos[i]=%.2f.\n",i,tireDefl,terrainHeight,tireZPos[i]);
+#endif
+		if( tireDefl <= 0.0 ) 
+		{
+			tireDefl = 0.0;
+			tireDeflVel = 0.0;
+		}
+		tireNrmFrc[i] = ( cpCurState->tireStif * tireDefl + 
+						  cpCurState->tireDamp * tireDeflVel
+						  );
+		//
+		// Modify tire radius. Calculate tire longitudnal and lateral force
+		//
+		double tireRadius = tireZPos[i] - terrainHeight;
+		tireEffectRad = ( tireRadius * (1.0 + 4.0 * cVehAttr.tireInert / 
+						  ( cVehAttr.mass * tireRadius * tireRadius ) )
+						  );
+
+		double tireCircumference = 2*cPI*(tireRadius*cMetersToFeet);
+		double wheelRPM = ((cVehAttr.maximumSpeed*5280)/60)*(1/tireCircumference);
+		double speedTorqueLimiter = (cVehAttr.horsePower*5252)/wheelRPM; 
+		
+		limitTorque = driveTorque > speedTorqueLimiter;
+		if( limitTorque )
+		{
+			driveTorque = speedTorqueLimiter;
+		}
+
+		tireTorque     = driveTorque;
+		tireLongFrc[i] = tireTorque / tireEffectRad;
+        tireAvgRad     = tireAvgRad + tireRadius/4.0;
+		
+#if 0
+		if(i<3)
+			fprintf(stdout,"tireLongFrc[i] = %.2f ",tireLongFrc[i]);
+		else
+			fprintf(stdout,"tireLongFrc[i] = %.2f \n ",tireLongFrc[i]);
+
+#endif
+  		double alfa;
+		if( fabs( vehVelLoc.m_i ) > cVelocityThresh ) 
+		{
+			alfa = ( ( vehVelLoc.m_j + suspVel.m_j ) / vehVelLoc.m_i - 
+					 steerTirePos[i]
+					 );
+		}
+		else 
+		{
+			alfa = ( ( vehVelLoc.m_j + suspVel.m_j ) / 
+					 ( SignOf( vehVelLoc.m_i ) * cVelocityThresh * 10.0 )
+					 - steerTirePos[i]
+					 );
+		}
+
+		tireLatFrc[i] = ( -SignOf( alfa ) * cMU * tireNrmFrc[i] * 
+						  ( 1.0 - exp( -cAlfaMult * alfa * alfa ) )
+						  );
+		tireZAcc[i] = ( ( tireNrmFrc[i] - suspFrc[i] ) /
+						cVehAttr.tireMass - terrainNormal.m_k * cGRAVITY 
+						);
+		tireOmeD[i] = ( ( tireTorque - tireRadius * tireLongFrc[i] ) / 
+						cVehAttr.tireInert 
+						);
+
+		//
+		// Assemble the tire forces to find the forces and moments 
+		//   on the chassis
+		//
+		a1 = tireLongFrc[i] * cos( steerTirePos[i] );
+		a2 = tireLatFrc[ i] * sin( steerTirePos[i] );
+		a3 = tireLongFrc[i] * sin( steerTirePos[i] );
+		a4 = tireLatFrc[i]  * cos( steerTirePos[i] );
+		b1 = tireLongFrc[i] * sin( steerTirePos[i] ) * tireLocalPos.m_x;
+		b2 = tireLatFrc[i]  * cos( steerTirePos[i] ) * tireLocalPos.m_x;
+		b3 = tireLongFrc[i] * cos( steerTirePos[i] ) * tireLocalPos.m_y;
+		b4 = tireLatFrc[i]  * sin( steerTirePos[i] ) * tireLocalPos.m_y;
+
+		longForce[i]  = a1 - a2;
+		latForce[i]   = a3 + a4;
+		yawMoment    += b1 + b2 - b3 + b4;
+		suspPitch    += tireLocalPos.m_x * suspFrc[i];
+		suspRoll     += tireLocalPos.m_y * suspFrc[i];
+		forceLoc.m_i += longForce[i];
+		forceLoc.m_j += latForce[i];
+		forceLoc.m_k += tireNrmFrc[i];
+#if 0
+		fprintf(stdout,"i=%d.  alfa=%.2f.  tireLongFrc[i]=%.2f  tireLatFrc[i]=%.2f tireNrmFrc[i]=%.2f\n",i,alfa,tireLongFrc[i],tireLatFrc[i],tireNrmFrc[i]);
+#endif
+	}
+#if 0
+		fprintf(stdout,"forceLoc Long = %.2f \n ",forceLoc.m_i);
+#endif
+
+#ifdef DEBUG_VEH_STATE
+	if ( cvedId == 5 && firstIteration )
+	{
+		printf("%.4f %.4f %.4f %.4f ", 
+			terrainAvgHt, grade.m_i, grade.m_j, grade.m_k);
+	}
+#endif
+
+	//
+	// Modify longitudinal force by rolling resistance and
+	//   aerodynamic drag.  These formulas use magic numbers.
+	//
+	double RollingResFrc,AeroFrc;
+	if( fabs( vehVelLoc.m_i ) > 0.01 ) 
+	{
+		 RollingResFrc = ( ( 0.013 + 0.0000065 * vehVelLoc.m_i *
+						   vehVelLoc.m_i ) * forceLoc.m_k);
+	} 
+	else 
+	{
+		 RollingResFrc = 0.0;
+	}
+	AeroFrc = 0.5 * 1.22570 * 2.06 * 0.360 * vehVelLoc.m_i * vehVelLoc.m_i;
+	forceLoc.m_i -= ( AeroFrc + RollingResFrc );
+
+	//
+	// Calculate roll and pitch moments
+	//
+	double CGHeight = vehPosition.m_z - terrainAvgHt;
+	double rollMoment = suspRoll;
+	for( i=0; i<NUM_TIRES; i++ ) rollMoment += latForce[i] * CGHeight;
+
+	double pitchMoment = suspPitch;
+	for( i=0; i<NUM_TIRES; i++ ) pitchMoment += longForce[i] * CGHeight;
+
+	//
+	// Transform local forces into global reference frame
+	//   on a possible grade
+	//
+	force.m_i = ( forceLoc.m_i * cos( vehOrient.m_z ) - 
+				  forceLoc.m_j * sin( vehOrient.m_z )
+				  );
+	force.m_j = ( forceLoc.m_i * sin( vehOrient.m_z ) + 
+				  forceLoc.m_j * cos( vehOrient.m_z )
+				  );
+	force.m_k = forceLoc.m_k ;
+
+	CVector3D GlbForce;
+	if( fabs( vehVelLoc.m_i ) > cVelocityThresh ) 
+	{
+		GlbForce.m_i = grade.m_k * force.m_i - grade.m_i * force.m_k;
+		GlbForce.m_j = grade.m_k * force.m_j - grade.m_j * force.m_k;
+	}
+	else
+	{
+		if ( fabs(grade.m_i) < cMU ) 
+		{
+			GlbForce.m_i = grade.m_k * force.m_i;
+		}
+		else 
+		{
+			GlbForce.m_i = ( grade.m_k * force.m_i - 
+							 ( grade.m_i - cMU ) * force.m_k
+							 );
+		}
+		if ( fabs(grade.m_j) < cMU ) 
+		{
+			GlbForce.m_j = grade.m_k * force.m_j;
+		}
+		else 
+		{
+			GlbForce.m_j = ( grade.m_k * force.m_j - 
+							 ( grade.m_j - cMU ) * force.m_k
+							 );
+		}
+	}
+	GlbForce.m_k = grade.m_k * force.m_k;
+
+
+	/************************************************************
+	*  Accelerations
+	*/
+	CVector3D vehAccel;
+	vehAccel.m_i = GlbForce.m_i / cVehAttr.mass;
+	vehAccel.m_j = GlbForce.m_j / cVehAttr.mass;
+	vehAccel.m_k = GlbForce.m_k / cVehAttr.mass - cGRAVITY;
+
+	CVector3D vehAccelLoc2;
+	vehAccelLoc2.m_i = vehAccel.m_i + vehVelocity.m_j * vehAngVel.m_k;
+	vehAccelLoc2.m_j = vehAccel.m_j - vehVelocity.m_i * vehAngVel.m_k;
+	vehAccelLoc2.m_k = vehAccel.m_k;
+	vehAccelLoc = ProdMatrixVector( &orientMtrx, vehAccelLoc2, true );
+
+	CVector3D CrossTerm;
+	CrossTerm.m_i = vehAngVel.m_j * vehAngVel.m_k * 
+		( cVehAttr.vInertia.m_items[1] - 
+		cVehAttr.vInertia.m_items[2] );
+	CrossTerm.m_j = vehAngVel.m_i * vehAngVel.m_k * 
+		( cVehAttr.vInertia.m_items[2] - 
+		cVehAttr.vInertia.m_items[0] );
+	CrossTerm.m_k = vehAngVel.m_i * vehAngVel.m_j * 
+		( cVehAttr.vInertia.m_items[0] - 
+		cVehAttr.vInertia.m_items[1] );
+	
+	CVector3D vehAngAcc;
+	vehAngAcc.m_i = (rollMoment  + CrossTerm.m_i) /
+		cVehAttr.vInertia.m_items[0];
+	vehAngAcc.m_j = (pitchMoment + CrossTerm.m_j) /
+		cVehAttr.vInertia.m_items[1];
+	vehAngAcc.m_k = (yawMoment   + CrossTerm.m_k) /
+		cVehAttr.vInertia.m_items[2];
+
+	/************************************************************
+	* Euler Velocity Mapping
+	*/
+	CVector3D vehEulerVel;
+	vehEulerVel.m_k =  (vehAngVel.m_j * sin(vehOrient.m_x) 
+		+ vehAngVel.m_k * cos(vehOrient.m_x))/cos(vehOrient.m_y);
+	vehEulerVel.m_j =  vehAngVel.m_j * cos(vehOrient.m_x)
+		- vehAngVel.m_k * sin(vehOrient.m_x);
+	vehEulerVel.m_i = vehAngVel.m_i + vehEulerVel.m_k * sin(vehOrient.m_y);
+
+	/************************************************************
+	* Mapping Derivatives
+	*/
+	if( stopped ) 
+	{
+		for( i = 0; i < 13;i++ ) derivs.state[i] = 0.0;
+	}
+	else 
+	{
+		derivs.state[0 ] = 0.0;
+		derivs.state[1 ] = vehVelocity.m_i*cMetersToFeet;
+		derivs.state[2 ] = vehVelocity.m_j*cMetersToFeet;
+		derivs.state[3 ] = vehVelocity.m_k*cMetersToFeet;
+		derivs.state[4 ] = vehAccel.m_i;
+		derivs.state[5 ] = vehAccel.m_j;
+		derivs.state[6 ] = vehAccel.m_k;
+		derivs.state[7 ] = vehEulerVel.m_i;
+		derivs.state[8 ] = vehEulerVel.m_j;
+		derivs.state[9 ] = vehEulerVel.m_k;
+		derivs.state[10] = vehAngAcc.m_i;
+		derivs.state[11] = vehAngAcc.m_j;
+		derivs.state[12] = vehAngAcc.m_k;
+	}
+
+#if 0
+	fprintf(stdout,"vehAccel.m_i : %.2f vehAccel.m_j : %.2f fvehAccel.m_k : %.2f\n ", vehAccel.m_i, vehAccel.m_j, vehAccel.m_k );
+#endif
+
+	for( i = 0; i < NUM_TIRES; i++ ) 
+	{
+		derivs.state[12+3*i+1] = tireZVel[i];
+		derivs.state[12+3*i+2] = tireZAcc[i];
+		derivs.state[12+3*i+3] = tireOmeD[i];
+	}
+	//pFutState->
+	vehPosVisual.m_x = vehPosition.m_x;
+	vehPosVisual.m_y = vehPosition.m_y;
+	vehPosVisual.m_z = tireAvgPos - tireAvgRad;
+
+	CVector3D forward;
+			//TVehicleState*         pFutState,
+			//const TVehicleContInp* cpContInp,
+	CVector3D  target = 
+	cpCurState->position;  cpContInp->targPos;
+	target.Normalize();
+	target.DotP(forward);
+	pFutState->lateral;
+	forward = cpCurState->tangent;
+			//TVehicleState*         pFutState,
+			//const TVehicleContInp* cpContInp,
+	//TVehicleState turnRadius =
+	
+	auto wheel1 = cVehAttr.tireLocPos.m_items[0];
+	auto wheel2 = cVehAttr.tireLocPos.m_items[2];
+	if (cpCurState->vel > 0 && fabs(cpCurState->yawRate) > 0.001){
+	    auto theta = atan2((cpCurState->vel*cpCurState->vel),cpCurState->yawRate);
+	    auto turn_radius = (cpCurState->vel/cpCurState->yawRate);
+	    float gr = float(turn_radius*cGRAVITY);
+		float sgn = 1.0f;
+		float v2 = float(cpCurState->vel*cpCurState->vel);
+		if (gr >= 0){
+			sgn = -1.0f;
+		}
+	    auto lean = atan2(v2,fabs(gr)) ;
+		steerRoll = steerRoll*0.99f + lean*sgn*0.01f;
+	    //steerRoll = lean*sgn;
+			
+	}else{
+		steerRoll = 0;
+	}
+}  // TwoWheelVehDyna
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -1376,7 +2083,12 @@ ReadInfoFromSol(
 	const CSolObjVehicle* cpSolObjVeh = 
 				dynamic_cast<const CSolObjVehicle*> ( cpSolObj );
 	const CDynaParams& dynaParams = cpSolObjVeh->GetDynaParams();
-
+	int type = cpSolObjVeh->GetType();
+	if ((type & cSOL_MOTORCYCLE) > 0){
+		vehSolAttr.type = eTwoWheelVeh;	
+	}else{
+	    vehSolAttr.type = eFourWheelVeh;	
+	}
 	vehSolAttr.axleHeight = dynaParams.m_AxleHeight * cFeetToMeters;
 	vehSolAttr.mass = dynaParams.m_Mass;
 	vehSolAttr.tireInert = dynaParams.m_TireInert;
@@ -1395,16 +2107,13 @@ ReadInfoFromSol(
 	// Convert elements to feet to meters.
 	//
 	Vec::iterator i;
-	for( 
-		i = vehSolAttr.tireLocPos.m_items.begin(); 
-		i != vehSolAttr.tireLocPos.m_items.end(); 
-		i++ 
-		) 
+	auto &items = vehSolAttr.tireLocPos.m_items;
+	size_t size = items.size();
+	for( int i =0; i < size; ++i)
 	{
-		CPoint3D pt = *i;
-		(*i).m_x = pt.m_x * cFeetToMeters;
-		(*i).m_y = pt.m_y * cFeetToMeters;
-		(*i).m_z = pt.m_z * cFeetToMeters;
+		items[i].m_x *=  cFeetToMeters;
+		items[i].m_y *=  cFeetToMeters;
+		items[i].m_z *=  cFeetToMeters;
 	}
 }  // ReadInfoFromSol
 
@@ -1709,6 +2418,7 @@ DoVehicleDynamics(
 	TVehSolAttr vehSolAttr;
 	ReadInfoFromSol( cved, cpAttr->solId, vehSolAttr );
 
+
 	//
 	// Does the dynamics need to initialize itself?
 	//
@@ -1726,7 +2436,7 @@ DoVehicleDynamics(
 					);
         firstRun= true;
 	}
-
+	
 	//
 	// Using the 4-step Runge-Kutta method to solve the equations of motion.
 	// 
@@ -1771,6 +2481,17 @@ DoVehicleDynamics(
 	// current steering
 	double steeringWheelPos = cpCurState->steeringWheelAngle;
 	
+	CVector3D ZAxis(0, 0, 1);
+	CVector3D XAxis(1, 0, 0);
+	CVector3D lat(cpCurState->lateral.i,cpCurState->lateral.j,cpCurState->lateral.k);
+	float dotZ = (float)ZAxis.DotP(lat);
+	float dotX = (float)XAxis.DotP(lat);
+
+	float initRoll = (float)atan2( -cpCurState->lateral.k,
+                                     cpCurState->lateral.i * cpCurState->tangent.j
+                                    -cpCurState->lateral.j * cpCurState->tangent.i );
+
+	float steerRoll = initRoll;//atan2(dotZ, dotX); 
 	// 
 	// First iteration.
 	//
@@ -1789,6 +2510,32 @@ DoVehicleDynamics(
 
 #endif
     float evenFrameBase = updateSteering ? 0.5f:0;
+	if (vehSolAttr.type == eTwoWheelVeh){
+	TwoWheelVehDyna(
+				cvedId,
+				cved, 
+				cpCurState, 
+				pFutState,
+				cpContInp, 
+				cpAttr, 
+				vehSolAttr,
+				NUM_STATES_4_WHEEL_VEH,
+				delta,
+				initState.state[0], 
+				initState,
+				k1, 
+				vehAccelLoc,
+				vehPosVisual,
+				true,
+				qryTerrainInfo,
+				makeQryTerrainEfficient,
+				refreshQryTerrain,
+				qryTerrainErrCount,
+				steeringWheelPos,
+                evenFrameBase + 0.125f,
+				steerRoll
+				);
+	}else{
 	FourWheelVehDyna(
 				cvedId,
 				cved, 
@@ -1812,6 +2559,7 @@ DoVehicleDynamics(
 				steeringWheelPos,
                 evenFrameBase + 0.125f
 				);
+	}
 	
 	// 
 	// Second iteration.
@@ -1824,6 +2572,32 @@ DoVehicleDynamics(
 	{
 		 tempState.state[j] = initState.state[j] + 0.5 * delta * k1.state[j];
 	}
+		if (vehSolAttr.type == eTwoWheelVeh){
+	TwoWheelVehDyna(
+				cvedId,
+				cved, 
+				cpCurState, 
+				pFutState,
+				cpContInp, 
+				cpAttr, 
+				vehSolAttr,
+				NUM_STATES_4_WHEEL_VEH,
+				delta,
+				initState.state[0], 
+				tempState,
+				k2, 
+				vehAccelLoc,
+				vehPosVisual,
+				true,
+				qryTerrainInfo,
+				makeQryTerrainEfficient,
+				refreshQryTerrain,
+				qryTerrainErrCount,
+				steeringWheelPos,
+                evenFrameBase + 0.125f,
+				steerRoll
+				);
+	}else{
 	FourWheelVehDyna(
 				cvedId,
 				cved, 
@@ -1847,7 +2621,7 @@ DoVehicleDynamics(
 				steeringWheelPos,
                 evenFrameBase + 0.25f
 				);
-
+		}
 	// 
 	// Third iteration.
 	//
@@ -1855,6 +2629,32 @@ DoVehicleDynamics(
 	{
 		tempState.state[j] = initState.state[j] + 0.5 * delta * k2.state[j];
 	}
+		if (vehSolAttr.type == eTwoWheelVeh){
+	TwoWheelVehDyna(
+				cvedId,
+				cved, 
+				cpCurState, 
+				pFutState,
+				cpContInp, 
+				cpAttr, 
+				vehSolAttr,
+				NUM_STATES_4_WHEEL_VEH,
+				delta,
+				initState.state[0], 
+				tempState,
+				k3, 
+				vehAccelLoc,
+				vehPosVisual,
+				true,
+				qryTerrainInfo,
+				makeQryTerrainEfficient,
+				refreshQryTerrain,
+				qryTerrainErrCount,
+				steeringWheelPos,
+                evenFrameBase + 0.125f,
+				steerRoll
+				);
+	}else{
 	FourWheelVehDyna(
 				cvedId,
 				cved, 
@@ -1878,6 +2678,7 @@ DoVehicleDynamics(
 				steeringWheelPos,
                 evenFrameBase + 0.375f
 				);
+		}
 
 	// 
 	// Fourth iteration.
@@ -1887,6 +2688,32 @@ DoVehicleDynamics(
 	{
 		 tempState.state[j] = initState.state[j] + delta * k3.state[j];
 	}
+		if (vehSolAttr.type == eTwoWheelVeh){
+	TwoWheelVehDyna(
+				cvedId,
+				cved, 
+				cpCurState, 
+				pFutState,
+				cpContInp, 
+				cpAttr, 
+				vehSolAttr,
+				NUM_STATES_4_WHEEL_VEH,
+				delta,
+				initState.state[0], 
+				tempState,
+				k4, 
+				vehAccelLoc,
+				vehPosVisual,
+				true,
+				qryTerrainInfo,
+				makeQryTerrainEfficient,
+				refreshQryTerrain,
+				qryTerrainErrCount,
+				steeringWheelPos,
+                evenFrameBase + 0.125f,
+				steerRoll
+				);
+	}else{
 	FourWheelVehDyna(
 				cvedId,
 				cved, 
@@ -1910,6 +2737,7 @@ DoVehicleDynamics(
 				steeringWheelPos,
                 evenFrameBase + 0.5f
 				);
+		}
 
 	//
 	// Assemble intermediate results to calculate the next state.
@@ -1953,13 +2781,27 @@ DoVehicleDynamics(
 	pFutState->tangent.i = cos(yaw) * cos(pitch);
 	pFutState->tangent.j = sin(yaw) * cos(pitch);
 	pFutState->tangent.k = sin(pitch);
-	pFutState->lateral.i = -( -sin(yaw) * cos(roll) - 
-							  cos(yaw) * sin(pitch) * sin(roll)
-							  );
-	pFutState->lateral.j = -( cos(yaw) * cos(roll) - 
-							  sin(yaw) * sin(pitch) * sin(roll)
-							  );
-	pFutState->lateral.k = -( cos(pitch) * sin(roll) );
+
+
+	if (vehSolAttr.type == eTwoWheelVeh){
+	    pFutState->lateral.i = -( -sin(yaw) * cos(steerRoll) - 
+	    						  cos(yaw) * sin(pitch) * sin(steerRoll)
+	    						  );
+	      
+	    pFutState->lateral.j = -( cos(yaw) * cos(steerRoll) - 
+	    						  sin(yaw) * sin(pitch) * sin(steerRoll)
+	    						  );
+	    pFutState->lateral.k = -( cos(pitch) * sin(steerRoll) );	
+	}else{
+	    pFutState->lateral.i = -( -sin(yaw) * cos(roll) - 
+	    						  cos(yaw) * sin(pitch) * sin(roll)
+	    						  );
+	      
+	    pFutState->lateral.j = -( cos(yaw) * cos(roll) - 
+	    						  sin(yaw) * sin(pitch) * sin(roll)
+	    						  );
+	    pFutState->lateral.k = -( cos(pitch) * sin(roll) );	
+	}
 	vehVelocity.m_i = initState.state[4];
 	vehVelocity.m_j = initState.state[5];
 	vehVelocity.m_k = initState.state[6];
@@ -1980,7 +2822,7 @@ DoVehicleDynamics(
 	pFutState->dynaInitComplete = 1;
 
 	float tireCircumference;
-	tireCircumference = float(2*cPI*vehSolAttr.tireRadius);
+	tireCircumference = float(2*cPI*vehSolAttr.tireRadius*cMetersToFeet);
 	  
 	float tireDist;
 	tireDist =(float)( sqrt(pow((cpCurState->position.x - pFutState->position.x),2) + 
@@ -1990,12 +2832,11 @@ DoVehicleDynamics(
 	float frontRightTireRot = cpCurState->tireRot[1];
 	float rearTireRot = cpCurState->tireRot[2];
 
-	frontLeftTireRot = fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[0]),360);
-	frontRightTireRot = fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[1]),360);
-	rearTireRot = fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[2]),360);
+	frontLeftTireRot  = (float)fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[0]),360);
+	frontRightTireRot = (float)fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[1]),360);
+	rearTireRot       = (float)fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[2]),360);
 
 	pFutState->tireRot[0] = frontLeftTireRot;
 	pFutState->tireRot[1] = frontRightTireRot;
 	pFutState->tireRot[2] = rearTireRot;
-
 }  // DoVehicleDynamics

@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: roadpos.cxx,v 1.150 2016/10/28 15:58:21 IOWA\dheitbri Exp $
+// Version: 	$Id: roadpos.cxx,v 1.153 2018/09/13 19:31:52 IOWA\dheitbri Exp $
 //
 // Author(s):   Yiannis Papelis
 // Date:		September, 1998
@@ -827,7 +827,7 @@ CRoadPos::GetNextCrdr(int& crdrId, ETravelTurnDir& dirOut, ETravelTurnDir eTurnD
 		currentAvg /= crdrPntVec.size();
 
 		// test all other corridors 
-		double testAvg;
+		double testAvg = 0;
 		for(size_t i=1; i<straightCrdrVec.size(); i++) {
 			straightCrdrVec[i].GetCntrlPnts(crdrPntVec);
 
@@ -2358,6 +2358,7 @@ CRoadPos::GetVeryBestXYZ(bool useoffset) const
 		double ttt = tt * t;
 #ifdef _DEBUG
         cvTSplCoef tempcv; //for the debugger
+        tempcv.A =0;
 #endif
 		pT.m_x = ttt * pCurCP->hermite[0].A + tt * pCurCP->hermite[0].B +
 					t * pCurCP->hermite[0].C + pCurCP->hermite[0].D;
@@ -2460,11 +2461,12 @@ CRoadPos::GetXYZ() const
 	// If the current point is on an intersection
 	else {
 		vector<TCdo>::const_iterator cdo = m_cdo.begin();
-        TCrdrPnt debug;
 		TCrdrPnt* pCurCP = BindCrdrPnt(cdo->cntrlPntIdx);
 		TCrdrPnt* pNexCP = pCurCP+1;
+#ifdef _DEBUG
         TCrdrPnt debugP;
-
+        debugP.distance = 0;
+#endif
 		curCPLoc.m_x = pCurCP->location.x;
 		curCPLoc.m_y = pCurCP->location.y;		
         nexCPLoc.m_x = pNexCP->location.x;
@@ -4136,13 +4138,21 @@ CRoadPos::Travel(double dist, const CLane* cpDstLane, const ETravelTurnDir eTurn
 				return eERROR;
 			}
 
-			CIntrsctn intr = lane.GetNextIntrsctn();
+			CIntrsctn intr;
+            if (m_dist > 0){
+               intr = lane.GetNextIntrsctn();
+            }else{
+                intr = lane.GetPrevIntrsctn();
+            }
 			if (!intr.IsValid()){
 				return eERROR;
 			}
 
 			TCrdrVec crdrVec;
+            if (m_dist > 0)
 			intr.GetCrdrsStartingFrom(lane, crdrVec);
+            else
+                intr.GetCrdrsLeadingTo(lane, crdrVec);
 			int index = 0;
 
 			if (crdrVec.size() > 0){
@@ -4178,8 +4188,16 @@ CRoadPos::Travel(double dist, const CLane* cpDstLane, const ETravelTurnDir eTurn
 			m_cdo.clear();
 			TCdo tmpCdo;
 			tmpCdo.pCrdr = pCrdr;
+            if (m_dist > 0){
 			tmpCdo.ofs = m_ofs;
 			tmpCdo.dist = m_dist > m_pRoad->roadLengthLinear ? m_dist - m_pRoad->roadLengthLinear : -(m_dist);	// change to 0 to start at beginning of intersection
+            }else{
+                CVED::CCrdr crd(GetCved(),pCrdr);
+                tmpCdo.dist =crd.GetLength() + m_dist;
+                if (tmpCdo.dist < 0)
+                    tmpCdo.dist = 0;
+                m_dist= tmpCdo.dist;
+            }
 			tmpCdo.cntrlPntIdx = Search(tmpCdo.dist, tmpCdo.pCrdr)
 				+ tmpCdo.pCrdr->cntrlPntIdx;
 			m_cdo.push_back(tmpCdo);
@@ -4548,6 +4566,7 @@ CRoadPos::TravelDir(double dist, const ETravelTurnDir eTurnDir, const int idx)
 			else {
 #ifdef _DEBUG
 				cvTCrdr tcvtcrd; //for the benifit of the debugger
+                tcvtcrd.attrIdx = 0;
 #endif
 				m_dist = cdo->dist - length;
 
@@ -5575,6 +5594,7 @@ CRoadPos::Search(double dist,
 {
 #ifdef _DEBUG
 	cvTRoad tempcv; //for the debugger
+    tempcv.attrIdx = 0;
 #endif
 	// Search road if on road.
 	if (m_isRoad) {

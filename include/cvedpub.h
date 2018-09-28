@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 		$Id: cvedpub.h,v 1.33 2016/10/28 20:38:07 IOWA\dheitbri Exp $
+// Version: 		$Id: cvedpub.h,v 1.36 2018/04/03 16:01:41 IOWA\dheitbri Exp $
 //
 // Author(s):	Yiannis Papelis
 // Date:		October, 1998
@@ -38,7 +38,9 @@
 #include <set>
 #include <bitset>
 #include <map>
-
+#include <memory>
+#include <algorithm>
+#include <tuple>
 #ifdef _WIN32
 #ifndef _WINSOCKAPI
 #define _WINSOCKAPI
@@ -60,10 +62,10 @@ using namespace std;
 /*version control*/
 #include "cvedversionnum.h"
 #include "sol2.h"
-
+#include "undeletable_ptr.h"
 using namespace std;
 #include "sharedmem.h"
-
+#include "Orientation.h"
 #include "cveddecl.h"
 #include "cvederr.h"
 #include "cveditem.h"
@@ -80,6 +82,7 @@ using namespace std;
 #include "envirotype.h"
 #include "enviro.h"
 #include "objlayout.h"
+#include "ExternalControlInterface.h"
 #include "objmask.h"
 #include "objattr.h"
 #include "obj.h"

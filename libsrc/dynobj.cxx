@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 		$Id: dynobj.cxx,v 1.80 2016/07/15 14:36:05 IOWA\dheitbri Exp $
+// Version: 		$Id: dynobj.cxx,v 1.83 2018/09/12 20:08:43 IOWA\dheitbri Exp $
 //
 // Author(s):
 // Date:		September, 1998
@@ -783,6 +783,48 @@ CTrajFollowerObj::SetInitPosRotVel( const double initPosRot[6], const double ini
 	}
 }
 
+
+void 
+CTrajFollowerObj::SetModeType(cvEObjMode mode)
+{
+	int i;
+
+	AssertValid();
+
+	cvTHeader* pH = static_cast<cvTHeader*>(GetInst());
+
+	if ((pH->frame & 1) == 0)
+	{
+		// even frame
+		m_pObj->stateBufB.state.trajFollowerState.classType = mode;
+	}
+	else
+	{
+		m_pObj->stateBufA.state.trajFollowerState.classType = mode;
+	}
+}
+cvEObjMode 
+CTrajFollowerObj::GetModeType()
+{
+	int i;
+
+	AssertValid();
+
+	cvTHeader* pH = static_cast<cvTHeader*>(GetInst());
+
+	if ((pH->frame & 1) == 0)
+	{
+		return (cvEObjMode)m_pObj->stateBufA.state.trajFollowerState.classType;
+	}
+	else
+	{
+		// odd frame
+		for (i = 0; i < 6; ++i)
+		{
+			return (cvEObjMode)m_pObj->stateBufB.state.trajFollowerState.classType;
+		}
+	}
+}
 //////////////////////////////////////////////////////////////////////////////
 //
 // Description: Set the target direction of the trajfollower object.
@@ -2788,7 +2830,58 @@ CVehicleObj::SetQryTerrainErrCountImm( const int cQryTerrainErrCount )
 														cQryTerrainErrCount;
 	}
 } // end of SetQryTerrainErrCountImm
+//////////////////////////////////////////////////////////////////////////////
+///
+/// Description: Tells the system its dynamics are controlled outside of CVED
+///
+/// Returns:
+///
+//////////////////////////////////////////////////////////////////////////////
+void
+CVehicleObj::SetExternalDynaControlId( int id )
+{
+	AssertValid();
 
+	cvTHeader *pH = static_cast<cvTHeader*>( GetInst() );
+
+	if( ( pH->frame & 1 ) == 0 ) 
+	{
+		// even frame
+        m_pObj->stateBufB.state.vehicleState.vehState.extrnControlId = id;
+	}
+	else 
+	{
+		// odd frame
+		m_pObj->stateBufA.state.vehicleState.vehState.extrnControlId = id;
+	}
+} // end of SetQryTerrainErrCount
+
+
+//////////////////////////////////////////////////////////////////////////////
+///
+/// Description: Tells the system its dynamics are controlled outside of CVED
+///
+/// Returns:
+///
+//////////////////////////////////////////////////////////////////////////////
+void
+CVehicleObj::SetExternalDynaControlIdImm( int id )
+{
+	AssertValid();
+
+	cvTHeader *pH = static_cast<cvTHeader*>( GetInst() );
+
+	if( ( pH->frame & 1 ) == 0 ) 
+	{
+		// even frame
+		m_pObj->stateBufA.state.vehicleState.vehState.extrnControlId = id;
+	}
+	else 
+	{
+		// odd frame
+		m_pObj->stateBufB.state.vehicleState.vehState.extrnControlId = id;
+	}
+} // end of SetQryTerrainErrCountImm
 //////////////////////////////////////////////////////////////////////////////
 //              EMERGENCY VEHICLE MEMBER FUNCTIONS
 //////////////////////////////////////////////////////////////////////////////
@@ -3310,6 +3403,35 @@ TU16b CVisualObjectObj::GetStateIndex() const{
 		return m_pObj->stateBufB.state.virtualObjectState.StateIndex;
 	}
 }
+
+TU16b CVisualObjectObj::GetPrecreateId() const{
+	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+
+	if(  ( pH->frame & 1 ) == 0 ) 
+	{
+		// even frame
+		return m_pObj->stateBufA.state.virtualObjectState.ParseBlockID;
+	}
+	else 
+	{
+		// odd frame
+		return m_pObj->stateBufB.state.virtualObjectState.ParseBlockID;
+	}
+}
+TS8b  CVisualObjectObj::GetLightTarget() const{
+	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+
+	if(  ( pH->frame & 1 ) == 0 ) 
+	{
+		// even frame
+		return m_pObj->stateBufA.state.virtualObjectState.lightID;
+	}
+	else 
+	{
+		// odd frame
+		return m_pObj->stateBufB.state.virtualObjectState.lightID;
+	}
+}
 void CVisualObjectObj::SetStateIndex(TU16b id, bool doublebuffer){
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 
@@ -3324,6 +3446,36 @@ void CVisualObjectObj::SetStateIndex(TU16b id, bool doublebuffer){
 		m_pObj->stateBufA.state.virtualObjectState.StateIndex = id;
 	}
 }
+
+void  CVisualObjectObj::SetPrecreateId(TU16b id, bool doublebuffer){
+	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+
+	if( !doublebuffer  ||   ( pH->frame & 1 ) == 0 ) 
+	{
+		// even frame
+		m_pObj->stateBufB.state.virtualObjectState.ParseBlockID = id;
+	}
+	if(!doublebuffer  ||    ( pH->frame & 1 ) > 0 ) 
+	{
+		// odd frame
+		m_pObj->stateBufA.state.virtualObjectState.ParseBlockID = id;
+	}
+}
+void  CVisualObjectObj::SetLightTarget(TS8b id, bool doublebuffer) {
+	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+
+	if( !doublebuffer  ||   ( pH->frame & 1 ) == 0 ) 
+	{
+		// even frame
+        m_pObj->stateBufB.state.virtualObjectState.lightID = id;
+	}
+	if(!doublebuffer  ||    ( pH->frame & 1 ) > 0 ) 
+	{
+		// odd frame
+		m_pObj->stateBufA.state.virtualObjectState.lightID = id;
+	}
+}
+
 void CVisualObjectObj::SetBoarderColor(float R,float G, float B, float A, bool doublebuffer){
 	AssertValid();
 

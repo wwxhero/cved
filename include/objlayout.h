@@ -4,7 +4,7 @@
  * Simulation Center, the University of Iowa and The University
  * of Iowa. All rights reserved.
  *
- * Version: $Id: objlayout.h,v 1.108 2016/10/25 21:57:13 IOWA\dheitbri Exp $
+ * Version: $Id: objlayout.h,v 1.112 2018/09/12 20:06:55 IOWA\dheitbri Exp $
  *
  * Author:
  *
@@ -174,8 +174,9 @@ typedef struct TVehicleState {
 	double            pitchRate;    /* vehicle pitch rate     */
 	double            yawRate;      /* vehicle yaw rate       */
 	float             tireRot[3];   /*front left, front right, rear*/
+    int               extrnControlId; /* System ID if we are running a diff dyna */
 #ifndef SMALL_BLI
-	TS8b              reserved[48]; /*reserved for future use */
+	TS8b              reserved[44]; /*reserved for future use */
 #endif
 } TVehicleState;
 
@@ -204,7 +205,10 @@ typedef enum cvEObjMode {
 	eCV_GROUND_TRAJ = 0,
 	eCV_FREE_MOTION,
 	eCV_COUPLED_OBJ,
-	eCV_OBJ_REL_TRAJ
+	eCV_OBJ_REL_TRAJ,
+	eCV_DIGUY, //<Pre programed path
+	eCV_DIGUY_GUIDE_CONTROL, //<Guide based - 
+	eCV_DIGUY_DIR_CONTROL //< 100% control from Scenario control 
 } cvEObjMode;
 
 /*
@@ -249,7 +253,7 @@ typedef union cvTObjState {
 		TU16b             visualState;
 		TU16b             audioState;
 		//TU8b			  animationOn;  /*< is the animation on? */
-
+        TU8b              classType;   /*0, vehicle, walker, diGuy, free-body*/ 
 		cvTerQueryHint    posHint[3];
 
 		/* traj follower mode related data */
@@ -402,6 +406,8 @@ typedef union cvTObjState {
 		int	              parentId;
 		TU16b             StateIndex;
 		TU8b              DrawScreen;         /*predef shape ID */
+		TU16b             ParseBlockID;       /*predef shape ID */
+        TS8b              lightID;
 	} virtualObjectState;
 
 	struct ExternalDriverState {

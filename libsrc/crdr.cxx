@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: crdr.cxx,v 1.53 2015/10/30 16:56:22 iowa\oahmad Exp $
+// Version: 	$Id: crdr.cxx,v 1.54 2018/09/13 19:28:54 IOWA\dheitbri Exp $
 //
 // Author(s):	
 // Date:		September, 1998
@@ -816,7 +816,7 @@ CCrdr::GetLeftCrdrAlongDir( CCrdr& targetCrdr ) const
 //	cvTLane* pDstLeftLane;
 	if( moreLanesToLeft )
 	{
-//		pDstLeftLane = BindLane( dstLeftLaneNo );
+		pDstLeftLane = BindLane( dstLeftLaneNo );
 		if( !pDstLeftLane )  return false;
 		bool leftMostAlongDir = pDstLn->direction != pDstLeftLane->direction;
 		if( leftMostAlongDir )  return false;

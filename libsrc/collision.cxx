@@ -3,12 +3,12 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:     $Id: collision.cxx,v 1.15 2015/05/21 19:35:24 IOWA\dheitbri Exp $
+// Version:     $Id: collision.cxx,v 1.17 2018/03/27 15:04:25 IOWA\dheitbri Exp $
 //
 // Author(s):   Lijen Tsao
 // Date:        August, 2000
 //
-// Description: The implementation of CollisionDetection 
+// Description: The implementation of CollisionDetection
 //
 //////////////////////////////////////////////////////////////////////////////
 #include "cvedpub.h"
@@ -28,7 +28,7 @@ namespace CVED{
 //
 // Remarks: this function has to be provided with an id of a dynamic
 //  object, and ids of objects thare are within the rectangle of the specified
-//  object will be inserted in the provided STL vector in no specific order 
+//  object will be inserted in the provided STL vector in no specific order
 //
 // Arguments:
 //  objid - id of the queried dynamic object id
@@ -43,14 +43,14 @@ namespace CVED{
 //////////////////////////////////////////////////////////////////////////////
 int
 CCved::CollisionDetection(
-				int objId, 
-				vector<int>& objIdVec, 
+				int objId,
+				vector<int>& objIdVec,
 				CObjTypeMask mask) const
 {
 	if (objId >= cNUM_DYN_OBJS)
 		return -1;
 
-	objIdVec.clear();	
+	objIdVec.clear();
 	///////////// for dynamic objects
 	cvTObj* pObj = BindObj(objId);
 
@@ -143,7 +143,7 @@ CCved::CollisionDetection(
 			}
 		}
 	}
-	
+
 	vector<int> rdpcsVec;
 	set<int>    roadsUsed;
 
@@ -273,13 +273,13 @@ CCved::CollisionDetection(
 //
 // Arguments:
 //  objId1: id of the first object
-//  objId2: id of the second object 
+//  objId2: id of the second object
 //
 // Returns: if the two objects overlap
 //
 /////////////////////////////////////////////////////////////////////
 
-static void         
+static void
 myUpdateBBox(const cvTObjAttr *cpAttr,
 		const CVector3D &cTangent,
 		const CVector3D &cLateral,
@@ -317,10 +317,10 @@ myUpdateBBox(const cvTObjAttr *cpAttr,
 } // end of UpdateBBox
 
 
-bool 
+bool
 CCved::IfOverlap(int objId1, int objId2) const
 {
-	cvTObj* pObjPool = BindObj(0);	
+	cvTObj* pObjPool = BindObj(0);
 	cvTObjState* pState1;
 	if ((m_pHdr->frame & 1) == 0)
 	{
@@ -338,7 +338,7 @@ CCved::IfOverlap(int objId1, int objId2) const
 
 	CBoundingBox bbox1;
 	double zmin1, zmax1;
-	
+
 	if ( objId1 == 0 || objId1 == 1 ) {	// if driver or trailer, use our own bbox calculation
 		CPoint3D ll, ur;
 		myUpdateBBox(&pObjPool[objId1].attr, pState1->anyState.tangent, pState1->anyState.lateral, pState1->anyState.position,
@@ -368,7 +368,7 @@ CCved::IfOverlap(int objId1, int objId2) const
 
 	TPoint3D* pBox2 = (pState2->anyState.boundBox);
 	CBoundingBox bbox2(pBox2[0].x, pBox2[0].y, pBox2[1].x, pBox2[1].y);
-	double zmin2 = pState2->anyState.position.z, 
+	double zmin2 = pState2->anyState.position.z,
 		zmax2 = pState2->anyState.position.z+pObjPool[objId2].attr.zSize;
 
 #if DEBUG_COLLISION >= 1
@@ -384,7 +384,7 @@ CCved::IfOverlap(int objId1, int objId2) const
 	{
 #if DEBUG_COLLISION >= 1
 		if ( objId2 < 600 )
-			printf("Obj1 %d z(%f %f), obj2 %d z(%f %f), non overlapping\n", 
+			printf("Obj1 %d z(%f %f), obj2 %d z(%f %f), non overlapping\n",
 				objId1, zmin1, zmax1, objId2, zmin2, zmax2);
 #endif
 		return false;
@@ -446,7 +446,7 @@ CCved::IfOverlap(int objId1, int objId2) const
 ///\param[in] bbox the bounding box
 ///\param[out] objectIds
 /////////////////////////////////////////////////////////////////////////////
-void 
+void
 CCved::GetStaticObjectsInBoundingBox(const CBoundingBox &bbox,vector<int>& objIdVec) const{
 	vector<int> soVec;
 	CObjTypeMask mask;
@@ -456,7 +456,7 @@ CCved::GetStaticObjectsInBoundingBox(const CBoundingBox &bbox,vector<int>& objId
 //
 // Description: QryTerrainOffRoad (private)
 //	Find the elevation of the querried point. only called when it is off
-//  road.	
+//  road.
 //
 // Remarks:
 //
@@ -478,7 +478,7 @@ CCved::GetStaticObjectsInBoundingBox(const CBoundingBox &bbox,vector<int>& objId
 ///\param[in] bbox the bounding box
 ///\param[out] objectIds
 /////////////////////////////////////////////////////////////////////////////
-void 
+void
 CCved::GetTerrianObjectsInBoundingBox(const CBoundingBox &bbox,vector<int>& objIdVec) const
 {
 	bool found = false;

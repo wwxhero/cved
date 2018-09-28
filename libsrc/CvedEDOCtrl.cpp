@@ -4,12 +4,10 @@
 #include "objreflistUtl.h"
 #include "EnvVar.h"
 #include <algorithm>
-#include "hcsmobject.h"
 #include "ExternalControlInterface.h"
 #include "polygon2d.h"
 
 #include <filename.h>
-#include "hcsmobject.h"
 #include "odeDynamics.h"
 namespace CVED {
 

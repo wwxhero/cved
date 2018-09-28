@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 		$Id: cved.cxx,v 1.284 2016/10/28 15:58:21 IOWA\dheitbri Exp $
+// Version: 		$Id: cved.cxx,v 1.289 2018/09/13 19:29:50 IOWA\dheitbri Exp $
 //
 // Author(s):	Yiannis Papelis
 // Date:		September, 1998
@@ -16,12 +16,12 @@
 #include "objreflistUtl.h"
 #include "EnvVar.h"
 #include <algorithm>
-#include "hcsmobject.h"
+//#include "hcsmobject.h"
 
 #include "polygon2d.h"
 
 #include <filename.h>
-#include "hcsmobject.h"
+//#include "hcsmobject.h"
 #ifdef _PowerMAXOS
 template int* std::copy<int*,int*>(int*,int*,int*);
 template int* std::copy_backward<int*,int*>(int*,int*,int*);
@@ -89,7 +89,8 @@ CCved::CCved()
 	  m_debug( 0 ),
 	  m_state( eUNCONFIGURED ),
 	  m_haveFakeExternalDriver( true ),
-	  m_FirstTimeLightsNear(true)
+	  m_FirstTimeLightsNear(true),
+      m_currentExternalCntlId(1)
 {
 
 	m_terQryCalls = m_terQryRoadHits = m_terQryInterHits = 0;
@@ -1031,6 +1032,20 @@ CCved::SetExternalDriverHcsmId( int hcsmId )
 
 
 //////////////////////////////////////////////////////////////////////////////
+///\brief
+///    Pull all of the create and delete commands from our ExternalControlers
+///
+///This function should only be called between the time PreUpdateDynamicModels();
+///and PostUpdateDynamicModels is called.  
+///  
+///  
+///  
+void 
+CCved::ProcessExternalCreatesandDeletes(){
+    //m_ExternalControllers.HandleExternalCreateAndDeletes(*this);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 //
 // Description: This function executes one iteration of the dynamic model
 //   for all dynamic objects in the virtual environment.
@@ -1049,8 +1064,10 @@ CCved::SetExternalDriverHcsmId( int hcsmId )
 // Returns: void
 //
 //////////////////////////////////////////////////////////////////////////////
+class IExternalObjectControl;
+IExternalObjectControl* ctrl;
 void
-CCved::ExecuteDynamicModels( void )
+CCved::ExecuteDynamicModels(  )
 {
 	TObjectPoolIdx id;
 	TObj*          pO;
@@ -1066,19 +1083,10 @@ CCved::ExecuteDynamicModels( void )
 	                                                // rot, vel can be obtained. This way newly
 	                                                // transitioned free motion objects won't lose
 	                                                // one frame of dynamics.
-	int            attachedObjCount = 0, freeMotionObjCount = 0, i;
-//	static short timer = 0;
-//	double currentSecs;
 
-	/*
-	if ( !timer )
-	{
-		timer   = hrt_timer_alloc(HRT_MICROSECOND, "");
-		hrt_timer_start( timer );
-	}
-	printf("ExecDyna: current sec %f simstep size %f\n",
-		hrt_timer_currentsecs( timer ), m_pHdr->deltaT / m_pHdr->dynaMult * 2);
-	*/
+	int attachedObjCount = 0, freeMotionObjCount = 0, i;
+    //m_ExternalControllers.PreUpdateDynamicModels();
+    ProcessExternalCreatesandDeletes();
 
 	if( m_haveFakeExternalDriver )
 	{
@@ -1092,6 +1100,36 @@ CCved::ExecuteDynamicModels( void )
 
 	while( id < cNUM_DYN_OBJS )
 	{
+        if (pO->phase == eDYING){
+            //m_ExternalControllers.OnPushDeleteObject(id);
+        }
+        else if( pO->phase == eBORN){
+			    cvTObjState currState;
+			    const cvTObjState* pCurrState = &currState;
+			    cvTObjState* pFutState;
+			    const cvTObjContInp* pCurrContInp;
+                bool exCreateType = pO->type == eCV_TRAJ_FOLLOWER || 
+                                    pO->type == eCV_VEHICLE;
+
+                if (exCreateType){
+                if( (m_pHdr->frame & 1) == 0 ) 
+			    {
+			    	// even frame
+			    	pCurrContInp = &pO->stateBufA.contInp;
+			    	currState    = pO->stateBufB.state;
+			    	pFutState    = &pO->stateBufB.state;
+			    }
+			    else 
+			    {
+			    	// odd frame
+			    	pCurrContInp = &pO->stateBufB.contInp;
+			    	currState    = pO->stateBufA.state;
+			    	pFutState    = &pO->stateBufA.state;
+			    }
+
+                //m_ExternalControllers.OnCreateObj(id,&pO->attr,pFutState);
+            }
+        }
 		bool executeDynaModel = (
 					(
 						pO->type == eCV_TRAJ_FOLLOWER ||
@@ -1102,81 +1140,77 @@ CCved::ExecuteDynamicModels( void )
 					( pO->phase == eALIVE || pO->phase == eDYING )
 					);
 
-//		if ( pO->type == eCV_TRAJ_FOLLOWER )
-//			fprintf(stdout, " traj follower %d phase %d\n", id, pO->phase);
+        if (executeDynaModel)
+        {
+            cvTObjState currState;
+            const cvTObjState* pCurrState = &currState;
+            cvTObjState* pFutState;
+            const cvTObjContInp* pCurrContInp;
 
-		if( executeDynaModel )
-		{
-			cvTObjState currState;
-			const cvTObjState* pCurrState = &currState;
-			cvTObjState* pFutState;
-			const cvTObjContInp* pCurrContInp;
+            // on even frames, dynamic servers use buffer A for
+            // control inputs and buffer B for state.  Vice versa
+            // for odd frames.  Same attributes are used as
+            // attributes don't change based on the frame.
 
-			// on even frames, dynamic servers use buffer A for
-			// control inputs and buffer B for state.  Vice versa
-			// for odd frames.  Same attributes are used as
-			// attributes don't change based on the frame.
+            if ((m_pHdr->frame & 1) == 0)
+            {
+                // even frame
+                pCurrContInp = &pO->stateBufA.contInp;
+                currState = pO->stateBufB.state;
+                pFutState = &pO->stateBufB.state;
+            }
+            else
+            {
+                // odd frame
+                pCurrContInp = &pO->stateBufB.contInp;
+                currState = pO->stateBufA.state;
+                pFutState = &pO->stateBufA.state;
+            }
 
-			if( (m_pHdr->frame & 1) == 0 )
-			{
-				// even frame
-				pCurrContInp = &pO->stateBufA.contInp;
-				currState    = pO->stateBufB.state;
-				pFutState    = &pO->stateBufB.state;
-			}
-			else
-			{
-				// odd frame
-				pCurrContInp = &pO->stateBufB.contInp;
-				currState    = pO->stateBufA.state;
-				pFutState    = &pO->stateBufA.state;
-			}
+            if (pO->type == eCV_TRAJ_FOLLOWER)
+            {
+                if (currState.trajFollowerState.curMode == eCV_FREE_MOTION)
+                    // free motion object, its pos, rot, vel information has to
+                    // be obtained in a separate loop after the ode sim step.
+                {
+                    freeMotionObjIds[freeMotionObjCount] = id;
+                    ++freeMotionObjCount;
+                }
 
-			if ( pO->type == eCV_TRAJ_FOLLOWER )
-			{
-				if ( currState.trajFollowerState.curMode == eCV_FREE_MOTION )
-				// free motion object, its pos, rot, vel information has to
-				// be obtained in a separate loop after the ode sim step.
-				{
-					freeMotionObjIds[freeMotionObjCount] = id;
-					++freeMotionObjCount;
-				}
+                if (currState.trajFollowerState.curMode != eCV_GROUND_TRAJ)
+                    // traj follower that was or is attached to a parent object, delay the dynamics computation
+                {
+                    attachedObjIds[attachedObjCount] = id;
+                    ++attachedObjCount;
+                }
+                else
+                    DynamicModel(
+                        id,
+                        pO->type,
+                        &pO->attr,
+                        pCurrState,
+                        pCurrContInp,
+                        pFutState
+                    );
+            }
+            else
+                DynamicModel(
+                    id,
+                    pO->type,
+                    &pO->attr,
+                    pCurrState,
+                    pCurrContInp,
+                    pFutState
+                );
 
-				if ( currState.trajFollowerState.curMode != eCV_GROUND_TRAJ )
-				// traj follower that was or is attached to a parent object, delay the dynamics computation
-				{
-					attachedObjIds[attachedObjCount] = id;
-					++attachedObjCount;
-				}
-				else
-						DynamicModel(
-							id,
-							pO->type,
-							&pO->attr,
-							pCurrState,
-							pCurrContInp,
-							pFutState
-							);
-					}
-			else
-					DynamicModel(
-						id,
-						pO->type,
-						&pO->attr,
-						pCurrState,
-						pCurrContInp,
-						pFutState
-						);
-
-			// This is an optimization.
-			// We know the total number of dynamic objects because
-			// is stored in the header so once we have processed
-			// as many objects, there is no reason to keep going through
-			// the object pool since the rest of the objects will
-			// certainly be in the TDead state
-			count++;
-			if( count == m_pHdr->dynObjectCount )  break;
-		}
+            // This is an optimization.
+            // We know the total number of dynamic objects because
+            // is stored in the header so once we have processed
+            // as many objects, there is no reason to keep going through
+            // the object pool since the rest of the objects will
+            // certainly be in the TDead state
+            count++;
+        }
 
 		id++;
 		pO++;
@@ -1279,7 +1313,7 @@ CCved::ExecuteDynamicModels( void )
 
 
 	}
-
+    //m_ExternalControllers.PostUpdateDynamicModels();
 } // end of ExecuteDynamicModels
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2448,6 +2482,7 @@ CCved::GetObj(const string &cObjName, vector<int> &objId) const
 	TObj  *pO;
 #ifdef _DEBUG
 	TObj tObj;
+    tObj.myId =-1;
 #endif
 	// Search through the multimap and return all objects with the given name.
 	// Will not work when the shared memory interface is used because
@@ -2779,6 +2814,8 @@ CCved::GetAllDynObjsOnRoadRange(int roadId,
 #ifdef _DEBUG
 	cvTDynObjRef temp; //for the debugger........
     cvTRoadRef tempf;
+    tempf.objIdx =0;
+    temp.corridors=0;
 #endif
     if (m_pRoadRefPool == 0) {
 		// EXIT: Maintainer has not been run yet.
@@ -3478,7 +3515,7 @@ CCved::CreateDynObj(
 	if ( m_debug > 0 ) {
 		gout << "->Enter CCved::CreateDynObj("
 			<< cName << ", " << type << ")" << endl;
-		gout << "header addr is " << (int) m_pHdr << endl << flush;
+		gout << "header addr is " << std::hex<< (size_t) m_pHdr << endl << flush;
 	}
 
 	LockObjectPool();
@@ -3659,9 +3696,9 @@ CCved::CreateDynObj(
 
 	if( m_debug > 0 )
 	{
-		gout << "->Exit CCved::CreateDynObj, ptr is"  << (int)pTheObj << endl;
+		gout << "->Exit CCved::CreateDynObj, ptr is"  <<std::hex<< (size_t)pTheObj << endl;
 	}
-
+    
 	return pTheObj;
 } // end of CreateDynObj
 
@@ -4101,6 +4138,7 @@ CCved::GetRunTimeDynObjType(cvEObjType type)
 		case eCV_VIRTUAL_OBJECT  : return typeid( CVisualObjectObj );
 		case eCV_AVATAR          : return typeid( CAvatarObj );
 		case eCV_EXTERNAL_AVATAR : return typeid( CExternalAvatarObj );
+		case eCV_EXTERNAL_VEH_OBJECT  : return typeid(CExternalVehObj);
 		default                  : assert( 0 ); return typeid( int ); // dummy
 	}
 } // end of GetRunTimeDynObjType
@@ -6633,7 +6671,7 @@ CCved::Verify(void)
 	for (i=0; i<m_pHdr->objectStrgCount; i++) {
 		cvTObj *pO = BindObj(i);
 
-		gout << "Object " << i << ", at addr " << (int)pO << endl;
+		gout << "Object " << i << ", at addr " << std::hex << (size_t)pO << endl;
 		gout << "  myId      = " << (int)pO->myId << endl;
 		gout << "  type      = " << (int)pO->type << endl;
 		gout << "  phase     = " << (int)pO->phase << endl;
@@ -8111,6 +8149,7 @@ CCved::BuildBackObjList(
 				// Insert object into main list.
 				//
 				TObjListInfo node;
+                memset(&node, 0, sizeof(TObjListInfo));
 				node.objId = objId;
 				node.distFromOwner = distFromOwner;
 				node.sameDirAsLane = true;
@@ -8120,7 +8159,7 @@ CCved::BuildBackObjList(
 				gout << " with dist = " << node.distFromOwner;
 				gout << endl;
 #endif
-
+			
 				backObjs.push_back( node );
 			}
 		}
@@ -10668,7 +10707,7 @@ CCved::GetFirstObjOnIntrsctingCrdr(
 	{
 		// Get the last intersecting distance of this intersecting corridor
 		// with the other corridor.
-		double intrsctingDist;
+		double intrsctingDist=0;
 		/*static*/ vector<double> dists;
 
 		//double intrsctingDist;
@@ -12574,6 +12613,7 @@ CCved::DeleteODEObj(CODEObject* obj){
 	delete obj;
 }
 
+
 void __cdecl CCved::Logoutf(const TCHAR* format, ...)
 {
 #ifdef _DEBUG
@@ -12597,6 +12637,20 @@ void __cdecl CCved::Logoutf(const TCHAR* format, ...)
 	free(buffer);
 #endif
 }
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///\brief add External Controller, callback mech for object controller/syncing
+///
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//int 
+//CCved::AddExternalController(TExternalObjectControlRef ref){
+//    m_ExternalControllers[m_currentExternalCntlId] = ref;
+//    m_currentExternalCntlId++;
+//    return m_currentExternalCntlId;
+//}
+
 
 } // namespace CVED
 

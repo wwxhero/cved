@@ -4,7 +4,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:    $Id: dynobjreflist.cxx,v 1.54 2013/10/22 15:45:42 IOWA\dheitbri Exp $
+// Version:    $Id: dynobjreflist.cxx,v 1.56 2018/09/13 19:30:09 IOWA\dheitbri Exp $
 //
 // Author(s):  Jillian Vogel, Omar Ahmad
 // Date:       September, 1999
@@ -74,8 +74,13 @@ CCved::FillByRoadDynObjList( void )
 		}
 		else
 		{
-			memset( m_pSavedObjLoc, 0, cNUM_DYN_OBJS * sizeof(TSavedObjLoc) );
-
+            for (int i = 0; i < cNUM_DYN_OBJS; i++) {
+                m_pSavedObjLoc[i].boundBox.SetMin(CPoint2D());
+                m_pSavedObjLoc[i].boundBox.SetMax(CPoint2D());
+                m_pSavedObjLoc[i].pDynObjRefs = nullptr;
+                m_pSavedObjLoc[i].same = false;
+                m_pSavedObjLoc[i].valid = false;
+            }
 			int i;
 			for( i = 0; i < cNUM_DYN_OBJS; ++i )
 			{
@@ -741,6 +746,7 @@ CCved::IsObjOnRoadNetwork( const cvTObj* cpObj )
 {
 #ifdef _DEBUG
 	cvTObj tobj; //for the benifit of the debugger
+    tobj.myId =-1;
 #endif
     string spc = "  ";
 #ifdef DEBUG_DYN_OBJ_LIST

@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:    $Id: cved.h,v 1.163 2016/08/16 22:20:37 IOWA\dheitbri Exp $
+// Version:    $Id: cved.h,v 1.164 2018/04/03 16:01:41 IOWA\dheitbri Exp $
 //
 // Author(s):
 // Date:       September, 1998
@@ -82,7 +82,6 @@ public:
 	typedef vector<CLane>		TLaneVec;
 	typedef vector<int>			TIntVec;
 	typedef vector<CIntrsctn>	TIntrsctnVec;
-
 	typedef struct {
 		int objId;
 		double dist;
@@ -127,7 +126,7 @@ public:
 	bool		Init(const string& cLriName, string& errMsg);
 	void		ReInit(void);
 	virtual void Maintainer(void);
-	virtual void ExecuteDynamicModels(void);
+	virtual void ExecuteDynamicModels();
 	void		SetDebug(int level);
 
 	// SOL related
@@ -643,7 +642,11 @@ public:
 						 TVehicleState*,
 						 bool);
 
+
 protected:
+
+
+
 	// these components are declared private to disallow their use
 	CCved(const CCved&);
 	CCved &operator=(const CCved&);
@@ -746,7 +749,7 @@ protected:
 			const cvTObjState*,
 			const cvTObjContInp*,
 			cvTObjState*);
-
+    void ProcessExternalCreatesandDeletes();
 	// help with object types
 	const type_info &GetRunTimeDynObjType(cvEObjType type);
 
@@ -773,6 +776,7 @@ protected:
 	//traffic light data
 	bool m_FirstTimeLightsNear; //<First
 	vector<CTrafLightData> m_tlData;
+    int m_currentExternalCntlId;
 #ifdef _WIN32
 	HANDLE	m_MUTEX_LightsNear; //only one thread at time can access GetTrafLightsNear
 #endif

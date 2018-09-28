@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: road.cxx,v 1.50 2016/10/28 15:58:21 IOWA\dheitbri Exp $
+// Version: 	$Id: road.cxx,v 1.51 2018/03/27 15:01:39 IOWA\dheitbri Exp $
 //
 // Author(s):	Yiannis Papelis
 // Date:		August, 1998
@@ -196,7 +196,6 @@ CRoad::CRoad( const CCved& cCved, TU32b id )
 	//
 	if( id >= (int)pH->roadCount )
 	{
-		char buf[1024];
         stringstream ss;
 		ss<<"No road with id = "<<id;
 		cvCInternalError e( ss.str(), __FILE__, __LINE__ );
