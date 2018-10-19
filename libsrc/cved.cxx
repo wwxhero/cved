@@ -1080,7 +1080,7 @@ CCved::ExecuteDynamicModels( void )
 		hrt_timer_currentsecs( timer ), m_pHdr->deltaT / m_pHdr->dynaMult * 2);
 	*/
 
-	if( m_haveFakeExternalDriver ) 
+	if( m_haveFakeExternalDriver )
 	{
 		id = 0;
 	}
@@ -4035,6 +4035,7 @@ CCved::CreateTypedObject(cvEObjType type, int id)
 		"eCV_WALKER",
 		"eCV_EXTERNAL_TRAILER",
 		"eCV_VIRTUAL_OBJECT",
+		"eCV_AVATAR",
 		"eCV_OBJ_TYPE_EN"
 	};
 
@@ -4056,6 +4057,7 @@ CCved::CreateTypedObject(cvEObjType type, int id)
 		case eCV_EXTERNAL_TRAILER: return new CExternalTrailerObj(*this, BindObj(id));
 		case eCV_WALKER          : return new CWalkerObj(*this, BindObj(id));
 		case eCV_VIRTUAL_OBJECT  : return new CVisualObjectObj(*this, BindObj(id));
+		case eCV_AVATAR          : return new CAvatarObj(*this, BindObj(id));
 		default                  : return 0;
 	}
 } // end of CreateTypedObject

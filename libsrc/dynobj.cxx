@@ -13,7 +13,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "cvedpub.h"
 #include "cvedstrc.h"
-
+#include <queue>
 // for Docjet to recognize the namespace
 /*
 using namespace CVED;
@@ -45,6 +45,7 @@ CDynObj::~CDynObj()
 	if( !m_readOnly )
 		m_pObj->phase = eDYING;
 } // end of ~CDynObj
+
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -313,6 +314,14 @@ CDynObj::SetVel( double vel, bool useDoubleBuffer )
 		m_pObj->stateBufB.state.anyState.vel = vel;
 	}
 } // end of SetVel
+
+CDynObj&
+CDynObj::operator=(const CDynObj& src)
+{
+	m_pObj = src.m_pObj;
+	m_readOnly = src.m_readOnly;
+	return *this;
+}
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -3543,4 +3552,277 @@ void CVisualObjectObj::GetDrawSize(float &x, float &y) const {
 		y = m_pObj->stateBufB.state.virtualObjectState.scale[1];
 	}
 }
+
+CAvatarObj::JointTemplate CAvatarObj::s_jointTemplate[] = {
+		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solution
+		{
+			"Virtual_root", -1, {0, 0, 0}, 1, -1
+		}
+		,{
+			"Visualizer", 4096, {0, 0, 0}, 5, 2		//1
+		}
+		,{
+			"Visualizer2", 4128, {0, 0, 0}, -1, 3	//2
+		}
+		,{
+			"Visaulzier3", 4160, {0, 0, 0}, -1, 4	//3
+		}
+		,{
+			"Visualizer4", 4192, {0, 0, 0}, -1, -1	//4
+		}
+		,{
+			"Visualizer5", 4416, {0, 0, 0}, -1, -1	//5
+		}
+};
+
+CAvatarObj::CAvatarObj()
+	: CDynObj()
+	, m_jointsA(NULL)
+	, m_jointsB(NULL)
+{
+}
+
+CAvatarObj::~CAvatarObj()
+{
+	UnInitJoints();
+}
+
+CAvatarObj::CAvatarObj(const CAvatarObj& src)
+	: CDynObj(src)
+	, m_jointsA(NULL)
+	, m_jointsB(NULL)
+{
+	m_readOnly = src.m_readOnly;
+	m_pObj = src.m_pObj;
+	m_jointsA = src.m_jointsA;
+	m_jointsB = src.m_jointsB;
+}
+
+CAvatarObj::CAvatarObj ( const CCved& cved, TObj* pObj)
+	: CDynObj(cved, pObj)
+	, m_jointsA(NULL)
+	, m_jointsB(NULL)
+{
+	InitJoints();
+	pObj->stateBufA.state.avatarState.child_first = m_jointsA;
+	pObj->stateBufB.state.avatarState.child_first = m_jointsB;
+}
+
+void CAvatarObj::InitJoints()
+{
+	m_jointsA = InitJoint();
+	m_jointsB = InitJoint();
+}
+
+TAvatarJoint* CAvatarObj::InitJoint()
+{
+	assert(NULL == m_jointsA
+		&& NULL == m_jointsB);
+
+	JointTemplate* nt_root = &s_jointTemplate[0];
+	std::queue<JointTemplate*> q_template;
+	q_template.push(nt_root);
+
+	TAvatarJoint joint_root = VIRTUAL_ROOT(NULL);
+	std::queue<TAvatarJoint*> q_joint;
+	q_joint.push(&joint_root);
+	while (!q_template.empty())
+	{
+		JointTemplate* nt_parent = q_template.front();
+		q_template.pop();
+		TAvatarJoint* n_parent = q_joint.front();
+		q_joint.pop();
+
+		int i_child = nt_parent->child_first;
+		TAvatarJoint** n_precessor = &n_parent->child_first;
+		while (i_child > 0)
+		{
+			JointTemplate* nt_child = &s_jointTemplate[i_child];
+			TAvatarJoint* n_child = new TAvatarJoint;
+			q_template.push(nt_child);
+			q_joint.push(n_child);
+			n_child->name = _strdup(nt_child->name);
+			n_child->type = nt_child->type;
+			n_child->angle = nt_child->angle;
+			n_child->angleRate.i = 0;
+			n_child->angleRate.j = 0;
+			n_child->angleRate.k = 0;
+			n_child->child_first = NULL;
+			n_child->sibling_next = NULL;
+			*n_precessor = n_child;
+
+			i_child = nt_child->sibling_next;
+			n_precessor = &n_child->sibling_next;
+		}
+	}
+	return joint_root.child_first;
+}
+
+void CAvatarObj::UnInitJoint(TAvatarJoint* joint)
+{
+	TAvatarJoint* n_root = new TAvatarJoint;
+	n_root->child_first = joint;
+	n_root->name = NULL;
+	n_root->sibling_next = NULL;
+	std::queue<TAvatarJoint*> q_joints;
+	q_joints.push(n_root);
+	while(!q_joints.empty())
+	{
+		TAvatarJoint* n_parent = q_joints.front();
+		q_joints.pop();
+		TAvatarJoint* n_child = n_parent->child_first;
+		while (n_child)
+		{
+			q_joints.push(n_child);
+			n_child = n_child->sibling_next;
+		}
+		free((void *)n_parent->name);
+		delete n_parent;
+	}
+}
+
+void CAvatarObj::UnInitJoints()
+{
+	assert((NULL == m_jointsA)
+		== (NULL == m_jointsB));
+	if (m_jointsA)
+	{
+		UnInitJoint(m_jointsA);
+		UnInitJoint(m_jointsB);
+		m_jointsA = NULL;
+		m_jointsB = NULL;
+	}
+}
+
+
+CAvatarObj& CAvatarObj::operator=(const CAvatarObj& src)
+{
+	//m_cpCved = src.m_cpCved;
+	m_readOnly = src.m_readOnly;
+	m_pObj = src.m_pObj;
+	m_jointsA = src.m_jointsA;
+	m_jointsB = src.m_jointsB;
+	return *this;
+}
+
+//remark: make a sophisticated memory allocation
+void CAvatarObj::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const
+{
+	NameBlock blk;
+	Init(&blk);
+	JointTemplate* nt_root = &s_jointTemplate[0];
+	typedef std::pair<JointTemplate*, const char*> JointTemplateEx; //1st: template node; 2nd: pointer to template node full path in blk
+	std::queue<JointTemplateEx> q_template;
+	JointTemplateEx root = JointTemplateEx(nt_root, rootName);
+	q_template.push(root);
+	while (q_template.empty())
+	{
+		JointTemplateEx nte = q_template.front();
+		q_template.pop();
+		int i_child = nte.first->child_first;
+		while (i_child > 0)
+		{
+			JointTemplate* nt_child = &s_jointTemplate[i_child];
+			char* name_full = (char*)blk.entries[blk.num];
+			sprintf(name_full, "%s/%s", nte.second, nt_child->name);
+			blk.num ++;
+			if (!(blk.num < blk.cap))
+			{
+				Grow(&blk);
+			}
+			JointTemplateEx nte_child = JointTemplateEx(nt_child, name_full);
+			q_template.push(nte_child);
+			i_child = nt_child->sibling_next;
+		}
+	}
+	*szNames = blk.entries;
+	*num = blk.num;
+}
+
+
+void CAvatarObj::BFTFree(const char** szNames, unsigned int num) const
+{
+	NameBlock blk = {szNames, num, num};
+	UnInit(&blk);
+}
+
+void CAvatarObj::BFTFillAnglesIn(const TVector3D* angles, unsigned int num) const
+{
+	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+
+	TAvatarJoint* joints = NULL;
+	if( ( pH->frame & 1 ) == 0 )
+	{
+		// even frame
+		joints = m_jointsB;
+	}
+	else
+	{
+		// odd frame
+		joints = m_jointsA;
+	}
+	TAvatarJoint vr = VIRTUAL_ROOT(joints);
+	std::queue<TAvatarJoint*> q_joints;
+	q_joints.push(&vr);
+	int num_filled = 0;
+	while (!q_joints.empty())
+	{
+		TAvatarJoint* j_parent = q_joints.front();
+		q_joints.pop();
+		TAvatarJoint* j_child = j_parent->child_first;
+		while (NULL != j_child)
+		{
+			q_joints.push(j_child);
+			j_child->angle = angles[num_filled];
+			num_filled ++;
+			assert(num_filled < num);
+			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
+			j_child = j_child->sibling_next;
+		}
+	}
+	assert(num_filled == num);
+}
+
+void CAvatarObj::BFTFillAnglesOut(TVector3D* angles, unsigned int num) const
+{
+	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+
+	TAvatarJoint* joints = NULL;
+	if( ( pH->frame & 1 ) == 0 )
+	{
+		// even frame
+		joints = m_jointsA;
+	}
+	else
+	{
+		// odd frame
+		joints = m_jointsB;
+	}
+	TAvatarJoint vr = VIRTUAL_ROOT(joints);
+	std::queue<TAvatarJoint*> q_joints;
+	q_joints.push(&vr);
+	int num_filled = 0;
+	while (!q_joints.empty())
+	{
+		TAvatarJoint* j_parent = q_joints.front();
+		q_joints.pop();
+		TAvatarJoint* j_child = j_parent->child_first;
+		while (NULL != j_child)
+		{
+			q_joints.push(j_child);
+			angles[num_filled] = j_child->angle;
+			num_filled ++;
+			assert(num_filled < num);
+			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
+			j_child = j_child->sibling_next;
+		}
+	}
+	assert(num_filled == num);
+}
+
+
 } // end namespace CVED

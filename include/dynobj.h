@@ -448,7 +448,71 @@ public:
 	void SetAnimationState(bool isOn);
 };
 
+class CAvatarObj : public CDynObj
+{
+public:
+	CAvatarObj();
+	virtual ~CAvatarObj();
+	CAvatarObj(const CAvatarObj& );
+	CAvatarObj& operator=( const CAvatarObj& );
 
+	CAvatarObj ( const CCved&, TObj* );
+
+	void BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const;
+	void BFTFree(const char** szNames, unsigned int num) const;
+	void BFTFillAnglesIn(const TVector3D* angles, unsigned int num) const;
+	void BFTFillAnglesOut(TVector3D* angles, unsigned int num) const;
+private:
+	typedef struct JointTemplate_tag
+	{
+		const char*		name;
+		int				type;			//joint vrlink articulated type
+		TVector3D		angle; 			//taitbryan euler
+		int				child_first;
+		int				sibling_next;
+	} JointTemplate;
+	void InitJoints();
+	void UnInitJoints();
+	TAvatarJoint* InitJoint();
+	void UnInitJoint(TAvatarJoint*);
+
+	typedef struct NameBlock_tag
+	{
+		const char** entries; 		//block starts from address entries[0]
+		unsigned int cap;
+		unsigned int num;
+	} NameBlock;
+#define NAME_BLOCK_M 1024
+	inline void Init(NameBlock* blk) const
+	{
+		blk->cap = 32;
+		blk->entries = (const char**)malloc(blk->cap * sizeof(const char*));
+		blk->entries[0] = (const char*)malloc(blk->cap * NAME_BLOCK_M * sizeof(char));
+		for (int i_entry = 1; i_entry < blk->cap; i_entry ++)
+			blk->entries[i_entry] = blk->entries[i_entry-1] + NAME_BLOCK_M;
+		blk->num = 0;
+	}
+	inline void Grow(NameBlock* blk) const
+	{
+		unsigned int cap_m = blk->cap;
+		blk->cap = (blk->cap << 1);
+		blk->entries = (const char**)realloc(blk->entries, blk->cap * sizeof(const char*));
+		blk->entries[0] =(const char*)realloc((void *)blk->entries[0], blk->cap * NAME_BLOCK_M * sizeof(char));
+		for (int i_entry = cap_m; i_entry < blk->cap; i_entry ++)
+			blk->entries[i_entry] = blk->entries[i_entry-1] + NAME_BLOCK_M;
+	}
+	inline void UnInit(NameBlock* blk) const
+	{
+		free((void*)blk->entries[0]);
+		free(blk->entries);
+		blk->cap = 0;
+		blk->num = 0;
+		blk->entries = NULL;
+	}
+#undef NAME_BLOCK_M
+	TAvatarJoint *m_jointsA, *m_jointsB; //extension to default state, it takes heap memory
+	static JointTemplate s_jointTemplate[];
+};
 
 /////////////////////////////////////////////////////////////////////////////
 //
