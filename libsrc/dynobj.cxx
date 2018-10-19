@@ -3553,7 +3553,7 @@ void CVisualObjectObj::GetDrawSize(float &x, float &y) const {
 	}
 }
 
-CAvatarObj::JointTemplate CAvatarObj::s_jointTemplate[] = {
+CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
 		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solution
 		{
 			"Virtual_root", -1, {0, 0, 0}, 1, -1
@@ -3575,20 +3575,20 @@ CAvatarObj::JointTemplate CAvatarObj::s_jointTemplate[] = {
 		}
 };
 
-CAvatarObj::CAvatarObj()
-	: CDynObj()
+CExternalAvatarObj::CExternalAvatarObj()
+	: CExternalDriverObj()
 	, m_jointsA(NULL)
 	, m_jointsB(NULL)
 {
 }
 
-CAvatarObj::~CAvatarObj()
+CExternalAvatarObj::~CExternalAvatarObj()
 {
 	UnInitJoints();
 }
 
-CAvatarObj::CAvatarObj(const CAvatarObj& src)
-	: CDynObj(src)
+CExternalAvatarObj::CExternalAvatarObj(const CExternalAvatarObj& src)
+	: CExternalDriverObj(src)
 	, m_jointsA(NULL)
 	, m_jointsB(NULL)
 {
@@ -3598,8 +3598,8 @@ CAvatarObj::CAvatarObj(const CAvatarObj& src)
 	m_jointsB = src.m_jointsB;
 }
 
-CAvatarObj::CAvatarObj ( const CCved& cved, TObj* pObj)
-	: CDynObj(cved, pObj)
+CExternalAvatarObj::CExternalAvatarObj ( const CCved& cved, TObj* pObj)
+	: CExternalDriverObj(cved, pObj)
 	, m_jointsA(NULL)
 	, m_jointsB(NULL)
 {
@@ -3608,13 +3608,13 @@ CAvatarObj::CAvatarObj ( const CCved& cved, TObj* pObj)
 	pObj->stateBufB.state.avatarState.child_first = m_jointsB;
 }
 
-void CAvatarObj::InitJoints()
+void CExternalAvatarObj::InitJoints()
 {
 	m_jointsA = InitJoint();
 	m_jointsB = InitJoint();
 }
 
-TAvatarJoint* CAvatarObj::InitJoint()
+TAvatarJoint* CExternalAvatarObj::InitJoint()
 {
 	assert(NULL == m_jointsA
 		&& NULL == m_jointsB);
@@ -3658,7 +3658,7 @@ TAvatarJoint* CAvatarObj::InitJoint()
 	return joint_root.child_first;
 }
 
-void CAvatarObj::UnInitJoint(TAvatarJoint* joint)
+void CExternalAvatarObj::UnInitJoint(TAvatarJoint* joint)
 {
 	TAvatarJoint* n_root = new TAvatarJoint;
 	n_root->child_first = joint;
@@ -3681,7 +3681,7 @@ void CAvatarObj::UnInitJoint(TAvatarJoint* joint)
 	}
 }
 
-void CAvatarObj::UnInitJoints()
+void CExternalAvatarObj::UnInitJoints()
 {
 	assert((NULL == m_jointsA)
 		== (NULL == m_jointsB));
@@ -3695,7 +3695,7 @@ void CAvatarObj::UnInitJoints()
 }
 
 
-CAvatarObj& CAvatarObj::operator=(const CAvatarObj& src)
+CExternalAvatarObj& CExternalAvatarObj::operator=(const CExternalAvatarObj& src)
 {
 	//m_cpCved = src.m_cpCved;
 	m_readOnly = src.m_readOnly;
@@ -3706,7 +3706,7 @@ CAvatarObj& CAvatarObj::operator=(const CAvatarObj& src)
 }
 
 //remark: make a sophisticated memory allocation
-void CAvatarObj::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const
+void CExternalAvatarObj::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const
 {
 	NameBlock blk;
 	Init(&blk);
@@ -3740,13 +3740,13 @@ void CAvatarObj::BFTAlloc(const char* rootName, const char*** szNames, unsigned 
 }
 
 
-void CAvatarObj::BFTFree(const char** szNames, unsigned int num) const
+void CExternalAvatarObj::BFTFree(const char** szNames, unsigned int num) const
 {
 	NameBlock blk = {szNames, num, num};
 	UnInit(&blk);
 }
 
-void CAvatarObj::BFTFillAnglesIn(const TVector3D* angles, unsigned int num) const
+void CExternalAvatarObj::BFTFillAnglesIn(const TVector3D* angles, unsigned int num) const
 {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 
@@ -3785,7 +3785,7 @@ void CAvatarObj::BFTFillAnglesIn(const TVector3D* angles, unsigned int num) cons
 	assert(num_filled == num);
 }
 
-void CAvatarObj::BFTFillAnglesOut(TVector3D* angles, unsigned int num) const
+void CExternalAvatarObj::BFTFillAnglesOut(TVector3D* angles, unsigned int num) const
 {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 

@@ -448,15 +448,15 @@ public:
 	void SetAnimationState(bool isOn);
 };
 
-class CAvatarObj : public CDynObj
+class CExternalAvatarObj : public CExternalDriverObj
 {
 public:
-	CAvatarObj();
-	virtual ~CAvatarObj();
-	CAvatarObj(const CAvatarObj& );
-	CAvatarObj& operator=( const CAvatarObj& );
+	CExternalAvatarObj();
+	virtual ~CExternalAvatarObj();
+	CExternalAvatarObj(const CExternalAvatarObj& );
+	CExternalAvatarObj& operator=( const CExternalAvatarObj& );
 
-	CAvatarObj ( const CCved&, TObj* );
+	CExternalAvatarObj ( const CCved&, TObj* );
 
 	void BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const;
 	void BFTFree(const char** szNames, unsigned int num) const;
