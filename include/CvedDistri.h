@@ -56,6 +56,15 @@ protected:
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0) = 0;
+	CDynObj * CreateDynObj(
+					bool own,
+					const string&     cName,
+					cvEObjType        type,
+					const cvTObjAttr& cAttr,
+					const CPoint3D*   cpInitPos,
+					const CVector3D*  cpInitTan,
+					const CVector3D*  cpInitLat);
+
 public:
 	virtual void LocalDeletePDO(CDynObj* );
 protected:
