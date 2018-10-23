@@ -463,7 +463,7 @@ public:
 	void BFTFree(const char** szNames, unsigned int num) const;
 
 	//calling this function with cautious, it reads A buffer for even frame and B buffer for odd frame
-	void BFTGetJoints(TVector3D* angles, unsigned int num) const;
+	void BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const;
 	static void BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num);
 	static void BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num);
 private:

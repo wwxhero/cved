@@ -3735,7 +3735,12 @@ void CExternalAvatarObj::BFTFree(const char** szNames, unsigned int num) const
 	UnInit(&blk);
 }
 
-void CExternalAvatarObj::BFTGetJoints(TVector3D* angles, unsigned int num) const
+//this function is called internally
+//parameters:
+//	names[num]: an array of char*, for each retrived item stored in names[num], it is a pointer to the joint name
+//	angles[num]: an array of TVector3D, follows taitbryan convension
+//	num: number of joints
+void CExternalAvatarObj::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const
 {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 
@@ -3763,6 +3768,7 @@ void CExternalAvatarObj::BFTGetJoints(TVector3D* angles, unsigned int num) const
 		{
 			q_joints.push(j_child);
 			angles[num_filled] = j_child->angle;
+			names[num_filled] = j_child->name;
 			num_filled ++;
 			assert(num_filled < num);
 			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
