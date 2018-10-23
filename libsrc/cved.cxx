@@ -3482,7 +3482,8 @@ CCved::CreateDynObj(
 	}
 
 	LockObjectPool();
-	if ( type == eCV_EXTERNAL_DRIVER ) {
+	if ( type == eCV_EXTERNAL_DRIVER
+		|| type == eCV_EXTERNAL_AVATAR ) {
 		objId = 0;
 		pO    = BindObj(objId);
 

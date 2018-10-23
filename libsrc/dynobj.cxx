@@ -3565,7 +3565,7 @@ CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
 			"Visualizer2", 4128, {0, 0, 0}, -1, 3	//2
 		}
 		,{
-			"Visaulzier3", 4160, {0, 0, 0}, -1, 4	//3
+			"Visualizer3", 4160, {0, 0, 0}, -1, 4	//3
 		}
 		,{
 			"Visualizer4", 4192, {0, 0, 0}, -1, -1	//4
@@ -3599,15 +3599,14 @@ CExternalAvatarObj::CExternalAvatarObj ( const CCved& cved, TObj* pObj)
 
 void CExternalAvatarObj::InitJoints()
 {
+	assert(NULL == m_jointsA
+		&& NULL == m_jointsB);
 	m_jointsA = InitJoint();
 	m_jointsB = InitJoint();
 }
 
 TAvatarJoint* CExternalAvatarObj::InitJoint()
 {
-	assert(NULL == m_jointsA
-		&& NULL == m_jointsB);
-
 	JointTemplate* nt_root = &s_jointTemplate[0];
 	std::queue<JointTemplate*> q_template;
 	q_template.push(nt_root);
@@ -3704,7 +3703,7 @@ void CExternalAvatarObj::BFTAlloc(const char* rootName, const char*** szNames, u
 	std::queue<JointTemplateEx> q_template;
 	JointTemplateEx root = JointTemplateEx(nt_root, rootName);
 	q_template.push(root);
-	while (q_template.empty())
+	while (!q_template.empty())
 	{
 		JointTemplateEx nte = q_template.front();
 		q_template.pop();
@@ -3795,9 +3794,9 @@ void CExternalAvatarObj::BFTGetJoints(const cvTObjState* s, TVector3D* angles, u
 		while (NULL != j_child)
 		{
 			q_joints.push(j_child);
+			assert(num_filled < num);
 			angles[num_filled] = j_child->angle;
 			num_filled ++;
-			assert(num_filled < num);
 			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
 			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
 			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
@@ -3822,9 +3821,9 @@ void CExternalAvatarObj::BFTSetJoints(cvTObjState* s, const TVector3D* angles, u
 		while (NULL != j_child)
 		{
 			q_joints.push(j_child);
+			assert(num_filled < num);
 			j_child->angle = angles[num_filled];
 			num_filled ++;
-			assert(num_filled < num);
 			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
 			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
 			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
