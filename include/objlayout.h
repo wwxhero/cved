@@ -453,15 +453,7 @@ typedef union cvTObjState {
 
 		/* the following are needed for fake driver vehicle dynamics */
 		double            acc;          /* acceleration along tangent */
-		double            suspStif;     /* suspension stiffness */
-		double            suspDamp;     /* suspension dampness */
-		double            tireStif;     /* tire stiffness */
-		double            tireDamp;     /* tire dampness */
-		double            velBrake;
-		cvTerQueryHint    posHint[4];
 		double            latAccel;     /* vehicle's current lat accel  */
-		EDynaFidelity     dynaFidelity; /* vehicle's dynamics fidelity  */
-		//External Driver State Matches with DynObjState above this point
 		//....new elements should be added after here.
 
 		TVector3D         angularVel;   /* object's angular velocity */

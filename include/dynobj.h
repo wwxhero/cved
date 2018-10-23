@@ -458,10 +458,14 @@ public:
 
 	CExternalAvatarObj ( const CCved&, TObj* );
 
+	unsigned int GetNumParts() const;
 	void BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const;
 	void BFTFree(const char** szNames, unsigned int num) const;
-	void BFTFillAnglesIn(const TVector3D* angles, unsigned int num) const;
-	void BFTFillAnglesOut(TVector3D* angles, unsigned int num) const;
+
+	//calling this function with cautious, it reads A buffer for even frame and B buffer for odd frame
+	void BFTGetJoints(TVector3D* angles, unsigned int num) const;
+	static void BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num);
+	static void BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num);
 private:
 	typedef struct JointTemplate_tag
 	{

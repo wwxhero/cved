@@ -3587,17 +3587,6 @@ CExternalAvatarObj::~CExternalAvatarObj()
 	UnInitJoints();
 }
 
-CExternalAvatarObj::CExternalAvatarObj(const CExternalAvatarObj& src)
-	: CExternalDriverObj(src)
-	, m_jointsA(NULL)
-	, m_jointsB(NULL)
-{
-	m_readOnly = src.m_readOnly;
-	m_pObj = src.m_pObj;
-	m_jointsA = src.m_jointsA;
-	m_jointsB = src.m_jointsB;
-}
-
 CExternalAvatarObj::CExternalAvatarObj ( const CCved& cved, TObj* pObj)
 	: CExternalDriverObj(cved, pObj)
 	, m_jointsA(NULL)
@@ -3746,46 +3735,7 @@ void CExternalAvatarObj::BFTFree(const char** szNames, unsigned int num) const
 	UnInit(&blk);
 }
 
-void CExternalAvatarObj::BFTFillAnglesIn(const TVector3D* angles, unsigned int num) const
-{
-	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
-
-	TAvatarJoint* joints = NULL;
-	if( ( pH->frame & 1 ) == 0 )
-	{
-		// even frame
-		joints = m_jointsB;
-	}
-	else
-	{
-		// odd frame
-		joints = m_jointsA;
-	}
-	TAvatarJoint vr = VIRTUAL_ROOT(joints);
-	std::queue<TAvatarJoint*> q_joints;
-	q_joints.push(&vr);
-	int num_filled = 0;
-	while (!q_joints.empty())
-	{
-		TAvatarJoint* j_parent = q_joints.front();
-		q_joints.pop();
-		TAvatarJoint* j_child = j_parent->child_first;
-		while (NULL != j_child)
-		{
-			q_joints.push(j_child);
-			j_child->angle = angles[num_filled];
-			num_filled ++;
-			assert(num_filled < num);
-			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
-			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
-			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
-			j_child = j_child->sibling_next;
-		}
-	}
-	assert(num_filled == num);
-}
-
-void CExternalAvatarObj::BFTFillAnglesOut(TVector3D* angles, unsigned int num) const
+void CExternalAvatarObj::BFTGetJoints(TVector3D* angles, unsigned int num) const
 {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 
@@ -3824,5 +3774,63 @@ void CExternalAvatarObj::BFTFillAnglesOut(TVector3D* angles, unsigned int num) c
 	assert(num_filled == num);
 }
 
+void CExternalAvatarObj::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num)
+{
+	const cvTObjState::AvatarState& s_a = s->avatarState;
+	TAvatarJoint vr = VIRTUAL_ROOT(s_a.child_first);
+	std::queue<TAvatarJoint*> q_joints;
+	q_joints.push(&vr);
+	int num_filled = 0;
+	while (!q_joints.empty())
+	{
+		TAvatarJoint* j_parent = q_joints.front();
+		q_joints.pop();
+		TAvatarJoint* j_child = j_parent->child_first;
+		while (NULL != j_child)
+		{
+			q_joints.push(j_child);
+			angles[num_filled] = j_child->angle;
+			num_filled ++;
+			assert(num_filled < num);
+			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
+			j_child = j_child->sibling_next;
+		}
+	}
+	assert(num_filled == num);
+}
+
+void CExternalAvatarObj::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num)
+{
+	cvTObjState::AvatarState& s_a = s->avatarState;
+	TAvatarJoint vr = VIRTUAL_ROOT(s_a.child_first);
+	std::queue<TAvatarJoint*> q_joints;
+	q_joints.push(&vr);
+	int num_filled = 0;
+	while (!q_joints.empty())
+	{
+		TAvatarJoint* j_parent = q_joints.front();
+		q_joints.pop();
+		TAvatarJoint* j_child = j_parent->child_first;
+		while (NULL != j_child)
+		{
+			q_joints.push(j_child);
+			j_child->angle = angles[num_filled];
+			num_filled ++;
+			assert(num_filled < num);
+			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
+			j_child = j_child->sibling_next;
+		}
+	}
+	assert(num_filled == num);
+}
+
+unsigned int CExternalAvatarObj::GetNumParts() const
+{
+	return sizeof(CExternalAvatarObj::s_jointTemplate)/sizeof(JointTemplate) - 1;
+}
 
 } // end namespace CVED
