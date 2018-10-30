@@ -3552,7 +3552,7 @@ void CVisualObjectObj::GetDrawSize(float &x, float &y) const {
 		y = m_pObj->stateBufB.state.virtualObjectState.scale[1];
 	}
 }
-
+#ifdef _AVATAR_TEST
 CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
 		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solution
 		{
@@ -3574,6 +3574,110 @@ CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
 			"Visualizer5", 4416, {0, 0, 0}, -1, -1	//5
 		}
 };
+#elif defined _AVATAR_31
+CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
+		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solutionBase, 2, -1
+		{
+			"Virtual_root", -1, {0, 0, 0}, 1, -1
+		}
+		, {
+			"Base", 4096, {0,0,0}, 2, -1
+		}
+		, {
+			"Hips",4128,{0,0,0},3,-1
+		}
+		, {
+			"LHipJoint",4160,{0,0,0},6,4
+		}
+		, {
+			"LowerBack",4192,{0,0,0},7,5
+		}
+		, {
+			"RHipJoint",4224,{0,0,0},8,-1
+		}
+		, {
+			"LeftUpLeg",4256,{0,0,0},9,-1
+		}
+		, {
+			"Spine",4288,{0,0,0},10,-1
+		}
+		, {
+			"RightUpLeg",4320,{0,0,0},11,-1
+		}
+		, {
+			"LeftLeg",4352,{0,0,0},12,-1
+		}
+		, {
+			"Spine1",4384,{0,0,0},13,-1
+		}
+		, {
+			"RightLeg",4416,{0,0,0},16,-1
+		}
+		, {
+			"LeftFoot",4448,{0,0,0},17,-1
+		}
+		, {
+			"LeftShoulder",4480,{0,0,0},18,14
+		}
+		, {
+			"Neck",4512,{0,0,0},19,15
+		}
+		, {
+			"RightShoulder",4544,{0,0,0},20,-1
+		}
+		, {
+			"RightFoot",4576,{0,0,0},21,-1
+		}
+		, {
+			"LeftToeBase",4608,{0,0,0},-1,-1
+		}
+		, {
+			"LeftArm",4640,{0,0,0},22,-1
+		}
+		, {
+			"Neck1",4672,{0,0,0},23,-1
+		}
+		, {
+			"RightArm",4704,{0,0,0},24,-1
+		}
+		, {
+			"RightToeBase",4736,{0,0,0},-1,-1
+		}
+		, {
+			"LeftForeArm",4768,{0,0,0},25,-1
+		}
+		, {
+			"Head",4800,{0,0,0},-1,-1
+		}
+		, {
+			"RightForeArm",4832,{0,0,0},26,-1
+		}
+		, {
+			"LeftHand",4864,{0,0,0},27,-1
+		}
+		, {
+			"RightHand",4896,{0,0,0},29,-1
+		}
+		, {
+			"LeftFingerBase",4928,{0,0,0},31,28
+		}
+		, {
+			"LThumb",4960,{0,0,0},-1,-1
+		}
+		, {
+			"RightFingerBase",4992,{0,0,0},32,30
+		}
+		, {
+			"RThumb",5024,{0,0,0},-1,-1
+		}
+		, {
+			"LeftHandFinger1",5056,{0,0,0},-1,-1
+		}
+		, {
+			"RightHandFinger1",5088,{0,0,0},-1,-1
+		}
+	};
+#endif
 
 CExternalAvatarObj::CExternalAvatarObj()
 	: CExternalDriverObj()
