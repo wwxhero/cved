@@ -57,7 +57,6 @@ protected:
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0) = 0;
 	CDynObj * CreateDynObj(
-					bool own,
 					const string&     cName,
 					cvEObjType        type,
 					const cvTObjAttr& cAttr,
