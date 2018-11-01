@@ -448,11 +448,11 @@ public:
 	void SetAnimationState(bool isOn);
 };
 
-class CAvatarBase
+class CArtiJoints
 {
 public:
-	CAvatarBase(bool init);
-	~CAvatarBase();
+	CArtiJoints(bool init);
+	~CArtiJoints();
 	unsigned int GetNumParts() const;
 	void BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const;
 	void BFTFree(const char** szNames, unsigned int num) const;
@@ -514,17 +514,19 @@ protected:
 	static JointTemplate s_jointTemplate[];
 };
 
-class CExternalAvatarObj : public CExternalDriverObj
-						 , public CAvatarBase
+class CAvatarObj : public CDynObj
+				 , public CArtiJoints
 {
 public:
-	CExternalAvatarObj();
-	CExternalAvatarObj(const CExternalAvatarObj& );
-	CExternalAvatarObj ( const CCved&, TObj* );
-	virtual ~CExternalAvatarObj();
-	CExternalAvatarObj& operator=( const CExternalAvatarObj& );
+	CAvatarObj();
+	CAvatarObj(const CAvatarObj& );
+	CAvatarObj ( const CCved&, TObj* );
+	virtual ~CAvatarObj();
+	CAvatarObj& operator=( const CAvatarObj& );
 	void BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const;
 };
+
+typedef CAvatarObj CExternalAvatarObj;
 
 /////////////////////////////////////////////////////////////////////////////
 //

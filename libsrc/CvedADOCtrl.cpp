@@ -305,7 +305,7 @@ CDynObj* CCvedADOCtrl::LocalCreateEDO(
 					const CVector3D*	cpInitTan,
 					const CVector3D*	cpInitLat)
 {
-	return CCvedDistri::CreateDynObj(false, cName, eCV_EXTERNAL_DRIVER, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	return CCvedDistri::CreateDynObj(cName, eCV_EXTERNAL_DRIVER, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
 CDynObj*	CCvedADOCtrl::DistriCreateADO(const string&		cName,
@@ -314,7 +314,7 @@ CDynObj*	CCvedADOCtrl::DistriCreateADO(const string&		cName,
 								const CVector3D*	cpInitTan,
 								const CVector3D*	cpInitLat)
 {
-	CDynObj* obj =  CCvedDistri::CreateDynObj(false, cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	CDynObj* obj =  CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 	CVehicleObj* pVehicle = static_cast<CVehicleObj*>(obj);
 	CPoint3D pos = pVehicle->GetPos();
 	CVector3D tan = pVehicle->GetTan();
@@ -337,8 +337,8 @@ CDynObj* CCvedADOCtrl::LocalCreatePDO(
 					const CVector3D*	cpInitTan,
 					const CVector3D*	cpInitLat)
 {
-	//fixme: a new type of mark for pedestrain should be added for pedestrain
-	return CCvedDistri::CreateDynObj(own, cName, eCV_EXTERNAL_AVATAR, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	cvEObjType type = (own?eCV_EXTERNAL_AVATAR:eCV_AVATAR);
+	return CCvedDistri::CreateDynObj(cName, type, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
 }

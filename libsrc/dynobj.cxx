@@ -3553,7 +3553,7 @@ void CVisualObjectObj::GetDrawSize(float &x, float &y) const {
 	}
 }
 #ifdef _AVATAR_TEST
-CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
+CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
 		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solution
 		{
 			"Virtual_root", -1, {0, 0, 0}, 1, -1
@@ -3575,7 +3575,7 @@ CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
 		}
 };
 #elif defined _AVATAR_31
-CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
+CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
 		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solutionBase, 2, -1
 		{
 			"Virtual_root", -1, {0, 0, 0}, 1, -1
@@ -3679,33 +3679,33 @@ CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
 	};
 #endif
 
-CExternalAvatarObj::CExternalAvatarObj()
-	: CExternalDriverObj()
-	, CAvatarBase(false)
+CAvatarObj::CAvatarObj()
+	: CDynObj()
+	, CArtiJoints(false)
 {
 }
 
-CExternalAvatarObj::~CExternalAvatarObj()
+CAvatarObj::~CAvatarObj()
 {
 }
 
-CExternalAvatarObj::CExternalAvatarObj ( const CCved& cved, TObj* pObj)
-	: CExternalDriverObj(cved, pObj)
-	, CAvatarBase(true)
+CAvatarObj::CAvatarObj ( const CCved& cved, TObj* pObj)
+	: CDynObj(cved, pObj)
+	, CArtiJoints(true)
 {
 
 	pObj->stateBufA.state.avatarState.child_first = m_jointsA;
 	pObj->stateBufB.state.avatarState.child_first = m_jointsB;
 }
 
-void CExternalAvatarObj::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const
+void CAvatarObj::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const
 {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 	bool evenFm = ((pH->frame & 1) == 0);
-	CAvatarBase::BFTGetJoints(names, angles, num, evenFm);
+	CArtiJoints::BFTGetJoints(names, angles, num, evenFm);
 }
 
-CExternalAvatarObj& CExternalAvatarObj::operator=(const CExternalAvatarObj& src)
+CAvatarObj& CAvatarObj::operator=(const CAvatarObj& src)
 {
 	//m_cpCved = src.m_cpCved;
 	m_readOnly = src.m_readOnly;
@@ -3715,7 +3715,7 @@ CExternalAvatarObj& CExternalAvatarObj::operator=(const CExternalAvatarObj& src)
 	return *this;
 }
 
-CAvatarBase::CAvatarBase(bool init)
+CArtiJoints::CArtiJoints(bool init)
 			: m_jointsA(NULL)
 			, m_jointsB(NULL)
 {
@@ -3723,12 +3723,12 @@ CAvatarBase::CAvatarBase(bool init)
 		InitJoints();
 }
 
-CAvatarBase::~CAvatarBase()
+CArtiJoints::~CArtiJoints()
 {
 	UnInitJoints();
 }
 
-void CAvatarBase::InitJoints()
+void CArtiJoints::InitJoints()
 {
 	assert(NULL == m_jointsA
 		&& NULL == m_jointsB);
@@ -3736,7 +3736,7 @@ void CAvatarBase::InitJoints()
 	m_jointsB = InitJoint();
 }
 
-TAvatarJoint* CAvatarBase::InitJoint()
+TAvatarJoint* CArtiJoints::InitJoint()
 {
 	JointTemplate* nt_root = &s_jointTemplate[0];
 	std::queue<JointTemplate*> q_template;
@@ -3777,7 +3777,7 @@ TAvatarJoint* CAvatarBase::InitJoint()
 	return joint_root.child_first;
 }
 
-void CAvatarBase::UnInitJoint(TAvatarJoint* joint)
+void CArtiJoints::UnInitJoint(TAvatarJoint* joint)
 {
 	TAvatarJoint* n_root = new TAvatarJoint;
 	n_root->child_first = joint;
@@ -3800,7 +3800,7 @@ void CAvatarBase::UnInitJoint(TAvatarJoint* joint)
 	}
 }
 
-void CAvatarBase::UnInitJoints()
+void CArtiJoints::UnInitJoints()
 {
 	assert((NULL == m_jointsA)
 		== (NULL == m_jointsB));
@@ -3815,7 +3815,7 @@ void CAvatarBase::UnInitJoints()
 
 
 //remark: make a sophisticated memory allocation
-void CAvatarBase::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const
+void CArtiJoints::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const
 {
 	NameBlock blk;
 	Init(&blk);
@@ -3849,7 +3849,7 @@ void CAvatarBase::BFTAlloc(const char* rootName, const char*** szNames, unsigned
 }
 
 
-void CAvatarBase::BFTFree(const char** szNames, unsigned int num) const
+void CArtiJoints::BFTFree(const char** szNames, unsigned int num) const
 {
 	NameBlock blk = {szNames, num, num};
 	UnInit(&blk);
@@ -3860,7 +3860,7 @@ void CAvatarBase::BFTFree(const char** szNames, unsigned int num) const
 //	names[num]: an array of char*, for each retrived item stored in names[num], it is a pointer to the joint name
 //	angles[num]: an array of TVector3D, follows taitbryan convension
 //	num: number of joints
-void CAvatarBase::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const
+void CArtiJoints::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const
 {
 	TAvatarJoint* joints = NULL;
 	if( evenFm)
@@ -3898,7 +3898,7 @@ void CAvatarBase::BFTGetJoints(const char** names, TVector3D* angles, unsigned i
 	assert(num_filled == num);
 }
 
-void CAvatarBase::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num)
+void CArtiJoints::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num)
 {
 	const cvTObjState::AvatarState& s_a = s->avatarState;
 	TAvatarJoint vr = VIRTUAL_ROOT(s_a.child_first);
@@ -3925,7 +3925,7 @@ void CAvatarBase::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned
 	assert(num_filled == num);
 }
 
-void CAvatarBase::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num)
+void CArtiJoints::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num)
 {
 	cvTObjState::AvatarState& s_a = s->avatarState;
 	TAvatarJoint vr = VIRTUAL_ROOT(s_a.child_first);
@@ -3952,9 +3952,9 @@ void CAvatarBase::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned
 	assert(num_filled == num);
 }
 
-unsigned int CAvatarBase::GetNumParts() const
+unsigned int CArtiJoints::GetNumParts() const
 {
-	return sizeof(CAvatarBase::s_jointTemplate)/sizeof(JointTemplate) - 1;
+	return sizeof(CArtiJoints::s_jointTemplate)/sizeof(JointTemplate) - 1;
 }
 
 } // end namespace CVED

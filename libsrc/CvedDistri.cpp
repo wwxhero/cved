@@ -296,11 +296,6 @@ CDynObj* CCvedDistri::LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own)
 
 
 	//
-	// Get a pointer to the vehicle object.
-	//
-	CVehicleObj* pVehicleObj = dynamic_cast<CVehicleObj *>( pObj );
-
-	//
 	// Set the initial velocity.
 	//
 
@@ -312,82 +307,11 @@ CDynObj* CCvedDistri::LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own)
 		pObj->SetVel( initVel, false );
 	}
 
-	//
-	// Initialize the vehicle state and dynamics.  The SOL contains vehicle
-	// dynamics settings particular to each vehicle.
-	//
-	const CSolObjVehicle* cpSolVeh =
-				dynamic_cast<const CSolObjVehicle*> ( cpSolObj );
-	if( !cpSolVeh )
-	{
-		assert(0);
-		this->DeleteDynObj(pObj);
-		return NULL;
-	}
-
-	const CDynaParams& dynaParams = cpSolVeh->GetDynaParams();
-
-	double suspStif =
-			( dynaParams.m_SuspStifMin + dynaParams.m_SuspStifMax ) / 2;
-	pVehicleObj->SetSuspStif( suspStif );
-	pVehicleObj->SetSuspStifImm( suspStif );
-	double suspDamp =
-			( dynaParams.m_SuspDampMin + dynaParams.m_SuspDampMax ) / 2;
-	pVehicleObj->SetSuspDamp( suspDamp );
-	pVehicleObj->SetSuspDampImm( suspDamp );
-
-	double tireStif =
-			( dynaParams.m_TireStifMin + dynaParams.m_TireStifMax ) / 2;
-	pVehicleObj->SetTireStif( tireStif );
-	pVehicleObj->SetTireStifImm( tireStif );
-	double tireDamp =
-			( dynaParams.m_TireDampMin + dynaParams.m_TireDampMax ) / 2;
-	pVehicleObj->SetTireDamp( tireDamp );
-	pVehicleObj->SetTireDampImm( tireDamp );
-	//pVehicleObj->SetDynaFidelity( m_pI->m_dynModel );
-	//pVehicleObj->SetDynaFidelityImm( m_pI->m_dynModel );
-	pVehicleObj->SetQryTerrainErrCount( 0 );
-	pVehicleObj->SetQryTerrainErrCountImm( 0 );
-	pVehicleObj->SetDynaInitComplete( 0 );
-	pVehicleObj->SetDynaInitCompleteImm( 0 );
-
-	//
-	// Set the initial audio and visual state.
-	//
-	pVehicleObj->SetAudioState( blk.GetAudioState() );
-	pVehicleObj->SetVisualState( blk.GetVisualState() );
-
-	// //
-	// // If the audio or visual has been set then assign these values
-	// // to the dials.  This way the ADO will play those sounds and
-	// // display those lights until they are explicity turned off.
-	// //
-	// if( blk.GetVisualState() > 0 )
-	// {
-	// 	char buf[128];
-	// 	sprintf( buf, "%d", blk.GetVisualState() );
-	// 	string str( buf );
-	// 	m_dialVisualState.SetValue( str );
-	// }
-
-	// if( blk.GetAudioState() > 0 )
-	// {
-	// 	char buf[128];
-	// 	sprintf( buf, "%d", blk.GetAudioState() );
-	// 	string str( buf );
-	// 	m_dialAudioState.SetValue( str );
-	// }
-
-    //init control
-    pVehicleObj->SetTargPos(cartPos);
-    pVehicleObj->StoreOldTargPos();
-
 	return pObj;
 }
 //fixme: this function will be removed to confine external(vechicle|avatar) convension
 CDynObj *
 CCvedDistri::CreateDynObj(
-			bool own,
 			const string&     cName,
 			cvEObjType        type,
 			const cvTObjAttr& cAttr,
@@ -422,7 +346,7 @@ CCvedDistri::CreateDynObj(
 
 	LockObjectPool();
 	if ( type == eCV_EXTERNAL_DRIVER
-		|| (type == eCV_EXTERNAL_AVATAR && own) ) {
+		|| type == eCV_EXTERNAL_AVATAR ) {
 		objId = 0;
 		pO    = BindObj(objId);
 

@@ -4058,6 +4058,7 @@ CCved::CreateTypedObject(cvEObjType type, int id)
 		case eCV_EXTERNAL_TRAILER: return new CExternalTrailerObj(*this, BindObj(id));
 		case eCV_WALKER          : return new CWalkerObj(*this, BindObj(id));
 		case eCV_VIRTUAL_OBJECT  : return new CVisualObjectObj(*this, BindObj(id));
+		case eCV_AVATAR			 : return new CAvatarObj(*this, BindObj(id));
 		case eCV_EXTERNAL_AVATAR : return new CExternalAvatarObj(*this, BindObj(id));
 		default                  : return 0;
 	}
@@ -4098,6 +4099,7 @@ CCved::GetRunTimeDynObjType(cvEObjType type)
 		case eCV_EXTERNAL_TRAILER: return typeid( CExternalTrailerObj );
 		case eCV_WALKER          : return typeid( CWalkerObj );
 		case eCV_VIRTUAL_OBJECT  : return typeid( CVisualObjectObj );
+		case eCV_AVATAR			 : return typeid( CAvatarObj );
 		case eCV_EXTERNAL_AVATAR : return typeid( CExternalAvatarObj );
 		default                  : assert( 0 ); return typeid( int ); // dummy
 	}
