@@ -448,22 +448,17 @@ public:
 	void SetAnimationState(bool isOn);
 };
 
-class CExternalAvatarObj : public CExternalDriverObj
+class CAvatarBase
 {
 public:
-	CExternalAvatarObj();
-	virtual ~CExternalAvatarObj();
-	CExternalAvatarObj(const CExternalAvatarObj& );
-	CExternalAvatarObj& operator=( const CExternalAvatarObj& );
-
-	CExternalAvatarObj ( const CCved&, TObj* );
-
+	CAvatarBase(bool init);
+	~CAvatarBase();
 	unsigned int GetNumParts() const;
 	void BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const;
 	void BFTFree(const char** szNames, unsigned int num) const;
 
 	//calling this function with cautious, it reads A buffer for even frame and B buffer for odd frame
-	void BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const;
+	void BFTGetJoints(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const;
 	static void BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num);
 	static void BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num);
 private:
@@ -514,8 +509,21 @@ private:
 		blk->entries = NULL;
 	}
 #undef NAME_BLOCK_M
+protected:
 	TAvatarJoint *m_jointsA, *m_jointsB; //extension to default state, it takes heap memory
 	static JointTemplate s_jointTemplate[];
+};
+
+class CExternalAvatarObj : public CExternalDriverObj
+						 , public CAvatarBase
+{
+public:
+	CExternalAvatarObj();
+	CExternalAvatarObj(const CExternalAvatarObj& );
+	CExternalAvatarObj ( const CCved&, TObj* );
+	virtual ~CExternalAvatarObj();
+	CExternalAvatarObj& operator=( const CExternalAvatarObj& );
+	void BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

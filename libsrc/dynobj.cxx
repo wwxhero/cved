@@ -3681,27 +3681,54 @@ CExternalAvatarObj::JointTemplate CExternalAvatarObj::s_jointTemplate[] = {
 
 CExternalAvatarObj::CExternalAvatarObj()
 	: CExternalDriverObj()
-	, m_jointsA(NULL)
-	, m_jointsB(NULL)
+	, CAvatarBase(false)
 {
 }
 
 CExternalAvatarObj::~CExternalAvatarObj()
 {
-	UnInitJoints();
 }
 
 CExternalAvatarObj::CExternalAvatarObj ( const CCved& cved, TObj* pObj)
 	: CExternalDriverObj(cved, pObj)
-	, m_jointsA(NULL)
-	, m_jointsB(NULL)
+	, CAvatarBase(true)
 {
-	InitJoints();
+
 	pObj->stateBufA.state.avatarState.child_first = m_jointsA;
 	pObj->stateBufB.state.avatarState.child_first = m_jointsB;
 }
 
-void CExternalAvatarObj::InitJoints()
+void CExternalAvatarObj::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const
+{
+	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+	bool evenFm = ((pH->frame & 1) == 0);
+	CAvatarBase::BFTGetJoints(names, angles, num, evenFm);
+}
+
+CExternalAvatarObj& CExternalAvatarObj::operator=(const CExternalAvatarObj& src)
+{
+	//m_cpCved = src.m_cpCved;
+	m_readOnly = src.m_readOnly;
+	m_pObj = src.m_pObj;
+	m_jointsA = src.m_jointsA;
+	m_jointsB = src.m_jointsB;
+	return *this;
+}
+
+CAvatarBase::CAvatarBase(bool init)
+			: m_jointsA(NULL)
+			, m_jointsB(NULL)
+{
+	if (init)
+		InitJoints();
+}
+
+CAvatarBase::~CAvatarBase()
+{
+	UnInitJoints();
+}
+
+void CAvatarBase::InitJoints()
 {
 	assert(NULL == m_jointsA
 		&& NULL == m_jointsB);
@@ -3709,7 +3736,7 @@ void CExternalAvatarObj::InitJoints()
 	m_jointsB = InitJoint();
 }
 
-TAvatarJoint* CExternalAvatarObj::InitJoint()
+TAvatarJoint* CAvatarBase::InitJoint()
 {
 	JointTemplate* nt_root = &s_jointTemplate[0];
 	std::queue<JointTemplate*> q_template;
@@ -3750,7 +3777,7 @@ TAvatarJoint* CExternalAvatarObj::InitJoint()
 	return joint_root.child_first;
 }
 
-void CExternalAvatarObj::UnInitJoint(TAvatarJoint* joint)
+void CAvatarBase::UnInitJoint(TAvatarJoint* joint)
 {
 	TAvatarJoint* n_root = new TAvatarJoint;
 	n_root->child_first = joint;
@@ -3773,7 +3800,7 @@ void CExternalAvatarObj::UnInitJoint(TAvatarJoint* joint)
 	}
 }
 
-void CExternalAvatarObj::UnInitJoints()
+void CAvatarBase::UnInitJoints()
 {
 	assert((NULL == m_jointsA)
 		== (NULL == m_jointsB));
@@ -3787,18 +3814,8 @@ void CExternalAvatarObj::UnInitJoints()
 }
 
 
-CExternalAvatarObj& CExternalAvatarObj::operator=(const CExternalAvatarObj& src)
-{
-	//m_cpCved = src.m_cpCved;
-	m_readOnly = src.m_readOnly;
-	m_pObj = src.m_pObj;
-	m_jointsA = src.m_jointsA;
-	m_jointsB = src.m_jointsB;
-	return *this;
-}
-
 //remark: make a sophisticated memory allocation
-void CExternalAvatarObj::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const
+void CAvatarBase::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const
 {
 	NameBlock blk;
 	Init(&blk);
@@ -3832,7 +3849,7 @@ void CExternalAvatarObj::BFTAlloc(const char* rootName, const char*** szNames, u
 }
 
 
-void CExternalAvatarObj::BFTFree(const char** szNames, unsigned int num) const
+void CAvatarBase::BFTFree(const char** szNames, unsigned int num) const
 {
 	NameBlock blk = {szNames, num, num};
 	UnInit(&blk);
@@ -3843,12 +3860,10 @@ void CExternalAvatarObj::BFTFree(const char** szNames, unsigned int num) const
 //	names[num]: an array of char*, for each retrived item stored in names[num], it is a pointer to the joint name
 //	angles[num]: an array of TVector3D, follows taitbryan convension
 //	num: number of joints
-void CExternalAvatarObj::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const
+void CAvatarBase::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const
 {
-	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
-
 	TAvatarJoint* joints = NULL;
-	if( ( pH->frame & 1 ) == 0 )
+	if( evenFm)
 	{
 		// even frame
 		joints = m_jointsA;
@@ -3883,7 +3898,7 @@ void CExternalAvatarObj::BFTGetJoints(const char** names, TVector3D* angles, uns
 	assert(num_filled == num);
 }
 
-void CExternalAvatarObj::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num)
+void CAvatarBase::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num)
 {
 	const cvTObjState::AvatarState& s_a = s->avatarState;
 	TAvatarJoint vr = VIRTUAL_ROOT(s_a.child_first);
@@ -3910,7 +3925,7 @@ void CExternalAvatarObj::BFTGetJoints(const cvTObjState* s, TVector3D* angles, u
 	assert(num_filled == num);
 }
 
-void CExternalAvatarObj::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num)
+void CAvatarBase::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num)
 {
 	cvTObjState::AvatarState& s_a = s->avatarState;
 	TAvatarJoint vr = VIRTUAL_ROOT(s_a.child_first);
@@ -3937,9 +3952,9 @@ void CExternalAvatarObj::BFTSetJoints(cvTObjState* s, const TVector3D* angles, u
 	assert(num_filled == num);
 }
 
-unsigned int CExternalAvatarObj::GetNumParts() const
+unsigned int CAvatarBase::GetNumParts() const
 {
-	return sizeof(CExternalAvatarObj::s_jointTemplate)/sizeof(JointTemplate) - 1;
+	return sizeof(CAvatarBase::s_jointTemplate)/sizeof(JointTemplate) - 1;
 }
 
 } // end namespace CVED
