@@ -3698,11 +3698,11 @@ CAvatarObj::CAvatarObj ( const CCved& cved, TObj* pObj)
 	pObj->stateBufB.state.avatarState.child_first = m_jointsB;
 }
 
-void CAvatarObj::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num) const
+void CAvatarObj::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num) const
 {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 	bool evenFm = ((pH->frame & 1) == 0);
-	CArtiJoints::BFTGetJoints(names, angles, num, evenFm);
+	CArtiJoints::BFTGetJointsDiGuy(names, angles, num, evenFm);
 }
 
 CAvatarObj& CAvatarObj::operator=(const CAvatarObj& src)
@@ -3736,7 +3736,7 @@ void CArtiJoints::InitJoints()
 	m_jointsB = InitJoint();
 }
 
-TAvatarJoint* CArtiJoints::InitJoint()
+TAvatarJoint* CArtiJoints::InitJoint() const
 {
 	JointTemplate* nt_root = &s_jointTemplate[0];
 	std::queue<JointTemplate*> q_template;
@@ -3777,7 +3777,7 @@ TAvatarJoint* CArtiJoints::InitJoint()
 	return joint_root.child_first;
 }
 
-void CArtiJoints::UnInitJoint(TAvatarJoint* joint)
+void CArtiJoints::UnInitJoint(TAvatarJoint* joint) const
 {
 	TAvatarJoint* n_root = new TAvatarJoint;
 	n_root->child_first = joint;
@@ -3813,9 +3813,43 @@ void CArtiJoints::UnInitJoints()
 	}
 }
 
+typedef struct NameBlock_tag
+{
+	const char** entries; 		//block starts from address entries[0]
+	unsigned int cap;
+	unsigned int num;
+} NameBlock;
+#define NAME_BLOCK_M 1024
+inline void Init(NameBlock* blk)
+{
+	blk->cap = 32;
+	blk->entries = (const char**)malloc(blk->cap * sizeof(const char*));
+	blk->entries[0] = (const char*)malloc(blk->cap * NAME_BLOCK_M * sizeof(char));
+	for (int i_entry = 1; i_entry < blk->cap; i_entry ++)
+		blk->entries[i_entry] = blk->entries[i_entry-1] + NAME_BLOCK_M;
+	blk->num = 0;
+}
+inline void Grow(NameBlock* blk)
+{
+	unsigned int cap_m = blk->cap;
+	blk->cap = (blk->cap << 1);
+	blk->entries = (const char**)realloc(blk->entries, blk->cap * sizeof(const char*));
+	blk->entries[0] =(const char*)realloc((void *)blk->entries[0], blk->cap * NAME_BLOCK_M * sizeof(char));
+	for (int i_entry = cap_m; i_entry < blk->cap; i_entry ++)
+		blk->entries[i_entry] = blk->entries[i_entry-1] + NAME_BLOCK_M;
+}
+inline void UnInit(NameBlock* blk)
+{
+	free((void*)blk->entries[0]);
+	free(blk->entries);
+	blk->cap = 0;
+	blk->num = 0;
+	blk->entries = NULL;
+}
+#undef NAME_BLOCK_M
 
 //remark: make a sophisticated memory allocation
-void CArtiJoints::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num) const
+void CArtiJoints::BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num)
 {
 	NameBlock blk;
 	Init(&blk);
@@ -3849,7 +3883,7 @@ void CArtiJoints::BFTAlloc(const char* rootName, const char*** szNames, unsigned
 }
 
 
-void CArtiJoints::BFTFree(const char** szNames, unsigned int num) const
+void CArtiJoints::BFTFree(const char** szNames, unsigned int num)
 {
 	NameBlock blk = {szNames, num, num};
 	UnInit(&blk);
@@ -3860,7 +3894,7 @@ void CArtiJoints::BFTFree(const char** szNames, unsigned int num) const
 //	names[num]: an array of char*, for each retrived item stored in names[num], it is a pointer to the joint name
 //	angles[num]: an array of TVector3D, follows taitbryan convension
 //	num: number of joints
-void CArtiJoints::BFTGetJoints(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const
+void CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const
 {
 	TAvatarJoint* joints = NULL;
 	if( evenFm)
@@ -3952,7 +3986,7 @@ void CArtiJoints::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned
 	assert(num_filled == num);
 }
 
-unsigned int CArtiJoints::GetNumParts() const
+unsigned int CArtiJoints::GetNumParts()
 {
 	return sizeof(CArtiJoints::s_jointTemplate)/sizeof(JointTemplate) - 1;
 }
