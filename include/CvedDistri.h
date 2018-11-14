@@ -43,6 +43,7 @@ public:
 					const CVector3D*	cpInitLat=0);
 	virtual CDynObj* LocalCreateEDO(CHeaderDistriParseBlock& blk);
 	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own);
+	virtual void Maintainer(void);
 protected:
 	virtual CDynObj* LocalCreateEDO(const string&		cName,
 					const cvTObjAttr&	cAttr,
@@ -63,6 +64,7 @@ protected:
 					const CPoint3D*   cpInitPos,
 					const CVector3D*  cpInitTan,
 					const CVector3D*  cpInitLat);
+	void DeleteDynObj( CDynObj* dynObj );
 
 public:
 	virtual void LocalDeletePDO(CDynObj* );

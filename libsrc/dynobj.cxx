@@ -3578,103 +3578,103 @@ CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
 CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
 		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solutionBase, 2, -1
 		{
-			"Virtual_root", -1, {0, 0, 0}, 1, -1
+			"Virtual_root", NULL, -1, {0, 0, 0}, 1, -1
 		}
 		, {
-			"Base", 4096, {0,0,0}, 2, -1
+			"Base", NULL, 4096, {0,0,0}, 2, -1
 		}
 		, {
-			"Hips",4128,{0,0,0},3,-1
+			"Hips", "base", 4128, {0,0,0}, 3, -1
 		}
 		, {
-			"LHipJoint",4160,{0,0,0},6,4
+			"LHipJoint", NULL, 4160,{0,0,0},6,4
 		}
 		, {
-			"LowerBack",4192,{0,0,0},7,5
+			"LowerBack", "back",4192,{0,0,0},7,5
 		}
 		, {
-			"RHipJoint",4224,{0,0,0},8,-1
+			"RHipJoint", NULL, 4224, {0,0,0}, 8, -1
 		}
 		, {
-			"LeftUpLeg",4256,{0,0,0},9,-1
+			"LeftUpLeg", "hip_l", 4256,{0,0,0},9,-1
 		}
 		, {
-			"Spine",4288,{0,0,0},10,-1
+			"Spine", NULL, 4288, {0,0,0}, 10, -1
 		}
 		, {
-			"RightUpLeg",4320,{0,0,0},11,-1
+			"RightUpLeg", "hip_r", 4320, {0,0,0}, 11, -1
 		}
 		, {
-			"LeftLeg",4352,{0,0,0},12,-1
+			"LeftLeg", "knee_l", 4352, {0,0,0}, 12, -1
 		}
 		, {
-			"Spine1",4384,{0,0,0},13,-1
+			"Spine1", NULL, 4384, {0,0,0}, 13, -1
 		}
 		, {
-			"RightLeg",4416,{0,0,0},16,-1
+			"RightLeg", "knee_r",4416,{0,0,0},16,-1
 		}
 		, {
-			"LeftFoot",4448,{0,0,0},17,-1
+			"LeftFoot", "ankle_l", 4448,{0,0,0},17,-1
 		}
 		, {
-			"LeftShoulder",4480,{0,0,0},18,14
+			"LeftShoulder", NULL, 4480, {0,0,0}, 18, 14
 		}
 		, {
-			"Neck",4512,{0,0,0},19,15
+			"Neck", "cervical", 4512,{0,0,0},19,15
 		}
 		, {
-			"RightShoulder",4544,{0,0,0},20,-1
+			"RightShoulder", NULL, 4544, {0,0,0}, 20, -1
 		}
 		, {
-			"RightFoot",4576,{0,0,0},21,-1
+			"RightFoot", "ankle_r", 4576,{0,0,0},21,-1
 		}
 		, {
-			"LeftToeBase",4608,{0,0,0},-1,-1
+			"LeftToeBase", NULL, 4608, {0,0,0}, -1, -1
 		}
 		, {
-			"LeftArm",4640,{0,0,0},22,-1
+			"LeftArm", "shoulder_l", 4640,{0,0,0},22,-1
 		}
 		, {
-			"Neck1",4672,{0,0,0},23,-1
+			"Neck1", NULL, 4672, {0,0,0}, 23, -1
 		}
 		, {
-			"RightArm",4704,{0,0,0},24,-1
+			"RightArm", "shoulder_r", 4704,{0,0,0},24,-1
 		}
 		, {
-			"RightToeBase",4736,{0,0,0},-1,-1
+			"RightToeBase", NULL, 4736, {0,0,0}, -1, -1
 		}
 		, {
-			"LeftForeArm",4768,{0,0,0},25,-1
+			"LeftForeArm", "elbow_l", 4768,{0,0,0},25,-1
 		}
 		, {
-			"Head",4800,{0,0,0},-1,-1
+			"Head", NULL, 4800, {0,0,0}, -1, -1
 		}
 		, {
-			"RightForeArm",4832,{0,0,0},26,-1
+			"RightForeArm", "elbow_r", 4832,{0,0,0},26,-1
 		}
 		, {
-			"LeftHand",4864,{0,0,0},27,-1
+			"LeftHand", "wrist_l", 4864,{0,0,0},27,-1
 		}
 		, {
-			"RightHand",4896,{0,0,0},29,-1
+			"RightHand", "wrist_r",4896,{0,0,0},29,-1
 		}
 		, {
-			"LeftFingerBase",4928,{0,0,0},31,28
+			"LeftFingerBase", NULL, 4928, {0,0,0}, 31, 28
 		}
 		, {
-			"LThumb",4960,{0,0,0},-1,-1
+			"LThumb", NULL, 4960,{0,0,0},-1,-1
 		}
 		, {
-			"RightFingerBase",4992,{0,0,0},32,30
+			"RightFingerBase", NULL, 4992,{0,0,0},32,30
 		}
 		, {
-			"RThumb",5024,{0,0,0},-1,-1
+			"RThumb", NULL, 5024,{0,0,0},-1,-1
 		}
 		, {
-			"LeftHandFinger1",5056,{0,0,0},-1,-1
+			"LeftHandFinger1", NULL, 5056,{0,0,0},-1,-1
 		}
 		, {
-			"RightHandFinger1",5088,{0,0,0},-1,-1
+			"RightHandFinger1", NULL, 5088,{0,0,0},-1,-1
 		}
 	};
 #endif
@@ -3698,11 +3698,11 @@ CAvatarObj::CAvatarObj ( const CCved& cved, TObj* pObj)
 	pObj->stateBufB.state.avatarState.child_first = m_jointsB;
 }
 
-void CAvatarObj::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num) const
+unsigned int CAvatarObj::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num) const
 {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 	bool evenFm = ((pH->frame & 1) == 0);
-	CArtiJoints::BFTGetJointsDiGuy(names, angles, num, evenFm);
+	return CArtiJoints::BFTGetJointsDiGuy(names, angles, num, evenFm);
 }
 
 CAvatarObj& CAvatarObj::operator=(const CAvatarObj& src)
@@ -3760,7 +3760,7 @@ TAvatarJoint* CArtiJoints::InitJoint() const
 			TAvatarJoint* n_child = new TAvatarJoint;
 			q_template.push(nt_child);
 			q_joint.push(n_child);
-			n_child->name = _strdup(nt_child->name);
+			n_child->name = (NULL != nt_child->name_diguy ? _strdup(nt_child->name_diguy) : NULL);
 			n_child->type = nt_child->type;
 			n_child->angle = nt_child->angle;
 			n_child->angleRate.i = 0;
@@ -3795,7 +3795,8 @@ void CArtiJoints::UnInitJoint(TAvatarJoint* joint) const
 			q_joints.push(n_child);
 			n_child = n_child->sibling_next;
 		}
-		free((void *)n_parent->name);
+		if (NULL != n_parent->name)
+			free((void *)n_parent->name);
 		delete n_parent;
 	}
 }
@@ -3894,7 +3895,7 @@ void CArtiJoints::BFTFree(const char** szNames, unsigned int num)
 //	names[num]: an array of char*, for each retrived item stored in names[num], it is a pointer to the joint name
 //	angles[num]: an array of TVector3D, follows taitbryan convension
 //	num: number of joints
-void CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const
+unsigned int CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const
 {
 	TAvatarJoint* joints = NULL;
 	if( evenFm)
@@ -3919,17 +3920,20 @@ void CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsig
 		while (NULL != j_child)
 		{
 			q_joints.push(j_child);
-			angles[num_filled] = j_child->angle;
-			names[num_filled] = j_child->name;
-			num_filled ++;
-			assert(num_filled < num);
+			if (NULL != j_child->name)
+			{
+				angles[num_filled] = j_child->angle;
+				names[num_filled] = j_child->name;
+				num_filled ++;
+				assert(num_filled <= num);
+			}
 			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
 			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
 			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
 			j_child = j_child->sibling_next;
 		}
 	}
-	assert(num_filled == num);
+	return num_filled;
 }
 
 void CArtiJoints::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num)

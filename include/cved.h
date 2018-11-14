@@ -126,7 +126,7 @@ public:
 	bool		Attach(void);
 	bool		Init(const string& cLriName, string& errMsg);
 	void		ReInit(void);
-	void		Maintainer(void);
+	virtual void Maintainer(void);
 	virtual void ExecuteDynamicModels(void);
 	void		SetDebug(int level);
 

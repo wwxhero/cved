@@ -309,7 +309,166 @@ CDynObj* CCvedDistri::LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own)
 
 	return pObj;
 }
-//fixme: this function will be removed to confine external(vechicle|avatar) convension
+
+
+void CCvedDistri::Maintainer(void)
+{
+	int    i;
+	TObj   *pO;
+
+	if ( m_debug > 0 ) {
+		gout << "->Enter CCved::Maintainer, frm=" << m_pHdr->frame << endl;
+	}
+
+	// implement the object phase transition diagram
+	LockObjectPool();
+	for (i=0, pO = BindObj(0); i<cNUM_DYN_OBJS; i++, pO++) {
+		if ( pO->phase == eBORN ) {
+			if ( m_debug > 2 ) {
+				gout << "Object " << i << " from Born->Alive " << endl;
+			}
+			pO->phase = eALIVE;
+		}
+		else
+		if ( pO->phase == eDYING ) {
+			if ( m_debug > 2 ) {
+				gout << "Object " << i << " from Dying->Dead " << endl;
+			}
+			pO->phase = eDEAD;
+			m_pHdr->dynObjectCount--;
+		}
+	}
+
+	//
+	// Copy dynamic object state between buffers.
+	//
+	for( i = 0, pO = BindObj( 0 ); i < cNUM_DYN_OBJS; i++, pO++ )
+	{
+		if( pO->phase == eALIVE )
+		{
+			bool avatar_state = (pO->type == eCV_AVATAR
+							|| pO->type == eCV_EXTERNAL_AVATAR);
+			TAvatarJoint* j_a = NULL;
+			TAvatarJoint* j_b = NULL;
+			if (avatar_state)
+			{
+				j_a = pO->stateBufA.state.avatarState.child_first;
+				j_b = pO->stateBufB.state.avatarState.child_first;
+			}
+			if( (m_pHdr->frame & 1) == 0 )
+			{		// even frame
+				pO->stateBufA.state = pO->stateBufB.state;
+			}
+			else {
+				pO->stateBufB.state = pO->stateBufA.state;
+			}
+			if (avatar_state)
+			{
+				pO->stateBufA.state.avatarState.child_first = j_a;
+				pO->stateBufB.state.avatarState.child_first = j_b;
+			}
+
+		}
+	}
+	m_pHdr->frame++;
+	UnlockObjectPool();
+
+	FillByRoadDynObjList();
+
+#ifdef DEBUG_MAINTAINER
+if( m_pHdr->frame > 0 ) {
+
+	gout << "<<<<< *************** Maintainer [frame=" <<  m_pHdr->frame;
+	gout << "] *************** >>>>>" << endl;
+
+	int s;
+	for( s = 0; s < m_pHdr->roadRefCount; s++ )
+	{
+		if( m_pRoadRefPool[s].objIdx != 0 )
+		{
+			gout << "RoadRefPool[" << s << "].objIdx = ";
+			gout << m_pRoadRefPool[s].objIdx << endl;
+
+		}
+	}
+	for( s = 0; s < m_pHdr->intrsctnRefCount; s++ )
+	{
+		if( m_pIntrsctnRefPool[s].objIdx != 0 )
+		{
+			gout << "IntrsctnRefPool[" << s << "].objIdx = ";
+			gout << m_pIntrsctnRefPool[s].objIdx << endl;
+		}
+	}
+
+	for( s = 0; s < m_pHdr->dynObjRefCount; s++ )
+	{
+		if( m_pDynObjRefPool[s].objId == 0 ) continue;
+
+		gout << "DynObjRefPool[" << s << "]:" << endl;
+
+		cvTDynObjRef* pDorNode = &( m_pDynObjRefPool[s] );
+		if( pDorNode->objId != 0 )
+			gout << "  objId = "<< pDorNode->objId << endl;
+		if( (int)pDorNode->terrain != 0 )
+			gout << "  terrain = "<< (int)pDorNode->terrain << endl;
+		if( pDorNode->next != 0 )
+			gout<< "  next = " << pDorNode->next << endl;
+		if( pDorNode->roadId != 0 )
+			gout<< "  roadId = " << pDorNode->roadId << endl;
+		if( pDorNode->lanes != 0 )
+			gout << "  lanes = " << pDorNode->lanes << endl;
+		if( pDorNode->distance != 0.0f )
+			gout << "  distance = " << pDorNode->distance << endl;
+		if( (int)pDorNode->direction != 0 )
+			gout << "  direction = " << (int)pDorNode->direction << endl;
+		if( pDorNode->roadCntrlPnt != 0 )
+			gout << "  roadCntrlPnt = " << pDorNode->roadCntrlPnt << endl;
+		if( pDorNode->intrsctnId != 0 )
+			gout << "  intrsctnId = " << pDorNode->intrsctnId << endl;
+		if( pDorNode->corridors != 0 )
+			gout << "  corridors = " << pDorNode->corridors << endl;
+
+		int t;
+		for( t = 0; t < cCV_MAX_CRDRS; t++ )
+		{
+			if( pDorNode->crdrDistances[t] != 0.0f )
+				gout <<  "  crdrDistances[t] = " << pDorNode->crdrDistances[t] << endl;
+		}
+	}
+
+	// print out objs on road 2
+	int curRoadId = 14;
+	int curRoadIdx = m_pRoadRefPool[curRoadId].objIdx;
+	gout << "objs on road " << curRoadId << " are:  " ;
+	while( curRoadIdx != 0 )
+	{
+		gout << m_pDynObjRefPool[curRoadIdx].objId << ",";
+		curRoadIdx = m_pDynObjRefPool[curRoadIdx].next;
+	}
+	gout << endl;
+
+
+	// print out objs on intersection 2
+	int curIntrsctnId = 37;
+	int curIntrsctnIdx = m_pIntrsctnRefPool[curIntrsctnId].objIdx;
+	gout << "objs on intersection " << curIntrsctnId << " are:  ";
+	while( curIntrsctnIdx != 0 )
+	{
+		gout << m_pDynObjRefPool[curIntrsctnIdx].objId << ",";
+		curIntrsctnIdx = m_pDynObjRefPool[curIntrsctnIdx].next;
+	}
+	gout << endl;
+}
+
+
+#endif
+
+
+	if ( m_debug > 0 ) {
+		gout << "<-Exit CCved::Maintainer." << endl;
+	}
+} // end of Maintainer
+
 CDynObj *
 CCvedDistri::CreateDynObj(
 			const string&     cName,
@@ -516,7 +675,10 @@ CCvedDistri::CreateDynObj(
 
 	// select the appropriate derived class (based on the type)
 	// and create the object in the specified slot
-	CDynObj* pTheObj = CreateTypedObject( type, objId );
+	delete m_dynObjCache[objId];
+	m_dynObjCache[objId] = CreateTypedObject(pO->type, objId);
+	m_dynObjCache[objId]->MakeReadOnly(); //make read only prevents the object from deleting
+	CDynObj* pTheObj = m_dynObjCache[objId];
 
 	m_pHdr->dynObjectCount++;
 
@@ -528,14 +690,21 @@ CCvedDistri::CreateDynObj(
 	return pTheObj;
 } // end of CreateDynObj
 
+void	CCvedDistri::DeleteDynObj( CDynObj* dynObj )
+{
+	int id = dynObj->GetId();
+	m_dynObjCache[id] = NULL;
+	CCved::DeleteDynObj(dynObj);
+}
+
 void CCvedDistri::LocalDeletePDO( CDynObj* dynObj )
 {
-	CCved::DeleteDynObj(dynObj);
+	DeleteDynObj(dynObj);
 }
 
 void CCvedDistri::LocalDeleteDynObj( CDynObj* dynObj )
 {
-	CCved::DeleteDynObj(dynObj);
+	DeleteDynObj(dynObj);
 }
 
 CDynObj* CCvedDistri::LocalCreateADO(
@@ -545,7 +714,7 @@ CDynObj* CCvedDistri::LocalCreateADO(
 					const CVector3D*	cpInitTan,
 					const CVector3D*	cpInitLat)
 {
-	return CCved::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	return CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
 

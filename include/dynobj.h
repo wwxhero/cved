@@ -458,13 +458,14 @@ public:
 	static void BFTFree(const char** szNames, unsigned int num);
 
 	//calling this function with cautious, it reads A buffer for even frame and B buffer for odd frame
-	void BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const;
+	unsigned int BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const;
 	static void BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num);
 	static void BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num);
 private:
 	typedef struct JointTemplate_tag
 	{
 		const char*		name;
+		const char*		name_diguy;
 		int				type;			//joint vrlink articulated type
 		TVector3D		angle; 			//taitbryan euler
 		int				child_first;
@@ -488,7 +489,7 @@ public:
 	CAvatarObj ( const CCved&, TObj* );
 	virtual ~CAvatarObj();
 	CAvatarObj& operator=( const CAvatarObj& );
-	void BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num) const;
+	unsigned int BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num) const;
 };
 
 typedef CAvatarObj CExternalAvatarObj;
