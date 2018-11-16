@@ -517,6 +517,7 @@ call ..\mcopy include\*.inl ..\include
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release_Small_BLI|x64'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="libsrc\EulerAngles.cxx" />
     <ClCompile Include="libsrc\Obj.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug_Small_BLI|Win32'">Disabled</Optimization>
@@ -2124,6 +2125,7 @@ call ..\mcopy include\*.inl ..\include
     <ClInclude Include="include\CvedADOCtrl.h" />
     <ClInclude Include="include\CvedDistri.h" />
     <ClInclude Include="include\CvedEDOCtrl.h" />
+    <ClInclude Include="include\EulerAngles.h" />
     <ClInclude Include="include\ExternalControlInterface.h" />
     <ClInclude Include="include\objmask.h" />
     <ClInclude Include="include\attr.h" />

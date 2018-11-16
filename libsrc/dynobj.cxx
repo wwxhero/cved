@@ -14,6 +14,7 @@
 #include "cvedpub.h"
 #include "cvedstrc.h"
 #include <queue>
+#include "EulerAngles.h"
 // for Docjet to recognize the namespace
 /*
 using namespace CVED;
@@ -3922,7 +3923,16 @@ unsigned int CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angle
 			q_joints.push(j_child);
 			if (NULL != j_child->name)
 			{
-				angles[num_filled] = j_child->angle;
+				//fixme: much unncessary computation: taitbryan->matrix->diguy_euler
+				float a_zyxr_f[] = {j_child->angle.k, j_child->angle.j, j_child->angle.i};
+				EulerAngles a_zyxr = {a_zyxr_f[0], a_zyxr_f[1], a_zyxr_f[2], EulOrdZYXr} ;
+				HMatrix R;
+				Eul_ToHMatrix(a_zyxr, R);
+				EulerAngles a_zxys = Eul_FromHMatrix(R, EulOrdZXYs);
+				float a_zxys_f[] = {a_zxys.x, a_zxys.y, a_zxys.z};
+				angles[num_filled].i = a_zxys_f[1];
+				angles[num_filled].j = a_zxys_f[2];
+				angles[num_filled].k = a_zxys_f[0];
 				names[num_filled] = j_child->name;
 				num_filled ++;
 				assert(num_filled <= num);
