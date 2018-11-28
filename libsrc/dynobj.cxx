@@ -3928,11 +3928,12 @@ unsigned int CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angle
 				EulerAngles a_zyxr = {a_zyxr_f[0], a_zyxr_f[1], a_zyxr_f[2], EulOrdZYXr} ;
 				HMatrix R;
 				Eul_ToHMatrix(a_zyxr, R);
-				EulerAngles a_zxys = Eul_FromHMatrix(R, EulOrdZXYs);
-				float a_zxys_f[] = {a_zxys.x, a_zxys.y, a_zxys.z};
-				angles[num_filled].i = a_zxys_f[1];
-				angles[num_filled].j = a_zxys_f[2];
-				angles[num_filled].k = a_zxys_f[0];
+				EulerAngles a_zxyr = Eul_FromHMatrix(R, EulOrdZXYr);
+				float a_zxyr_f[] = {a_zxyr.x, a_zxyr.y, a_zxyr.z};
+				angles[num_filled].i = a_zxyr_f[1];
+				angles[num_filled].j = a_zxyr_f[2];
+				angles[num_filled].k = a_zxyr_f[0];
+				//angles[num_filled] = j_child->angle;
 				names[num_filled] = j_child->name;
 				num_filled ++;
 				assert(num_filled <= num);
