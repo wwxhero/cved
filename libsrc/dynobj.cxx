@@ -3582,7 +3582,7 @@ CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
 			"Virtual_root", NULL, -1, {0, 0, 0}, 1, -1
 		}
 		, {
-			"Base", NULL, 4096, {0,0,0}, 2, -1
+			"CMU compliant skeleton", NULL, 4096, {0,0,0}, 2, -1
 		}
 		, {
 			"Hips", "base", 4128, {0,0,0}, 3, -1
