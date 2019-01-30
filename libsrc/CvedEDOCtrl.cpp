@@ -336,7 +336,7 @@ CDynObj* CCvedEDOCtrl::LocalCreatePDO(
 					const CVector3D*	cpInitTan,
 					const CVector3D*	cpInitLat)
 {
-	return CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	return CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat); //fixme: using a vehicle to represent a pedestrain
 }
 
 };

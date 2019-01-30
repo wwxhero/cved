@@ -24,7 +24,9 @@ namespace CVED {
 		virtual void PreUpdateDynamicModels() = 0;
 		virtual void PostUpdateDynamicModels() = 0;
 		virtual bool OnGetUpdate(TObjectPoolIdx id_local, cvTObjContInp* curInput, cvTObjState* curState) = 0;
+		virtual bool OnGetUpdateArt(TObjectPoolIdx id_local, cvTObjState* curState) = 0;
 		virtual void OnPushUpdate(TObjectPoolIdx id_local, const cvTObjContInp* nextInput, const cvTObjState* nextState) = 0;
+		virtual void OnPushUpdateArt(TObjectPoolIdx id_local, const cvTObjState* curState) = 0;
 		virtual void OnCreateADO(TObjectPoolIdx id_local
 							, const char* szName
 							, const cvTObjAttr& cAttr

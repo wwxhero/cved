@@ -47,6 +47,7 @@ cvString2ObjType( const char* cpStr )
 	if( !strcmp( cpStr, "ExternalTrailer") ) return eCV_EXTERNAL_TRAILER;
 	if( !strcmp( cpStr,  "Walker") ) return eCV_WALKER;
 	if( !strcmp( cpStr, "VirtualObject") ) return eCV_VIRTUAL_OBJECT;
+	if( !strcmp( cpStr, "Avatar") ) return eCV_EXTERNAL_AVATAR;
 
 	return eCV_INVALID;
 } /* end of cvString2ObjType */
@@ -85,6 +86,7 @@ cvObjType2String(cvEObjType type)
 		case eCV_EXTERNAL_TRAILER: return "ExternalTrailer";
 		case eCV_WALKER         : return "Walker";
 		case eCV_VIRTUAL_OBJECT  : return "VirtualObject";
+		case eCV_EXTERNAL_AVATAR			: return "Avatar";
 		default					: return "Invalid";
 	}
 } /* end of cvObjType2String */

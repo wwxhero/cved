@@ -37,8 +37,8 @@
 #include "enumtostring.h"
 
 #define cMAX_PIECES_IN_COMPOSITE_SIGN 10
-//in the future we might want to manualy set the packing, 
-//the compilier will pick a packing that is optimal for 
+//in the future we might want to manualy set the packing,
+//the compilier will pick a packing that is optimal for
 //itself, but changes can cause different sizes of bli's.
 #pragma pack()
 /*
@@ -59,7 +59,7 @@ typedef struct cvTObjAttr {
 } cvTObjAttr;
 
 typedef struct cvTerQueryHint {
-	int                   hintState;	
+	int                   hintState;
 	TRoadPoolIdx          roadId;
 	TLongCntrlPntPoolIdx  roadPiece;
 	TIntrsctnPoolIdx      intersection;
@@ -81,9 +81,9 @@ typedef struct cvTVehLin {
  * This enumeration represents the varying fidelity of dynamics available
  * for 4-wheel vehicles.
  */
-typedef enum { 
-			eNON_LINEAR = 0, 
-			eFULL_LINEAR = 1, 
+typedef enum {
+			eNON_LINEAR = 0,
+			eFULL_LINEAR = 1,
 			eREDUCED_LINEAR = 2
 			} EDynaFidelity;
 
@@ -124,6 +124,18 @@ typedef enum {
 #define cVO_DIAMOND				0x00000040
 #define cVO_CUSTOM_ICON			0x00000080
 
+typedef struct TAvatarJoint {
+	const char*		name;
+	int				type;			//joint vrlink articulated type
+	TVector3D		angle; 			//taitbryan euler
+	TVector3D       angleRate;
+	TAvatarJoint*	child_first;
+	TAvatarJoint*	sibling_next;
+} TAvatarJoint;
+
+#define VIRTUAL_ROOT(childjoint)\
+	{"base", -1, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, childjoint, NULL};
+
 /*
  * The following 2 structures contains the states and control inputs
  * for vehicle objects that use the standard vehicle dynamics.
@@ -162,7 +174,7 @@ typedef struct TVehicleState {
 	double            pitchRate;    /* vehicle pitch rate     */
 	double            yawRate;      /* vehicle yaw rate       */
 	float             tireRot[3];   /*front left, front right, rear*/
-#ifndef SMALL_BLI 
+#ifndef SMALL_BLI
 	TS8b              reserved[48]; /*reserved for future use */
 #endif
 } TVehicleState;
@@ -179,7 +191,7 @@ typedef struct TVehicleContInp {
 	int         haveAccel;     /* does the targAccel have a valid value?*/
 	double      targAccel;     /* target acceleration                   */
 	int         haveSteer;     /* does the targSteer have a valid value?*/
-	float       targSteer;     /* target steering  (change float to fit 
+	float       targSteer;     /* target steering  (change float to fit
                                   new field */
     float       maxSteerRateRadpS;  /* Max turning rate Radians Per S   */
     TPoint3D    oldtargPos;       /* old target position                    */
@@ -188,7 +200,7 @@ typedef struct TVehicleContInp {
 #endif
 } TVehicleContInp;
 
-typedef enum cvEObjMode { 
+typedef enum cvEObjMode {
 	eCV_GROUND_TRAJ = 0,
 	eCV_FREE_MOTION,
 	eCV_COUPLED_OBJ,
@@ -244,8 +256,8 @@ typedef union cvTObjState {
 		unsigned char curMode;
 		unsigned char prevMode;
 		int parentId;
-		int useAsAbsoluteValue;   /* use initial position, rotation and velocities 
-		  						    * as absolute values for the free motion mode */ 
+		int useAsAbsoluteValue;   /* use initial position, rotation and velocities
+								    * as absolute values for the free motion mode */
 		double offset[6];
 		double initVel[6];
 		double rotMat[3][3];
@@ -256,7 +268,7 @@ typedef union cvTObjState {
 	} trajFollowerState;
 
 	struct VehicleState {
-		TVehicleState     vehState;     /* contains state variables for 
+		TVehicleState     vehState;     /* contains state variables for
 										 * vehicle objects that use the
 										 * vehicle dynamics */
 	} vehicleState;
@@ -300,7 +312,7 @@ typedef union cvTObjState {
 		TU16b             visualState;
 		TU16b             audioState;
 
-		eCVTrafficLightState	state;	/* Current state of the        */ 
+		eCVTrafficLightState	state;	/* Current state of the        */
 										/* traffic light               */
 
 	} trafficLightState;
@@ -430,7 +442,26 @@ typedef union cvTObjState {
 		//bool              animationOn;
 	} walkerState;
 
+	struct AvatarState {
+		TPoint3D          position;     /* object's position */
+		TVector3D         tangent;      /* tangent vector (normalized) */
+		TVector3D         lateral;      /* lateral vector (normalized) */
+		TPoint3D          boundBox[2];	/* object's bounding box */
+		double            vel;          /* velocity along tangent */
+		TU16b             visualState;
+		TU16b             audioState;
+
+		/* the following are needed for fake driver vehicle dynamics */
+		double            acc;          /* acceleration along tangent */
+		double            latAccel;     /* vehicle's current lat accel  */
+		//....new elements should be added after here.
+
+		TVector3D         angularVel;   /* object's angular velocity */
+		TAvatarJoint*     child_first;		/* the memory it points to will be located in heap */
+	} avatarState;
+
 } cvTObjState;
+
 
 
 /*

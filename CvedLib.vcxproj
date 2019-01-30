@@ -406,7 +406,7 @@ call ..\mcopy include\*.inl ..\include</Command>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>include;..\include;..\ode\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;EDO_CONTROLLER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;EDO_CONTROLLER;_AVATAR_31;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BufferSecurityCheck>true</BufferSecurityCheck>
@@ -612,7 +612,7 @@ call ..\mcopy include\*.inl ..\include
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalIncludeDirectories>include;..\include;..\ode\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;ADO_CONTROLLER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;ADO_CONTROLLER;_AVATAR_31;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StructMemberAlignment>Default</StructMemberAlignment>
@@ -767,6 +767,7 @@ call ..\mcopy include\*.inl ..\include
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</BrowseInformation>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Release_Small_BLI|x64'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="libsrc\EulerAngles.cxx" />
     <ClCompile Include="libsrc\Obj.cxx">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug_EDOCtrl|Win32'">Disabled</Optimization>
@@ -3142,6 +3143,7 @@ call ..\mcopy include\*.inl ..\include
     <ClInclude Include="include\CvedADOCtrl.h" />
     <ClInclude Include="include\CvedDistri.h" />
     <ClInclude Include="include\CvedEDOCtrl.h" />
+    <ClInclude Include="include\EulerAngles.h" />
     <ClInclude Include="include\ExternalControlInterface.h" />
     <ClInclude Include="include\objmask.h" />
     <ClInclude Include="include\attr.h" />

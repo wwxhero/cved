@@ -448,7 +448,51 @@ public:
 	void SetAnimationState(bool isOn);
 };
 
+class CArtiJoints
+{
+public:
+	CArtiJoints(bool init);
+	~CArtiJoints();
+	static unsigned int GetNumParts();
+	static void BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num);
+	static void BFTFree(const char** szNames, unsigned int num);
 
+	//calling this function with cautious, it reads A buffer for even frame and B buffer for odd frame
+	unsigned int BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const;
+	static void BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num);
+	static void BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num);
+private:
+	typedef struct JointTemplate_tag
+	{
+		const char*		name;
+		const char*		name_diguy;
+		int				type;			//joint vrlink articulated type
+		TVector3D		angle; 			//taitbryan euler
+		int				child_first;
+		int				sibling_next;
+	} JointTemplate;
+	void InitJoints();
+	void UnInitJoints();
+	TAvatarJoint* InitJoint() const;
+	void UnInitJoint(TAvatarJoint*) const;
+protected:
+	TAvatarJoint *m_jointsA, *m_jointsB; //extension to default state, it takes heap memory
+	static JointTemplate s_jointTemplate[];
+};
+
+class CAvatarObj : public CDynObj
+				 , protected CArtiJoints
+{
+public:
+	CAvatarObj();
+	CAvatarObj(const CAvatarObj& );
+	CAvatarObj ( const CCved&, TObj* );
+	virtual ~CAvatarObj();
+	CAvatarObj& operator=( const CAvatarObj& );
+	unsigned int BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num) const;
+};
+
+typedef CAvatarObj CExternalAvatarObj;
 
 /////////////////////////////////////////////////////////////////////////////
 //

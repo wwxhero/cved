@@ -1080,7 +1080,7 @@ CCved::ExecuteDynamicModels( void )
 		hrt_timer_currentsecs( timer ), m_pHdr->deltaT / m_pHdr->dynaMult * 2);
 	*/
 
-	if( m_haveFakeExternalDriver ) 
+	if( m_haveFakeExternalDriver )
 	{
 		id = 0;
 	}
@@ -3482,7 +3482,8 @@ CCved::CreateDynObj(
 	}
 
 	LockObjectPool();
-	if ( type == eCV_EXTERNAL_DRIVER ) {
+	if ( type == eCV_EXTERNAL_DRIVER
+		|| type == eCV_EXTERNAL_AVATAR ) {
 		objId = 0;
 		pO    = BindObj(objId);
 
@@ -4035,6 +4036,7 @@ CCved::CreateTypedObject(cvEObjType type, int id)
 		"eCV_WALKER",
 		"eCV_EXTERNAL_TRAILER",
 		"eCV_VIRTUAL_OBJECT",
+		"eCV_EXTERNAL_AVATAR",
 		"eCV_OBJ_TYPE_EN"
 	};
 
@@ -4056,6 +4058,8 @@ CCved::CreateTypedObject(cvEObjType type, int id)
 		case eCV_EXTERNAL_TRAILER: return new CExternalTrailerObj(*this, BindObj(id));
 		case eCV_WALKER          : return new CWalkerObj(*this, BindObj(id));
 		case eCV_VIRTUAL_OBJECT  : return new CVisualObjectObj(*this, BindObj(id));
+		case eCV_AVATAR          : return new CAvatarObj(*this, BindObj(id));
+		case eCV_EXTERNAL_AVATAR : return new CExternalAvatarObj(*this, BindObj(id));
 		default                  : return 0;
 	}
 } // end of CreateTypedObject
@@ -4094,7 +4098,9 @@ CCved::GetRunTimeDynObjType(cvEObjType type)
 		case eCV_EXTERNAL_DRIVER : return typeid( CExternalDriverObj );
 		case eCV_EXTERNAL_TRAILER: return typeid( CExternalTrailerObj );
 		case eCV_WALKER          : return typeid( CWalkerObj );
-		case eCV_VIRTUAL_OBJECT  : return typeid(CVisualObjectObj);
+		case eCV_VIRTUAL_OBJECT  : return typeid( CVisualObjectObj );
+		case eCV_AVATAR          : return typeid( CAvatarObj );
+		case eCV_EXTERNAL_AVATAR : return typeid( CExternalAvatarObj );
 		default                  : assert( 0 ); return typeid( int ); // dummy
 	}
 } // end of GetRunTimeDynObjType

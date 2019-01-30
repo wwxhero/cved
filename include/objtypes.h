@@ -48,6 +48,8 @@ typedef enum cvEObjType {
 	eCV_WALKER,
 	eCV_EXTERNAL_TRAILER,
 	eCV_VIRTUAL_OBJECT,
+	eCV_AVATAR,
+	eCV_EXTERNAL_AVATAR,
 	eCV_OBJ_TYPE_END
 } cvEObjType;
 
