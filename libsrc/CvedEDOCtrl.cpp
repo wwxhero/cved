@@ -76,14 +76,15 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					(
 						pO->type == eCV_TRAJ_FOLLOWER ||
 						pO->type == eCV_VEHICLE ||
-						pO->type == eCV_EXTERNAL_DRIVER
+						pO->type == eCV_EXTERNAL_DRIVER ||
+						pO->type == eCV_AVATAR
 						)
 					&&
 					( pO->phase == eALIVE || pO->phase == eDYING )
 					);
 		bool localOwn = (0 == id);
 		bool RemoteOwn = (0 != id
-					&& (pO->type == eCV_VEHICLE));
+					&& (pO->type == eCV_VEHICLE || pO->type == eCV_AVATAR));
 		bool psudoEdo = (0 == id && m_haveFakeExternalDriver);
 
 //		if ( pO->type == eCV_TRAJ_FOLLOWER )
@@ -336,7 +337,7 @@ CDynObj* CCvedEDOCtrl::LocalCreatePDO(
 					const CVector3D*	cpInitTan,
 					const CVector3D*	cpInitLat)
 {
-	return CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat); //fixme: using a vehicle to represent a pedestrain
+	return CCvedDistri::CreateDynObj(cName, eCV_AVATAR, cAttr, cpInitPos, cpInitTan, cpInitLat); //fixme: using a vehicle to represent a pedestrain
 }
 
 };
