@@ -1,4 +1,4 @@
-// Version: 		$Id: lane.h,v 1.38 2015/07/31 15:25:39 IOWA\dheitbri Exp $
+// Version: 		$Id: lane.h,v 1.39 2018/12/07 21:15:33 IOWA\dheitbri Exp $
 //
 // Lane.h: interface for the CLane class.
 //
@@ -23,10 +23,10 @@ class CCved;
 typedef struct cvTLane TLane;
 
 /////////////////////////////////////////////////////////////////////////
-//
-// Lane class definition.
-//
-//
+///
+/// Lane class definition.
+///
+///
 class CLane  : public CCvedItem
 {
 public:
@@ -47,8 +47,10 @@ public:
 	CLane		GetRight(void) const;
 	bool		IsLeftMost(void) const;
 	bool		IsRightMost(void) const;
+    bool        IsRightMostAlongDir(void) const;
 	bool        IsLeftMostAlongDir(void) const;
 	bool		IsLeftOpposite(void) const;
+    bool		IsRightOpposite(void) const;
 	bool        GetOppositeLane(CLane&) const;
 	void        GetOppositeLane( vector<CLane>& oppositeLanes, bool includeVehicleRestrictedLanes = false, bool includeTurnLanes = false ) const;
 	bool		IsVehicleRestrictedLane(void) const;
@@ -56,7 +58,7 @@ public:
 	bool		IsOnRamp(void) const;
     bool		IsOffRamp(void) const;
 	bool		IsDrivingLane(void) const;
-	
+    bool        IsInterstate(void) const;
 	double		GetWidth(double dist = 0.0) const;
 	double		GetOffset(double dist = 0.0) const;
 	TU8b		GetId(void) const;

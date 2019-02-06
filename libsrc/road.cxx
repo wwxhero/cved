@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: road.cxx,v 1.51 2018/03/27 15:01:39 IOWA\dheitbri Exp $
+// Version: 	$Id: road.cxx,v 1.52 2018/12/07 21:13:32 IOWA\dheitbri Exp $
 //
 // Author(s):	Yiannis Papelis
 // Date:		August, 1998
@@ -381,7 +381,70 @@ CRoad::GetName(void) const
 
 	return s;
 } // end of GetName
-
+  //////////////////////////////////////////////////////////////////////////////
+  ///\brief Return the left most lane relative to the given lane
+  ///
+  ///\param[in] targLane
+  /// 	Lane to start searching from
+  ///
+  ///\remark 
+  ///		This function will start at the target lane, and keep looking
+  ///       left until it either runs out of lanes, or the lane to the left
+  ///       changes directions. If the lane the supplied lane is the left most,
+  ///       this will return a copy of the lane.
+  ///
+  ///\return lane that is the left most of the current lane.
+  ///
+  //////////////////////////////////////////////////////////////////////////////
+CLane       
+CRoad::GetLeftMostLaneInSameDir(const CLane& targLane) const {
+    CLane curLane(targLane);
+    if (GetNumLanes() == 1)
+        return curLane;
+    while (true) {
+        if (curLane.IsLeftMostAlongDir()) {
+            return curLane;
+        }
+        try {
+            curLane = curLane.GetLeft();
+        }catch(cvCInternalError e){
+            return CLane();
+        }
+    }
+    return CLane();
+}
+//////////////////////////////////////////////////////////////////////////////
+///\brief Return the right most lane relative to the given lane
+///
+///\param[in] targLane
+/// 	Lane to start searching from
+///
+///\remark 
+///		This function will start at the target lane, and keep looking
+///       right until it either runs out of lanes, or the lane to the right
+///       changes directions. If the lane the supplied lane is the right most,
+///       this will return a copy of the lane.
+///
+///\return lane that is the right most of the current lane.
+///
+//////////////////////////////////////////////////////////////////////////////
+CLane  
+CRoad::GetRightMostLaneInSameDir(const CLane& targLane) const {
+    CLane curLane(targLane);
+    if (GetNumLanes() == 1)
+        return curLane;
+    while (true) {
+        if (curLane.IsRightMostAlongDir()) {
+            return curLane;
+        }
+        try {
+            curLane = curLane.GetRight();
+        }catch(cvCInternalError e){
+            return CLane();
+        }
+    }
+    return CLane();
+}
 //////////////////////////////////////////////////////////////////////////////
 ///\brief Return length of the current road
 ///

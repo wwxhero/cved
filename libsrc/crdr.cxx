@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: crdr.cxx,v 1.54 2018/09/13 19:28:54 IOWA\dheitbri Exp $
+// Version: 	$Id: crdr.cxx,v 1.55 2018/12/07 20:56:41 IOWA\dheitbri Exp $
 //
 // Author(s):	
 // Date:		September, 1998
@@ -1566,7 +1566,124 @@ CCrdr::QryAttr(vector<CAttr>& attrs) const
 
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//
+// Description: IsOnRamp
+// 	Is this a crd that leads onto an interstate?
+//
+// Remarks: Checks the attributes to see if this has been tagged as an 
+//  interstate on ramp.  This function doesn't check distance along the crdr
+//  and assumes that the entire crdr has been marked as a ramp.
+//
+// Arguments:
+//
+// Returns: A boolean indicating if it's an on ramp.
+//
+//////////////////////////////////////////////////////////////////////////////
+bool
+CCrdr::IsOnRamp( void ) const
+{
+    AssertValid();
+    // First check the road attributes
+    CAttr attr;
+    vector<CAttr> attrs;
+    QryAttr( attrs );
+    if( attrs.size() ==0 )
+    {
+        return false;
+    }
+    else
+    {
+        // For each attribute on the lane
+        int i;
+        for(auto attr : attrs  )
+        {
+            // If the attr ids match ...
+            bool match = attr.GetId() == cCV_INTERSTATE_ON_RAMP;
+            if( match )  return true;
+        }
+    }
 
+    // No matching attribute found
+    return false;
+}
+//////////////////////////////////////////////////////////////////////////////
+///
+/// Description: IsOffRamp
+/// 	Is this a crd that leads onto an interstate?
+///
+/// Remarks: Checks the attributes to see if this has been tagged as an 
+///  interstate off ramp.  This function doesn't check distance along the crdr
+///  and assumes that the entire crdr has been marked as a ramp.
+///
+/// Arguments:
+///
+/// Returns: A boolean indicating if it's an off ramp.
+///
+//////////////////////////////////////////////////////////////////////////////
+bool
+CCrdr::IsOffRamp(void) const {
+    AssertValid();
+    // First check the road attributes
+    CAttr attr;
+    vector<CAttr> attrs;
+    QryAttr( attrs );
+    if( attrs.size() ==0 )
+    {
+        return false;
+    }
+    else
+    {
+        // For each attribute on the lane
+        int i;
+        for(auto attr : attrs  )
+        {
+            // If the attr ids match ...
+            bool match = attr.GetId() == cCV_INTERSTATE_ON_RAMP;
+            if( match )  return true;
+        }
+    }
+
+    // No matching attribute found
+    return false;
+}
+//////////////////////////////////////////////////////////////////////////////
+//
+// Description: IsOnRamp
+// 	Is this a crd that leads onto an interstate?
+//
+// Remarks: Checks the attributes to see if this has been tagged as an 
+//  interstate on ramp.  This function doesn't check distance along the crdr
+//  and assumes that the entire crdr has been marked as a ramp.
+//
+// Arguments:
+//
+// Returns: A boolean indicating if it's an on ramp.
+//
+//////////////////////////////////////////////////////////////////////////////
+bool        
+CCrdr::IsInterstate(void) const {
+    AssertValid();
+    // First check the road attributes
+    CAttr attr;
+    vector<CAttr> attrs;
+    QryAttr( attrs );
+    if( attrs.size() ==0 )
+    {
+        return false;
+    }
+    else
+    {
+        // For each attribute on the lane
+        int i;
+        for(auto attr : attrs  )
+        {
+            // If the attr ids match ...
+            bool match = attr.GetId() == cCV_INTERSTATE_ATTR;
+            if( match )  return true;
+        }
+    }
+}
 //////////////////////////////////////////////////////////////////////////////
 //
 // Description: This function gets the width of the corridor.

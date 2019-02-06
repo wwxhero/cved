@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: intrsctn.cxx,v 1.43 2018/03/27 15:03:04 IOWA\dheitbri Exp $
+// Version: 	$Id: intrsctn.cxx,v 1.44 2018/12/07 20:58:57 IOWA\dheitbri Exp $
 //
 // Author(s):	Li-Jen Tsao
 // Date:		September, 1998
@@ -392,7 +392,7 @@ CIntrsctn::GetCrdr(const CLane& cSrc, const CLane& cDst) const
 	if (found)
 		return (*i);
 	else {
-		CCrdr	bound(GetCved(), 0);
+		CCrdr	bound(GetCved());
 		return	bound;
 	}
 } // end of GetCrdr

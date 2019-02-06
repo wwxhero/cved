@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: $Id: crdr.h,v 1.39 2014/10/24 18:24:24 iowa\cschwarz Exp $
+// Version: $Id: crdr.h,v 1.40 2018/12/07 21:16:41 IOWA\dheitbri Exp $
 //
 // Author(s): 
 // Date:       September, 1998
@@ -147,6 +147,10 @@ public:
 	void		QryAttr(vector<CAttr>& attrs) const;
 	double		GetWidth( double distance ) const;
 
+
+    bool		IsOnRamp(void) const;
+    bool		IsOffRamp(void) const;
+    bool        IsInterstate(void) const;
 
 	string      GetString( void ) const;
 	bool        SetString( const string& );

@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: $Id: objmask.inl,v 1.1 1999/12/30 18:23:54 jvogel Exp $
+// Version: $Id: objmask.inl,v 1.2 2018/12/10 16:01:15 IOWA\dheitbri Exp $
 //
 // Author(s):	
 // Date:		September, 1998
@@ -107,6 +107,30 @@ CObjTypeMask::CObjTypeMask(TU32b  bits)
 	}
 } // end of CObjTypeMask
 
+///////////////////////////////////////////////////////////////////////////////
+///
+/// Description: CObjTypeMask
+///\brief 	Constructor that takes an object type.
+///
+/// Remarks: 
+///	The contructor with the unsigned integer initializes the
+///	class with the contents of that integer.  Given that the
+///	actual values of the various object types can change, it
+///	is best if this constructor is used only as a convenient 
+///	converter of the integer 0 to an empty mask.
+///
+/// Arguments: 
+///	type
+/// 
+/// Returns: void
+///
+///////////////////////////////////////////////////////////////////////////////
+inline
+CObjTypeMask::CObjTypeMask(cvEObjType type) {
+    for (int i=0; i<(cNUM_OBJECT_TYPES+1)/8+1; i++) 
+        m_data[i] = 0;
+    Set(type);
+}
 //////////////////////////////////////////////////////////////////////////////
 //
 // Description: ~CObjTypeMask 
