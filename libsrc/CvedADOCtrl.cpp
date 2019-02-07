@@ -124,7 +124,6 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 				}
 				else{
 					CVED::CCved &me = *this;
-					CVED::CObj* obj = BindObjIdToClass2(id);
 					if ( !remoteObj
 					 ||	(NULL == ctrl
 					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
@@ -148,7 +147,6 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 			else
 			{
 				CVED::CCved &me = *this;
-				CVED::CObj* obj = BindObjIdToClass2(id);
 				if ( !remoteObj
 					 ||	(NULL == ctrl
 					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))

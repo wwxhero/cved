@@ -81,8 +81,10 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 					( pO->phase == eALIVE || pO->phase == eDYING )
 					);
 		bool localOwn = (0 == id);
-		bool RemoteOwn = (0 != id
-					&& (pO->type == eCV_VEHICLE || pO->type == eCV_AVATAR));
+		bool RemoteOwnVeh = (0 != id
+					&& pO->type == eCV_VEHICLE);
+		bool RemoteOwnPed = (0 != id
+					&& pO->type == eCV_AVATAR);
 		bool psudoEdo = (0 == id && m_haveFakeExternalDriver);
 
 //		if ( pO->type == eCV_TRAJ_FOLLOWER )
@@ -133,10 +135,9 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 				}
 				else{
 					CVED::CCved &me = *this;
-					CVED::CObj* obj = BindObjIdToClass2(id);
 					//start block of distributed update
-					bool received = ( !RemoteOwn
-									|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
+					bool received = ( !RemoteOwnVeh	|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState))
+								 && ( !RemoteOwnPed || ctrl->OnGetUpdateArt(id, pFutState));
 					if (!received)
 						*pFutState = *pCurrState;
 
@@ -161,10 +162,9 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 			else
 			{
 				CVED::CCved &me = *this;
-				CVED::CObj* obj = BindObjIdToClass2(id);
 				//start block of distributed update
-				bool received = ( !RemoteOwn
-								|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
+				bool received = ( !RemoteOwnVeh || ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState))
+							 && ( !RemoteOwnPed || ctrl->OnGetUpdateArt(id, pFutState));
 				if (!received)
 					*pFutState = *pCurrState;
 
@@ -234,11 +234,11 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 
 		CVED::CCved &me = *this;
 		bool localOwn = (0 == attachedObjIds[i]);
-		bool RemoteOwn = (0 != attachedObjIds[i]
+		bool RemoteOwnVeh = (0 != attachedObjIds[i]
 					&& pO->type == eCV_EXTERNAL_DRIVER);
 		bool psudoEdo = (0 == id && m_haveFakeExternalDriver);
 		//start block of distributed update
-		bool received = ( !RemoteOwn
+		bool received = ( !RemoteOwnVeh
 						|| ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState));
 		if (!received)
 			*pFutState = *pCurrState;
