@@ -71,7 +71,7 @@ namespace CVED {
 /// constructors.
 ///
 ///
-class CCved  
+class CCved
 {
 public:
 
@@ -127,7 +127,7 @@ public:
 	bool		Init(const string& cLriName, string& errMsg);
 	void		ReInit(void);
 	virtual void Maintainer(void);
-	void		ExecuteDynamicModels();
+	virtual void ExecuteDynamicModels();
 	void		SetDebug(int level);
 
 	// SOL related
@@ -165,14 +165,14 @@ public:
 			void CopyToStruct (cvTerQueryHint&) const;
 
 			CTerQueryHint(const CCved&);
-		
+
 			// Hint state typedef
 			typedef EQueryCode EHintState;
 
 			friend class CCved;
 
 		private:
-			EHintState				m_hintState;	
+			EHintState				m_hintState;
 			TRoadPoolIdx 			m_roadId;
 			TLongCntrlPntPoolIdx	m_roadPiece;
 			TIntrsctnPoolIdx        m_intersection;
@@ -182,27 +182,27 @@ public:
 	void		QryTrfLghtOnIntrsctn(const CIntrsctn&, vector<int>&);
 	void		QryTrfLghtOnIntrsctn(const string&, vector<int>&);
 	EQueryCode	QryTerrain(
-			double			x, 
-			double			y, 
-			double			z, 
-			double&			zout, 
-			CVector3D&		norm, 
+			double			x,
+			double			y,
+			double			z,
+			double&			zout,
+			CVector3D&		norm,
 			CTerQueryHint*	pHint,
 			int*			pIfTrrnObjUsed = NULL,
 			int*			pMaterial = NULL
 			);
 	EQueryCode	QryTerrain(
-			const CPoint3D&	in, 
-			double&			zout, 
-			CVector3D&		norm, 
+			const CPoint3D&	in,
+			double&			zout,
+			CVector3D&		norm,
 			CTerQueryHint*	pHint,
 			int*			pIfTrrnObjUsed = NULL,
 			int*			pMaterial = NULL
 			);
 	EQueryCode	QryTerrain(
-			const CRoadPos&	cRoadPos, 
-			double&			zout, 
-			CVector3D&		norm, 
+			const CRoadPos&	cRoadPos,
+			double&			zout,
+			CVector3D&		norm,
 			CTerQueryHint*	pHint,
 			int*			pIfTrrnObjUsed = NULL,
 			int*			pMaterial = NULL
@@ -223,7 +223,7 @@ public:
 					double&,          // output z
 					CVector3D&,       // normal
 					int*,
-					int*              //material	
+					int*              //material
 					);
 
 	// Road related
@@ -248,7 +248,7 @@ public:
 
 	void		GetAllObjs(TIntVec&, CObjTypeMask m=CObjTypeMask::m_all) const;
 	void		GetAllStaticObjs(
-					TIntVec&, 
+					TIntVec&,
 					CObjTypeMask m=CObjTypeMask::m_all
 					) const;
 	int         GetTrafLightsNear(
@@ -257,87 +257,87 @@ public:
 					int maxSize
 					);
 	void		GetAllDynamicObjs(
-					TIntVec&, 
+					TIntVec&,
 					CObjTypeMask m=CObjTypeMask::m_all
 					) const;
 	void		GetObjsNear(
-					const CPoint3D&	loc, 
+					const CPoint3D&	loc,
 					double 			radius,
-					TIntVec&, 
+					TIntVec&,
 					CObjTypeMask	m=CObjTypeMask::m_all
 					) const;
 	void		GetChangedStaticObjsNear(
-					const CPoint3D&	loc, 
+					const CPoint3D&	loc,
 					double 			boxHalfSide,
 					TU8b			changedId,
-					TIntVec&, 
+					TIntVec&,
 					CObjTypeMask	m=CObjTypeMask::m_all
 					) const;
 
 	void 		GetAllDynObjsOnRoad(
-					int roadId, 
-					const bitset<cCV_MAX_LANES>& cLanes, 
-					TIntVec& result, 
+					int roadId,
+					const bitset<cCV_MAX_LANES>& cLanes,
+					TIntVec& result,
 					const CObjTypeMask cM=CObjTypeMask::m_all
 					) const;
 	void		GetAllDynObjsOnLane (
-					CLane lane, 
-					vector<TObjWithDist>& result, 
+					CLane lane,
+					vector<TObjWithDist>& result,
 					const CObjTypeMask m=CObjTypeMask::m_all
 					) const;
 	void 		GetAllDynObjsOnRoadRange(
-					int roadId, 
-					const bitset<cCV_MAX_LANES>& cLanes, 
-					double startDist, 
-					double endDist, 
-					TIntVec& result, 
+					int roadId,
+					const bitset<cCV_MAX_LANES>& cLanes,
+					double startDist,
+					double endDist,
+					TIntVec& result,
 					const CObjTypeMask cM=CObjTypeMask::m_all
 					) const;
 	void 		GetAllDynObjsOnRoadRange(
-					int roadId, 
-					const bitset<cCV_MAX_LANES>& cLanes, 
-					double startDist, 
-					double endDist, 
-					TIntVec& result, 
+					int roadId,
+					const bitset<cCV_MAX_LANES>& cLanes,
+					double startDist,
+					double endDist,
+					TIntVec& result,
 					bitset<cCV_MAX_LANES>& usedLanes,
 					const CObjTypeMask cM=CObjTypeMask::m_all
 					) const;
-	
+
 	void 		GetAllDynObjsOnIntrsctn (
-					int intrsctnId, 
-					const bitset<cCV_MAX_CRDRS>& cCrdrs, 
-					TIntVec& result, 
+					int intrsctnId,
+					const bitset<cCV_MAX_CRDRS>& cCrdrs,
+					TIntVec& result,
 					const CObjTypeMask cM=CObjTypeMask::m_all
 					) const;
 	void 		GetAllDynObjsOnIntrsctnRange (
-					int intrsctnId, 
-					const bitset<cCV_MAX_CRDRS>& cCrdrs, 
+					int intrsctnId,
+					const bitset<cCV_MAX_CRDRS>& cCrdrs,
 					const double startDist[cCV_MAX_CRDRS],
 					const double endDist[cCV_MAX_CRDRS],
-					TIntVec& result, 
+					TIntVec& result,
 					const CObjTypeMask cM=CObjTypeMask::m_all
 					) const;
 	void 		GetAllDynObjsOnIntrsctnRange (
-					int intrsctnId, 
-					const bitset<cCV_MAX_CRDRS>& cCrdrs, 
+					int intrsctnId,
+					const bitset<cCV_MAX_CRDRS>& cCrdrs,
 					const double startDist[cCV_MAX_CRDRS],
 					const double endDist[cCV_MAX_CRDRS],
-					TIntVec& result, 
+					TIntVec& result,
 					bitset<cCV_MAX_CRDRS>& usedCrdrs,
 					const CObjTypeMask cM=CObjTypeMask::m_all
 					) const;
 	void 		GetAllDynObjsOnCrdr (
-					int intrsctnId, 
-					int crdrId, 
-					vector<TObjWithDist>& result, 
+					int intrsctnId,
+					int crdrId,
+					vector<TObjWithDist>& result,
 					const CObjTypeMask m=CObjTypeMask::m_all
 					) const;
 	void 		GetAllDynObjsOnCrdrRange (
-					int intrsctnId, 
-					int crdrId, 
+					int intrsctnId,
+					int crdrId,
 					double startDist,
 					double endDist,
-					TIntVec& result, 
+					TIntVec& result,
 					const CObjTypeMask cM=CObjTypeMask::m_all
 					) const;
 	void        BuildFwdObjList(
@@ -350,14 +350,14 @@ public:
 					);
 	void        BuildBackObjList(
 					int ownerObjId,
-					const CRoadPos& roadPos, 
+					const CRoadPos& roadPos,
 					int maxObjs,
 					const CObjTypeMask& objMask,
 					vector<TObjListInfo>& backObjs
 					);
 	void		BuildBackObjList2(
 					int ownerObjId,
-					const CRoadPos& roadPos, 
+					const CRoadPos& roadPos,
 					const CRoad& prevRoad,
 					int maxObjs,
 					const CObjTypeMask& objMask,
@@ -365,7 +365,7 @@ public:
 					);
 	void		BuildOncomingObjList(
 					int ownerObjId,
-					const CRoadPos& roadPos, 
+					const CRoadPos& roadPos,
 					const CPath& path,
 					int maxObjs,
 					const CObjTypeMask& objMask,
@@ -373,13 +373,13 @@ public:
 					);
 	void		BuildApprchObjList(
 					int ownerObjId,
-					const CRoadPos& roadPos, 
+					const CRoadPos& roadPos,
 					const CPath& path,
 					int maxObjs,
 					const CObjTypeMask& objMask,
 					vector<TObjListInfo>& apprchObjs
 					);
-	int			GetFirstObjOnIntrsctingCrdr( 
+	int			GetFirstObjOnIntrsctingCrdr(
 					int crdrId,
 					const CCrdr& interCrdr,
 					const CObjTypeMask& objMask
@@ -393,13 +393,13 @@ public:
 
 	void		TestIM(
 					int ownerObjId,
-					const CRoadPos& roadPos, 
+					const CRoadPos& roadPos,
 					const CPath& path,
 					const CObjTypeMask& objMask
 					);
-	bool		GetOwnVehicleInfo( 
+	bool		GetOwnVehicleInfo(
 					const CObjTypeMask& objMask,
-					TOwnVehiclePositionInfo& positionInfo, 
+					TOwnVehiclePositionInfo& positionInfo,
 					TOwnVehicleFollowInfo& followInfo
 					);
 
@@ -418,7 +418,7 @@ public:
 	int         GetVehicleVisualState(int objId);
 	void        SetVehicleAudioState(int objId, int state);
 	void        SetVehicleVisualState(int objId, int state);
-    
+
 
 	bool		SetRoadAttr(
 					const string& rd,
@@ -437,28 +437,28 @@ public:
 					double        to = -1.0,
 					int          laneMask = -1);
 	bool		SetIntrsctnAttr(
-					const CIntrsctn& intrsctn,  
+					const CIntrsctn& intrsctn,
 					int              attrId = -1,
 					double            value1 = -1,
 					double            value2 = -1,
 					double            from = -1,
 					double            to = -1);
 	bool		SetIntrsctnAttr(
-					const string& intrsctnName,     
+					const string& intrsctnName,
 					int              attrId = -1,
 					double            value1 = -1,
 					double            value2 = -1,
 					double            from = -1,
 					double            to = -1);
 	bool		SetCrdrAttr(
-					const CCrdr&     crdr,  
+					const CCrdr&     crdr,
 					int              attrId = -1,
 					double            value1 = -1,
 					double            value2 = -1,
 					double            from = -1,
 					double            to = -1);
 	bool		SetCrdrAttr(
-					const CIntrsctn& intrsctn,  
+					const CIntrsctn& intrsctn,
 					int              crdrId,
 					int              attrId = -1,
 					double            value1 = -1,
@@ -466,7 +466,7 @@ public:
 					double            from = -1,
 					double            to = -1);
 	bool		SetCrdrAttr(
-					const string&    intrsctnName,  
+					const string&    intrsctnName,
 					int              crdrId,
 					int              attrId = -1,
 					double            value1 = -1,
@@ -476,8 +476,8 @@ public:
 
 
 	int         CollisionDetection(
-							int, 
-							vector<int>&, 
+							int,
+							vector<int>&,
 							CObjTypeMask m=CObjTypeMask::m_all
 							) const;
 
@@ -485,7 +485,7 @@ public:
     void GetTerrianObjectsInBoundingBox(const CBoundingBox &bbox,vector<int>& objIdVec) const;
 
 	bool        IfOverlap(int, int) const;
-	
+
 	void        DumpEnvArea();
 	void        GetAllEnvArea(vector<CEnvArea>&) const;
 	CEnvArea    GetGlobalEnvArea() const;
@@ -494,22 +494,22 @@ public:
 	void        GetEnvArea(const CPoint3D&, vector<CEnvArea>&);
 	void        GetEnvArea(double, double, vector<CEnvArea>&);
 	bool        CreateEnvArea(
-						vector<cvTEnviroInfo>& info,  
+						vector<cvTEnviroInfo>& info,
 						vector<CPoint2D>& polyPts,
 						CPoint2D& originPt
 						);
 	void        SetEnviron(CEnvArea&, vector<cvTEnviroInfo>& info);
 	void        SetGlobalEnviron(vector<cvTEnviroInfo>& info);
-	
+
 	CDynObj*	CreateDynObj(
-					const string&		cName, 
+					const string&		cName,
 					cvEObjType			type,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
 	CDynObj*	CreateDynObj(
-					const string&		cName, 
+					const string&		cName,
 					cvEObjType			type,
 					int					hcsmType,
 					const cvTObjAttr&	cAttr,
@@ -527,7 +527,7 @@ public:
 
 	// Object access functions
 	bool		IsObjValid( int objId ) const;
-	
+
 	cvEObjType	GetObjType( int objId ) const;
 	int			GetObjHcsmTypeId( int objId ) const;
 	TS32b		GetObjSolId( int objId ) const;
@@ -542,9 +542,9 @@ public:
 	double      GetObjVel( int objId ) const;
 	void		GetObjState( int objId, cvTObjState& state ) const;
 	void		GetObjState(
-					int, 
-					CPoint3D&, 
-					CVector3D&, 
+					int,
+					CPoint3D&,
+					CVector3D&,
 					CVector3D&
 					) const;
 	CBoundingBox GetObjBoundBox(int) const;
@@ -569,9 +569,9 @@ public:
 	double      GetObjVelInstant( int objId ) const;
 	void		GetObjStateInstant( int objId, cvTObjState& state ) const;
 	void		GetObjStateInstant(
-					int, 
-					CPoint3D&, 
-					CVector3D&, 
+					int,
+					CPoint3D&,
+					CVector3D&,
 					CVector3D&
 					) const;
 	CBoundingBox GetObjBoundBoxInstant(int) const;
@@ -598,35 +598,35 @@ public:
 	// debugging function
 	void		Verify( void );
 	bool        GetSol2ParseLog(string&) const;
- 
+
 	// friend
 	friend class CCvedItem;
 
 //for testing, will be removed
 	CQuadTree	GetRdPcQuadTree() {return m_rdPcQTree;}
 	CQuadTree	GetIntrsctnQuadTree() {return m_intrsctnQTree;}
-	
+
 	// Used by CRoadPos to search for (x,y,z) in road network
 	int 		SearchRdPcQuadTree(double, double, double, double,
 						   vector<int>&) const;
 	int			SearchIntrsctnQuadTree(double, double, double, double,
 							   vector<int>&) const;
-	
+
 	// query terrain performance evaluation
 	void QryTerrainPerfCheck(string &, bool reset=false);
 
 	// functions to transition the mode of a traj follower
-	// if some of the arguments are not specified, use the values stored in the traj follower state 
+	// if some of the arguments are not specified, use the values stored in the traj follower state
 	bool CoupledObjectMotion( int child, int parent=-1, double offset[6]=NULL );
 	bool ObjRelTrajMotion( int child, int parent=-1, double offset[6]=NULL );
 	bool FreeObjectMotion( int child, double initPosRot[6]=NULL, double initVel[6]=NULL );
 	void CreateODEObject(odePublic::EODEObjType type,
 						CODEObject* pOdeObj,
-						const double initPosRot[6], 
-						const double initVel[6], 
-						double mass, 
-						double cgoffset[3], 
-						double dimension[3], 
+						const double initPosRot[6],
+						const double initVel[6],
+						double mass,
+						double cgoffset[3],
+						double dimension[3],
 						double visOrigOffset[3],
 						odePublic::SBodyProps bodyProps
 						);
@@ -643,9 +643,9 @@ public:
 						 TVehicleState*,
 						 bool);
 
-    int AddExternalController(TExternalObjectControlRef ref);
+    //int AddExternalController(TExternalObjectControlRef ref);
 
-private:
+protected:
 	// these components are declared private to disallow their use
 	CCved(const CCved&);
 	CCved &operator=(const CCved&);
@@ -659,8 +659,8 @@ private:
 	enum EState {eUNCONFIGURED, eCONFIGURED, eACTIVE};
 	typedef map<string, int>  TStr2IntMap;
 	typedef CTerrainGrid<Post> *CTerrainGridPtr;
-    typedef std::unique_ptr<CQuadTree> TQtreeRef; 
-    typedef std::pair<int, TQtreeRef> TQtreeIdRef; 
+    typedef std::unique_ptr<CQuadTree> TQtreeRef;
+    typedef std::pair<int, TQtreeRef> TQtreeIdRef;
     typedef map<int, TQtreeRef> TQtreeMap;
 
 	EState      m_state;		// class state
@@ -670,14 +670,14 @@ private:
 	int			m_dynaMult;		// Dynamics interleave frequency
 	CSharedMem  m_shm;			// class keeping track of shared memory
 	bool        m_haveFakeExternalDriver;  // do we have a fake driver??
-	int         m_debug;		// debug level, 0-none, 1-min, 2-more, 3-max 
+	int         m_debug;		// debug level, 0-none, 1-min, 2-more, 3-max
 	CQuadTree	m_rdPcQTree;	// quadtree for road pieces
 	CQuadTree	m_intrsctnQTree;	// quadtree for intersection
 	CQuadTree	m_staticObjQTree;	// quadtree for staic objects
 	CQuadTree	m_trrnObjQTree;		// quadtree for the objects of type terrain
     TQtreeMap   m_intersectionMap; //<
 
-	static CSol m_sSol;         // Sol library that is the same for all 
+	static CSol m_sSol;         // Sol library that is the same for all
 								//	CCved instances
 	TStr2IntMap	m_roadNameMap;		// maps road names to road identifiers
 	TStr2IntMap	m_intrsctnNameMap;	// maps intersection names to identifiers
@@ -687,7 +687,7 @@ private:
 	vector<CTerrainGridPtr> m_intrsctnGrids;	// intersection elev maps
 
 	// functions that help access internal pools
-	cvTObj*			BindObj(TObjectPoolIdx) const;	
+	cvTObj*			BindObj(TObjectPoolIdx) const;
 	cvTObjRef*		BindObjRef(TObjRefPoolIdx) const;
 	cvTRepObj*		BindRepObj(TRepObjPoolIdx) const;
 	cvTObjAttr*		BindObjAttr(TObjAttrPoolIdx) const;
@@ -703,35 +703,36 @@ private:
 	cvTDynObjRef*	BindDynObjRef(TObjectPoolIdx) const;
 	cvTRoadRef*		BindRoadRef(TRoadPoolIdx) const;
 	cvTIntrsctnRef*	BindIntrsctnRef(TIntrsctnPoolIdx) const;
+public:
 	static void __cdecl Logoutf(const TCHAR* format, ...);
 protected:
 
 	int	GetObjWithClosestDistOnCrdr(
 							 double intersectingCrdrLength,
-							 double intersectingPointDist, 
-							 vector<TObjWithDist>& objs 
+							 double intersectingPointDist,
+							 vector<TObjWithDist>& objs
 							 );
 
-	int	GetObjWithClosestDistOnLane( 
+	int	GetObjWithClosestDistOnLane(
 							 CLane& srcLane,
 							 vector<TObjWithDist>& objs );
-	int GetClosestObjBehindOnCrdr( 
+	int GetClosestObjBehindOnCrdr(
 							 int obj,
 							 double intersectingCrdrLength,
-							 double intersectingPointDist, 
-							 vector<TObjWithDist>& objs 
+							 double intersectingPointDist,
+							 vector<TObjWithDist>& objs
 							 );
-	int	GetClosestObjBehindOnLane( 
+	int	GetClosestObjBehindOnLane(
 							 int obj,
 							 CLane& srcLane,
-							 vector<TObjWithDist>& objs 
+							 vector<TObjWithDist>& objs
 							 );
 
 	// functions that are used by terrain queries
 #include "terrain.h"
 
-	// functions and variabled that are used by the dynamic 
-	// 	object reference list 
+	// functions and variabled that are used by the dynamic
+	// 	object reference list
 #include "dynobjreflist.h"
 
 	void LockObjectPool(void);		// mutex access through a blocking lock
@@ -742,10 +743,10 @@ protected:
 	// dispatcher for dynamic servers
     void DynamicModel(
 		    int,
-			cvEObjType, 
-			const cvTObjAttr*, 
+			cvEObjType,
+			const cvTObjAttr*,
 			const cvTObjState*,
-			const cvTObjContInp*, 
+			const cvTObjContInp*,
 			cvTObjState*);
     void ProcessExternalCreatesandDeletes();
 	// help with object types
@@ -753,7 +754,7 @@ protected:
 
 	// these variables help with performance evaluation of the
 	// terrain query function
-	long        m_terQryCalls;		// number of calls to terrain query         
+	long        m_terQryCalls;		// number of calls to terrain query
 	long        m_terQryRoadHits;	// number of calls that used the road hint
 	long        m_terQryInterHits;	// number of calls that used the intrs hint
 
@@ -769,14 +770,14 @@ protected:
 	// environment areas
 	vector<CEnvArea> m_envAreas;
 
-	// ode world 
+	// ode world
 	std::unique_ptr<CODE>		m_pOde;
 
 	//traffic light data
-	bool m_FirstTimeLightsNear; //<First 
+	bool m_FirstTimeLightsNear; //<First
 	vector<CTrafLightData> m_tlData;
     int m_currentExternalCntlId;
-    CExternalObjectMap m_ExternalControllers;
+    //CExternalObjectMap m_ExternalControllers;
 #ifdef _WIN32
 	HANDLE	m_MUTEX_LightsNear; //only one thread at time can access GetTrafLightsNear
 #endif
@@ -793,7 +794,7 @@ protected:
 // Description: CTerQueryHint
 // 	Default constructor creates an unbound and invalid CTerQueryHint instance.
 //
-// Remarks: 
+// Remarks:
 //
 // Arguments:
 //
@@ -801,7 +802,7 @@ protected:
 //
 //////////////////////////////////////////////////////////////////////////////
 inline
-CCved::CTerQueryHint::CTerQueryHint( void ) 
+CCved::CTerQueryHint::CTerQueryHint( void )
 {
 	m_hintState = eCV_OFF_ROAD;
 	m_roadId = 0;
@@ -814,7 +815,7 @@ CCved::CTerQueryHint::CTerQueryHint( void )
 // Description: ~CTerQueryHint
 // 	Default destructor does nothing.
 //
-// Remarks: 
+// Remarks:
 //
 // Arguments:
 //
@@ -822,7 +823,7 @@ CCved::CTerQueryHint::CTerQueryHint( void )
 //
 //////////////////////////////////////////////////////////////////////////////
 inline
-CCved::CTerQueryHint::~CTerQueryHint(void) 
+CCved::CTerQueryHint::~CTerQueryHint(void)
 {}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -830,7 +831,7 @@ CCved::CTerQueryHint::~CTerQueryHint(void)
 // Description: CTerQueryHint
 // 	Creates a bound and valid CTerQueryHint instance.
 //
-// Remarks: 
+// Remarks:
 //
 // Arguments:
 // 	cCved - reference to a CCved instance
@@ -839,8 +840,8 @@ CCved::CTerQueryHint::~CTerQueryHint(void)
 //
 //////////////////////////////////////////////////////////////////////////////
 inline
-CCved::CTerQueryHint::CTerQueryHint(const CCved &cCved) 
-	: CCvedItem(&cCved) 
+CCved::CTerQueryHint::CTerQueryHint(const CCved &cCved)
+	: CCvedItem(&cCved)
 {
 	m_hintState = eCV_OFF_ROAD;
 	m_roadId = 0;
@@ -851,7 +852,7 @@ CCved::CTerQueryHint::CTerQueryHint(const CCved &cCved)
 //////////////////////////////////////////////////////////////////////////////
 //
 // Description: operator=
-//	Performs a deep copy of the parameter to the current CTerQueryHint 
+//	Performs a deep copy of the parameter to the current CTerQueryHint
 //	instance.
 //
 // Remarks:
@@ -861,13 +862,13 @@ CCved::CTerQueryHint::CTerQueryHint(const CCved &cCved)
 //
 // Returns: a reference to the current CTerQueryHint instance, so that the
 // 	assignments can be nested.
-// 
+//
 //////////////////////////////////////////////////////////////////////////////
 inline CCved::CTerQueryHint&
 CCved::CTerQueryHint::operator=(const CTerQueryHint& cRhs)
 {
 	if ( this != &cRhs ) {
-		m_hintState    = cRhs.m_hintState;	
+		m_hintState    = cRhs.m_hintState;
 		m_roadId       = cRhs.m_roadId;
 		m_roadPiece    = cRhs.m_roadPiece;
 		m_intersection = cRhs.m_intersection;
@@ -900,7 +901,7 @@ CCved::CTerQueryHint::CTerQueryHint(const CTerQueryHint& cCopy)
 // Description: CopyFromStruct
 // 	Copies the contents of the parameter struct to the current instance.
 //
-// Remarks: 
+// Remarks:
 //
 // Arguments:
 // 	structHint - struct to copy from
@@ -908,7 +909,7 @@ CCved::CTerQueryHint::CTerQueryHint(const CTerQueryHint& cCopy)
 // Returns: void
 //
 //////////////////////////////////////////////////////////////////////////////
-inline void 
+inline void
 CCved::CTerQueryHint::CopyFromStruct(const cvTerQueryHint& structHint)
 {
 	m_hintState = (EHintState)structHint.hintState;
@@ -922,15 +923,15 @@ CCved::CTerQueryHint::CopyFromStruct(const cvTerQueryHint& structHint)
 // Description: CopyToStruct
 // 	Copies the contents of the current instance to the struct parameter.
 //
-// Remarks: 
+// Remarks:
 //
-// Arguments: 
+// Arguments:
 // 	structHint - struct to copy to
 //
 // Returns: void
 //
 //////////////////////////////////////////////////////////////////////////////
-inline void 
+inline void
 CCved::CTerQueryHint::CopyToStruct(cvTerQueryHint& structHint) const
 {
 	structHint.hintState = m_hintState;
@@ -949,7 +950,7 @@ CCved::CTerQueryHint::CopyToStruct(cvTerQueryHint& structHint) const
 // Description: SetDebug
 // 	Sets the debugging level.
 //
-// Remarks: 
+// Remarks:
 //
 // Arguments:
 //	level - level to set debugging to
@@ -970,14 +971,14 @@ CCved::SetDebug(int level)
 // Description: GetSol
 // 	Returns the static ScenObjLib associated with CCved
 //
-// Remarks: 
+// Remarks:
 //
 // Arguments:
 //
 // Returns: a const reference to the ScenObjLib
 //
 //////////////////////////////////////////////////////////////////////////////
-inline const CSol& 
+inline const CSol&
 CCved::GetSol()
 {
 	if (!m_sSol.IsInitialized())
