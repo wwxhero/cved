@@ -3851,11 +3851,11 @@ CAvatarObj::CAvatarObj ( const CCved& cved, TObj* pObj)
 	pObj->stateBufB.state.avatarState.child_first = m_jointsB;
 }
 
-unsigned int CAvatarObj::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num) const
+unsigned int CAvatarObj::BFTGetJointsDiGuy(const char** names, TVector3D* angles, TVector3D* offsets, unsigned int num) const
 {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 	bool evenFm = ((pH->frame & 1) == 0);
-	return CArtiJoints::BFTGetJointsDiGuy(names, angles, num, evenFm);
+	return CArtiJoints::BFTGetJointsDiGuy(names, angles, offsets, num, evenFm);
 }
 
 CAvatarObj& CAvatarObj::operator=(const CAvatarObj& src)
@@ -4048,7 +4048,7 @@ void CArtiJoints::BFTFree(const char** szNames, unsigned int num)
 //	names[num]: an array of char*, for each retrived item stored in names[num], it is a pointer to the joint name
 //	angles[num]: an array of TVector3D, follows taitbryan convension
 //	num: number of joints
-unsigned int CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const
+unsigned int CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angles, TVector3D* offsets, unsigned int num, bool evenFm) const
 {
 	TAvatarJoint* joints = NULL;
 	if( evenFm)
@@ -4085,7 +4085,7 @@ unsigned int CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angle
 				angles[num_filled].i = a_zxyr_f[1];
 				angles[num_filled].j = a_zxyr_f[2];
 				angles[num_filled].k = a_zxyr_f[0];
-				//angles[num_filled] = j_child->angle;
+				offsets[num_filled] = j_child->offset;
 				names[num_filled] = j_child->name;
 				num_filled ++;
 				assert(num_filled <= num);
