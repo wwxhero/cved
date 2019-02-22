@@ -30,7 +30,7 @@ namespace CVED {
 //
 // This class is an abstract class that cannot be instanced directly.
 // However, there will be one class derived per each object type
-// defined in the current version of CVED. 
+// defined in the current version of CVED.
 //
 //////////////////////////////////////////////////////////////////////////////
 class CDynObj : public CObj
@@ -41,7 +41,7 @@ public:
 	CDynObj( const CDynObj& );
 	CDynObj& operator=( const CDynObj& );
 
-	void MakeReadOnly( void ); 
+	void MakeReadOnly( void );
 
 	virtual void SetPos( const CPoint3D& cPos, bool useDoubleBuffer = true );
 	virtual void SetTan( const CVector3D& cTan, bool useDoubleBuffer = true );
@@ -67,7 +67,7 @@ class CTrajFollowerObj : public CDynObj
 {
 public:
 	CTrajFollowerObj();
-	CTrajFollowerObj( const CCved&, TObj* ); 
+	CTrajFollowerObj( const CCved&, TObj* );
 	CTrajFollowerObj( const CTrajFollowerObj& );
 	CTrajFollowerObj& operator=( const CTrajFollowerObj& );
 	virtual ~CTrajFollowerObj();
@@ -201,7 +201,7 @@ public:
 //
 // Description:
 // This class represents trailers towed by external objects outside
-// the virtual environment, while CTrailerObj are trailers towed 
+// the virtual environment, while CTrailerObj are trailers towed
 // by other entities inside the virtual environment.
 //
 class CExternalTrailerObj : public CDynObj
@@ -296,7 +296,7 @@ public:
 /////////////////////////////////////////////////////////////////////////
 //
 // Description:
-// This class represents composite signs.  
+// This class represents composite signs.
 //
 class CCompositeSignObj : public CDynObj
 {
@@ -331,7 +331,7 @@ public:
 /////////////////////////////////////////////////////////////////////////
 //
 // Description:
-// This class represents POIs (point-of-interests).  
+// This class represents POIs (point-of-interests).
 //
 class CPoiObj : public CDynObj
 {
@@ -439,7 +439,7 @@ public:
 // Description:
 // This class represents objects whose behavior is generated
 // outside the simulator's virtual environment.  It primarily
-// includes the objects controlled by other simulators, or 
+// includes the objects controlled by other simulators, or
 // replay sources.
 class CExternalVehObj : public CVehicleObj
 {
@@ -483,8 +483,8 @@ public:
 
 	//calling this function with cautious, it reads A buffer for even frame and B buffer for odd frame
 	unsigned int BFTGetJointsDiGuy(const char** names, TVector3D* angles, unsigned int num, bool evenFm) const;
-	static void BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num);
-	static void BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num);
+	static void BFTSetJoints(cvTObjState* s, const TVector3D* angles, const TVector3D* offsets, unsigned int num);
+	static void BFTGetJoints(const cvTObjState* s, TVector3D* angles, TVector3D* offsets, unsigned int num);
 private:
 	typedef struct JointTemplate_tag
 	{
@@ -520,7 +520,7 @@ typedef CAvatarObj CExternalAvatarObj;
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Inline functions. 
+// Inline functions.
 //
 /////////////////////////////////////////////////////////////////////////////
 #include "dynobj.inl"

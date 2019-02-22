@@ -784,7 +784,7 @@ CTrajFollowerObj::SetInitPosRotVel( const double initPosRot[6], const double ini
 }
 
 
-void 
+void
 CTrajFollowerObj::SetModeType(cvEObjMode mode)
 {
 	int i;
@@ -803,7 +803,7 @@ CTrajFollowerObj::SetModeType(cvEObjMode mode)
 		m_pObj->stateBufA.state.trajFollowerState.classType = mode;
 	}
 }
-cvEObjMode 
+cvEObjMode
 CTrajFollowerObj::GetModeType()
 {
 	int i;
@@ -2844,12 +2844,12 @@ CVehicleObj::SetExternalDynaControlId( int id )
 
 	cvTHeader *pH = static_cast<cvTHeader*>( GetInst() );
 
-	if( ( pH->frame & 1 ) == 0 ) 
+	if( ( pH->frame & 1 ) == 0 )
 	{
 		// even frame
         m_pObj->stateBufB.state.vehicleState.vehState.extrnControlId = id;
 	}
-	else 
+	else
 	{
 		// odd frame
 		m_pObj->stateBufA.state.vehicleState.vehState.extrnControlId = id;
@@ -2871,12 +2871,12 @@ CVehicleObj::SetExternalDynaControlIdImm( int id )
 
 	cvTHeader *pH = static_cast<cvTHeader*>( GetInst() );
 
-	if( ( pH->frame & 1 ) == 0 ) 
+	if( ( pH->frame & 1 ) == 0 )
 	{
 		// even frame
 		m_pObj->stateBufA.state.vehicleState.vehState.extrnControlId = id;
 	}
-	else 
+	else
 	{
 		// odd frame
 		m_pObj->stateBufB.state.vehicleState.vehState.extrnControlId = id;
@@ -3407,12 +3407,12 @@ TU16b CVisualObjectObj::GetStateIndex() const{
 TU16b CVisualObjectObj::GetPrecreateId() const{
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 
-	if(  ( pH->frame & 1 ) == 0 ) 
+	if(  ( pH->frame & 1 ) == 0 )
 	{
 		// even frame
 		return m_pObj->stateBufA.state.virtualObjectState.ParseBlockID;
 	}
-	else 
+	else
 	{
 		// odd frame
 		return m_pObj->stateBufB.state.virtualObjectState.ParseBlockID;
@@ -3421,12 +3421,12 @@ TU16b CVisualObjectObj::GetPrecreateId() const{
 TS8b  CVisualObjectObj::GetLightTarget() const{
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 
-	if(  ( pH->frame & 1 ) == 0 ) 
+	if(  ( pH->frame & 1 ) == 0 )
 	{
 		// even frame
 		return m_pObj->stateBufA.state.virtualObjectState.lightID;
 	}
-	else 
+	else
 	{
 		// odd frame
 		return m_pObj->stateBufB.state.virtualObjectState.lightID;
@@ -3450,12 +3450,12 @@ void CVisualObjectObj::SetStateIndex(TU16b id, bool doublebuffer){
 void  CVisualObjectObj::SetPrecreateId(TU16b id, bool doublebuffer){
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 
-	if( !doublebuffer  ||   ( pH->frame & 1 ) == 0 ) 
+	if( !doublebuffer  ||   ( pH->frame & 1 ) == 0 )
 	{
 		// even frame
 		m_pObj->stateBufB.state.virtualObjectState.ParseBlockID = id;
 	}
-	if(!doublebuffer  ||    ( pH->frame & 1 ) > 0 ) 
+	if(!doublebuffer  ||    ( pH->frame & 1 ) > 0 )
 	{
 		// odd frame
 		m_pObj->stateBufA.state.virtualObjectState.ParseBlockID = id;
@@ -3464,12 +3464,12 @@ void  CVisualObjectObj::SetPrecreateId(TU16b id, bool doublebuffer){
 void  CVisualObjectObj::SetLightTarget(TS8b id, bool doublebuffer) {
 	cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
 
-	if( !doublebuffer  ||   ( pH->frame & 1 ) == 0 ) 
+	if( !doublebuffer  ||   ( pH->frame & 1 ) == 0 )
 	{
 		// even frame
         m_pObj->stateBufB.state.virtualObjectState.lightID = id;
 	}
-	if(!doublebuffer  ||    ( pH->frame & 1 ) > 0 ) 
+	if(!doublebuffer  ||    ( pH->frame & 1 ) > 0 )
 	{
 		// odd frame
 		m_pObj->stateBufA.state.virtualObjectState.lightID = id;
@@ -3709,125 +3709,125 @@ void CVisualObjectObj::GetDrawSize(float &x, float &y) const {
 CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
 		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solution
 		{
-			"Virtual_root", -1, {0, 0, 0}, 1, -1
+			"Virtual_root", 4064, {0}, 1, -1
 		}
 		,{
-			"Visualizer", 4096, {0, 0, 0}, 5, 2		//1
+			"Visualizer", 4096, {0}, 5, 2		//1
 		}
 		,{
-			"Visualizer2", 4128, {0, 0, 0}, -1, 3	//2
+			"Visualizer2", 4128, {0}, -1, 3	//2
 		}
 		,{
-			"Visualizer3", 4160, {0, 0, 0}, -1, 4	//3
+			"Visualizer3", 4160, {0}, -1, 4	//3
 		}
 		,{
-			"Visualizer4", 4192, {0, 0, 0}, -1, -1	//4
+			"Visualizer4", 4192, {0}, -1, -1	//4
 		}
 		,{
-			"Visualizer5", 4416, {0, 0, 0}, -1, -1	//5
+			"Visualizer5", 4416, {0}, -1, -1	//5
 		}
 };
 #elif defined _AVATAR_31
 CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
 		//root is ignored but defined here: already have had root solution-----vehicles, then just reuse vehicles solutionBase, 2, -1
 		{
-			"Virtual_root", NULL, -1, {0, 0, 0}, 1, -1
+			"Virtual_root", NULL, 4064, {0}, 1, -1
 		}
 		, {
-			"CMU compliant skeleton", NULL, 4096, {0,0,0}, 2, -1
+			"CMU compliant skeleton", NULL, 4096, {0}, 2, -1
 		}
 		, {
-			"Hips", "base", 4128, {0,0,0}, 3, -1
+			"Hips", "base", 4128, {0}, 3, -1
 		}
 		, {
-			"LHipJoint", NULL, 4160,{0,0,0},6,4
+			"LHipJoint", NULL, 4160,{0},6,4
 		}
 		, {
-			"LowerBack", "back",4192,{0,0,0},7,5
+			"LowerBack", "back",4192,{0},7,5
 		}
 		, {
-			"RHipJoint", NULL, 4224, {0,0,0}, 8, -1
+			"RHipJoint", NULL, 4224, {0}, 8, -1
 		}
 		, {
-			"LeftUpLeg", "hip_l", 4256,{0,0,0},9,-1
+			"LeftUpLeg", "hip_l", 4256,{0},9,-1
 		}
 		, {
-			"Spine", NULL, 4288, {0,0,0}, 10, -1
+			"Spine", NULL, 4288, {0}, 10, -1
 		}
 		, {
-			"RightUpLeg", "hip_r", 4320, {0,0,0}, 11, -1
+			"RightUpLeg", "hip_r", 4320, {0}, 11, -1
 		}
 		, {
-			"LeftLeg", "knee_l", 4352, {0,0,0}, 12, -1
+			"LeftLeg", "knee_l", 4352, {0}, 12, -1
 		}
 		, {
-			"Spine1", NULL, 4384, {0,0,0}, 13, -1
+			"Spine1", NULL, 4384, {0}, 13, -1
 		}
 		, {
-			"RightLeg", "knee_r",4416,{0,0,0},16,-1
+			"RightLeg", "knee_r",4416,{0},16,-1
 		}
 		, {
-			"LeftFoot", "ankle_l", 4448,{0,0,0},17,-1
+			"LeftFoot", "ankle_l", 4448,{0},17,-1
 		}
 		, {
-			"LeftShoulder", NULL, 4480, {0,0,0}, 18, 14
+			"LeftShoulder", NULL, 4480, {0}, 18, 14
 		}
 		, {
-			"Neck", "cervical", 4512,{0,0,0},19,15
+			"Neck", "cervical", 4512,{0},19,15
 		}
 		, {
-			"RightShoulder", NULL, 4544, {0,0,0}, 20, -1
+			"RightShoulder", NULL, 4544, {0}, 20, -1
 		}
 		, {
-			"RightFoot", "ankle_r", 4576,{0,0,0},21,-1
+			"RightFoot", "ankle_r", 4576,{0},21,-1
 		}
 		, {
-			"LeftToeBase", NULL, 4608, {0,0,0}, -1, -1
+			"LeftToeBase", NULL, 4608, {0}, -1, -1
 		}
 		, {
-			"LeftArm", "shoulder_l", 4640,{0,0,0},22,-1
+			"LeftArm", "shoulder_l", 4640,{0},22,-1
 		}
 		, {
-			"Neck1", NULL, 4672, {0,0,0}, 23, -1
+			"Neck1", NULL, 4672, {0}, 23, -1
 		}
 		, {
-			"RightArm", "shoulder_r", 4704,{0,0,0},24,-1
+			"RightArm", "shoulder_r", 4704,{0},24,-1
 		}
 		, {
-			"RightToeBase", NULL, 4736, {0,0,0}, -1, -1
+			"RightToeBase", NULL, 4736, {0}, -1, -1
 		}
 		, {
-			"LeftForeArm", "elbow_l", 4768,{0,0,0},25,-1
+			"LeftForeArm", "elbow_l", 4768,{0},25,-1
 		}
 		, {
-			"Head", NULL, 4800, {0,0,0}, -1, -1
+			"Head", NULL, 4800, {0}, -1, -1
 		}
 		, {
-			"RightForeArm", "elbow_r", 4832,{0,0,0},26,-1
+			"RightForeArm", "elbow_r", 4832,{0},26,-1
 		}
 		, {
-			"LeftHand", "wrist_l", 4864,{0,0,0},27,-1
+			"LeftHand", "wrist_l", 4864,{0},27,-1
 		}
 		, {
-			"RightHand", "wrist_r",4896,{0,0,0},29,-1
+			"RightHand", "wrist_r",4896,{0},29,-1
 		}
 		, {
-			"LeftFingerBase", NULL, 4928, {0,0,0}, 31, 28
+			"LeftFingerBase", NULL, 4928, {0}, 31, 28
 		}
 		, {
-			"LThumb", NULL, 4960,{0,0,0},-1,-1
+			"LThumb", NULL, 4960,{0},-1,-1
 		}
 		, {
-			"RightFingerBase", NULL, 4992,{0,0,0},32,30
+			"RightFingerBase", NULL, 4992,{0},32,30
 		}
 		, {
-			"RThumb", NULL, 5024,{0,0,0},-1,-1
+			"RThumb", NULL, 5024,{0},-1,-1
 		}
 		, {
-			"LeftHandFinger1", NULL, 5056,{0,0,0},-1,-1
+			"LeftHandFinger1", NULL, 5056,{0},-1,-1
 		}
 		, {
-			"RightHandFinger1", NULL, 5088,{0,0,0},-1,-1
+			"RightHandFinger1", NULL, 5088,{0},-1,-1
 		}
 	};
 #endif
@@ -3916,9 +3916,9 @@ TAvatarJoint* CArtiJoints::InitJoint() const
 			n_child->name = (NULL != nt_child->name_diguy ? _strdup(nt_child->name_diguy) : NULL);
 			n_child->type = nt_child->type;
 			n_child->angle = nt_child->angle;
-			n_child->angleRate.i = 0;
-			n_child->angleRate.j = 0;
-			n_child->angleRate.k = 0;
+			n_child->angleRate = {0};
+			n_child->offset = {0}; //fixme: initial adjustment will have offset to match customized model
+			n_child->offsetRate = {0};
 			n_child->child_first = NULL;
 			n_child->sibling_next = NULL;
 			*n_precessor = n_child;
@@ -4099,7 +4099,7 @@ unsigned int CArtiJoints::BFTGetJointsDiGuy(const char** names, TVector3D* angle
 	return num_filled;
 }
 
-void CArtiJoints::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned int num)
+void CArtiJoints::BFTGetJoints(const cvTObjState* s, TVector3D* angles, TVector3D* offsets, unsigned int num)
 {
 	const cvTObjState::AvatarState& s_a = s->avatarState;
 	TAvatarJoint vr = VIRTUAL_ROOT(s_a.child_first);
@@ -4116,17 +4116,15 @@ void CArtiJoints::BFTGetJoints(const cvTObjState* s, TVector3D* angles, unsigned
 			q_joints.push(j_child);
 			assert(num_filled < num);
 			angles[num_filled] = j_child->angle;
+			offsets[num_filled] = j_child->offset;
 			num_filled ++;
-			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
-			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
-			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
 			j_child = j_child->sibling_next;
 		}
 	}
 	assert(num_filled == num);
 }
 
-void CArtiJoints::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned int num)
+void CArtiJoints::BFTSetJoints(cvTObjState* s, const TVector3D* angles, const TVector3D* offsets, unsigned int num)
 {
 	cvTObjState::AvatarState& s_a = s->avatarState;
 	TAvatarJoint vr = VIRTUAL_ROOT(s_a.child_first);
@@ -4143,10 +4141,10 @@ void CArtiJoints::BFTSetJoints(cvTObjState* s, const TVector3D* angles, unsigned
 			q_joints.push(j_child);
 			assert(num_filled < num);
 			j_child->angle = angles[num_filled];
+			j_child->offset = offsets[num_filled];
 			num_filled ++;
-			j_child->angleRate.i = 0; 		//fixme: a dynamic computation for angle rate
-			j_child->angleRate.j = 0; 		//fixme: a dynamic computation for angle rate
-			j_child->angleRate.k = 0; 		//fixme: a dynamic computation for angle rate
+			j_child->angleRate = {0}; 		//fixme: a dynamic computation for angle rate
+			j_child->offsetRate = {0};
 			j_child = j_child->sibling_next;
 		}
 	}

@@ -129,12 +129,14 @@ typedef struct TAvatarJoint {
 	int				type;			//joint vrlink articulated type
 	TVector3D		angle; 			//taitbryan euler
 	TVector3D       angleRate;
+	TVector3D		offset;
+	TVector3D		offsetRate;
 	TAvatarJoint*	child_first;
 	TAvatarJoint*	sibling_next;
 } TAvatarJoint;
 
 #define VIRTUAL_ROOT(childjoint)\
-	{"base", -1, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, childjoint, NULL};
+	{"pos", 4064, {0}, {0}, {0}, {0},childjoint, NULL};
 
 /*
  * The following 2 structures contains the states and control inputs
@@ -207,8 +209,8 @@ typedef enum cvEObjMode {
 	eCV_COUPLED_OBJ,
 	eCV_OBJ_REL_TRAJ,
 	eCV_DIGUY, //<Pre programed path
-	eCV_DIGUY_GUIDE_CONTROL, //<Guide based - 
-	eCV_DIGUY_DIR_CONTROL //< 100% control from Scenario control 
+	eCV_DIGUY_GUIDE_CONTROL, //<Guide based -
+	eCV_DIGUY_DIR_CONTROL //< 100% control from Scenario control
 } cvEObjMode;
 
 /*
@@ -253,7 +255,7 @@ typedef union cvTObjState {
 		TU16b             visualState;
 		TU16b             audioState;
 		//TU8b			  animationOn;  /*< is the animation on? */
-        TU8b              classType;   /*0, vehicle, walker, diGuy, free-body*/ 
+        TU8b              classType;   /*0, vehicle, walker, diGuy, free-body*/
 		cvTerQueryHint    posHint[3];
 
 		/* traj follower mode related data */
