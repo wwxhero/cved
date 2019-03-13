@@ -159,6 +159,8 @@ typedef struct TVehicleState {
 	cvTerQueryHint    posHint[4];
 	double            latAccel;     /* vehicle's current lat accel  */
 	EDynaFidelity     dynaFidelity; /* vehicle's dynamics fidelity  */
+	float             tireRot[3];   /*front left, front right, rear*/
+	double			  steeringWheelAngle; /* stores the current steering wheel angle */
 	//External Driver State Matches with DynObjState above this point
 	//All new cells must be added beneath this point,
 	//or be added to External Driver State as well
@@ -167,7 +169,7 @@ typedef struct TVehicleState {
 	int               braking;		/* when set, dec below threshold */
 	int               brakeLightOnCount; /* how long in 'braking' mode */
 	int               brakeLightOffCount;/* how long not in 'braking' mode */
-	double			  steeringWheelAngle; /* stores the current steering wheel angle */
+	
 
 	/*double          horsepower;*/
 	double            velLat;       /* lateral velocity       */
@@ -175,7 +177,6 @@ typedef struct TVehicleState {
 	double            rollRate;     /* vehicle roll rate      */
 	double            pitchRate;    /* vehicle pitch rate     */
 	double            yawRate;      /* vehicle yaw rate       */
-	float             tireRot[3];   /*front left, front right, rear*/
     int               extrnControlId; /* System ID if we are running a diff dyna */
 #ifndef SMALL_BLI
 	TS8b              reserved[44]; /*reserved for future use */
@@ -431,9 +432,10 @@ typedef union cvTObjState {
 		cvTerQueryHint    posHint[4];
 		double            latAccel;     /* vehicle's current lat accel  */
 		EDynaFidelity     dynaFidelity; /* vehicle's dynamics fidelity  */
+		float             tireRot[3];   /*front left, front right, rear*/
+		double			  steeringWheelAngle; /* stores the current steering wheel angle */
 		//External Driver State Matches with DynObjState above this point
 		//....new elements should be added after here.
-
 		TVector3D         angularVel;   /* object's angular velocity */
 
 	} externalDriverState;
