@@ -479,6 +479,7 @@ public:
 	~CArtiJoints();
 	static unsigned int GetNumParts();
 	static void BFTAlloc(const char* rootName, const char*** szNames, unsigned int* num);
+	static void BFTAlloc(const char*** szNames, unsigned int* num);
 	static void BFTFree(const char** szNames, unsigned int num);
 
 	//calling this function with cautious, it reads A buffer for even frame and B buffer for odd frame

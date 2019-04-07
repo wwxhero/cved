@@ -3830,6 +3830,25 @@ CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
 			"RightHandFinger1", NULL, 5088,{0},-1,-1
 		}
 	};
+#elif defined _AVATAR_15
+CArtiJoints::JointTemplate CArtiJoints::s_jointTemplate[] = {
+		  {NULL, "Virtual_root", 4096, {0}, 2, -1}
+		, {NULL, "base", 4128, {0}, 3, -1}
+		, {NULL, "back", 4160, {0}, 6, 4}
+		, {NULL, "hip_l", 4192, {0}, 9, 5}
+		, {NULL, "hip_r", 4224, {0}, 10, -1}
+		, {NULL, "cervical", 4256, {0}, -1, 7}
+		, {NULL, "shoulder_l", 4288, {0}, 11, 8}
+		, {NULL, "shoulder_r", 4320, {0}, 12, -1}
+		, {NULL, "knee_l", 4352, {0}, 13, -1}
+		, {NULL, "knee_r", 4384, {0}, 14, -1}
+		, {NULL, "elbow_l", 4416, {0}, 15, -1}
+		, {NULL, "elbow_r", 4448, {0}, 16, -1}
+		, {NULL, "ankle_l", 4480, {0}, -1, -1}
+		, {NULL, "ankle_r", 4512, {0}, -1, -1}
+		, {NULL, "wrist_l", 4544, {0}, -1, -1}
+		, {NULL, "wrist_r", 4576, {0}, -1, -1}
+	};
 #endif
 
 CAvatarObj::CAvatarObj()
@@ -4029,6 +4048,36 @@ void CArtiJoints::BFTAlloc(const char* rootName, const char*** szNames, unsigned
 			}
 			JointTemplateEx nte_child = JointTemplateEx(nt_child, name_full);
 			q_template.push(nte_child);
+			i_child = nt_child->sibling_next;
+		}
+	}
+	*szNames = blk.entries;
+	*num = blk.num;
+}
+
+void CArtiJoints::BFTAlloc(const char*** szNames, unsigned int* num)
+{
+	NameBlock blk;
+	Init(&blk);
+	JointTemplate* nt_root = &s_jointTemplate[0];
+	std::queue<JointTemplate*> q_template;
+	q_template.push(nt_root);
+	while (!q_template.empty())
+	{
+		JointTemplate* nt = q_template.front();
+		q_template.pop();
+		int i_child = nt->child_first;
+		while (i_child > 0)
+		{
+			JointTemplate* nt_child = &s_jointTemplate[i_child];
+			char* name = (char*)blk.entries[blk.num];
+			strcpy(name, nt_child->name);
+			blk.num ++;
+			if (!(blk.num < blk.cap))
+			{
+				Grow(&blk);
+			}
+			q_template.push(nt_child);
 			i_child = nt_child->sibling_next;
 		}
 	}
