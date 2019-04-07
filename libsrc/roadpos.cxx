@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: roadpos.cxx,v 1.150 2016/10/28 15:58:21 IOWA\dheitbri Exp $
+// Version: 	$Id: roadpos.cxx,v 1.154 2018/12/07 21:10:02 IOWA\dheitbri Exp $
 //
 // Author(s):   Yiannis Papelis
 // Date:		September, 1998
@@ -827,7 +827,7 @@ CRoadPos::GetNextCrdr(int& crdrId, ETravelTurnDir& dirOut, ETravelTurnDir eTurnD
 		currentAvg /= crdrPntVec.size();
 
 		// test all other corridors 
-		double testAvg;
+		double testAvg = 0;
 		for(size_t i=1; i<straightCrdrVec.size(); i++) {
 			straightCrdrVec[i].GetCntrlPnts(crdrPntVec);
 
@@ -2358,6 +2358,7 @@ CRoadPos::GetVeryBestXYZ(bool useoffset) const
 		double ttt = tt * t;
 #ifdef _DEBUG
         cvTSplCoef tempcv; //for the debugger
+        tempcv.A =0;
 #endif
 		pT.m_x = ttt * pCurCP->hermite[0].A + tt * pCurCP->hermite[0].B +
 					t * pCurCP->hermite[0].C + pCurCP->hermite[0].D;
@@ -2460,11 +2461,12 @@ CRoadPos::GetXYZ() const
 	// If the current point is on an intersection
 	else {
 		vector<TCdo>::const_iterator cdo = m_cdo.begin();
-        TCrdrPnt debug;
 		TCrdrPnt* pCurCP = BindCrdrPnt(cdo->cntrlPntIdx);
 		TCrdrPnt* pNexCP = pCurCP+1;
+#ifdef _DEBUG
         TCrdrPnt debugP;
-
+        debugP.distance = 0;
+#endif
 		curCPLoc.m_x = pCurCP->location.x;
 		curCPLoc.m_y = pCurCP->location.y;		
         nexCPLoc.m_x = pNexCP->location.x;
@@ -3771,27 +3773,28 @@ CRoadPos::SetOffset( double offset )
 } // end of SetOffset
 
 //////////////////////////////////////////////////////////////////////////////
-//
-// Description: Changes the lane of the current CRoadPos to the lane 
-//   at the left of the current lane.  
-//
-// Remarks: This function will throw an exception if the current 
-//   CRoadPos is invalid.
-//
-//   The lane is changed with respect to the direction of the current lane.
-//
-// Arguments:
-//		center - denotes whether or not the function should return a point
-//			in the center of the lane.
-//
-// Returns: 
-// 	 If the current CRoadPos instance is on a road:
-// 		If the current lane is the leftmost lane, then the function returns 
-// 		false and no change is made.  Otherwise, the lane is changed and the 
-// 		function returns true.
-// 	 If the current CRoadPos instance is on an intersection:
-//		Nothing is changed and the function returns false.
-//
+///
+/// Description: Changes the lane of the current CRoadPos to the lane 
+///   at the left of the current lane.  
+///
+/// Remarks: This function will throw an exception if the current 
+///   CRoadPos is invalid.
+///
+///   The lane is changed with respect to the direction of the current lane.
+///
+/// Arguments:
+///		center - denotes whether or not the function should return a point
+///			in the center of the lane.
+///
+/// Returns: 
+/// 	 If the current CRoadPos instance is on a road:
+/// 		If the current lane is the leftmost lane, then the function returns 
+/// 		false and no change is made.  Otherwise, the lane is changed and the 
+/// 		function returns true.
+/// 	 If the current road is in an intersection, it will return the crdr to 
+///         the right if, a crdr exist that has that connect to and from the 
+///         lane to the right of the src lane, and to the right of the dst lane
+///
 //////////////////////////////////////////////////////////////////////////////
 bool
 CRoadPos::ChangeLaneLeft(bool center) 
@@ -3816,30 +3819,78 @@ CRoadPos::ChangeLaneLeft(bool center)
 		return true;
 	}
 	else {
-		return false;
+        //m_cdo[0].pCrdr.le
+        CCrdr myCrdr(GetCved(), m_cdo[0].pCrdr);
+        int roadId = m_cdo[0].pCrdr->srcRdIdx;
+        int laneId = m_cdo[0].pCrdr->srcLnIdx;
+
+        CRoad srcRoad(GetCved(), roadId);
+        CLane srclane( srcRoad, laneId - srcRoad.GetLaneIdx() );
+        if ( srclane.IsLeftMost() )  return false;
+        CLane leftSrclane = srclane.GetLeft();
+
+
+        int dstroadId = m_cdo[0].pCrdr->dstRdIdx;
+        int dstlaneId = m_cdo[0].pCrdr->dstLnIdx;
+
+        CRoad dstRoad(GetCved(), dstroadId);
+        CLane dstlane( dstRoad, dstlaneId - dstRoad.GetLaneIdx() );
+        if ( dstlane.IsLeftMost() )  return false;
+        CLane leftDsclane = dstlane.GetLeft();
+
+
+        auto LeftLaneId = leftDsclane.GetIndex();
+
+        CIntrsctn intr(GetCved(), m_pIntrsctn->myId);
+        int crdrcnt = intr.GetNumCrdrs();
+        TU32b targetId = (TU32b)-1; 
+
+        auto leftCrd = intr.GetCrdr(leftSrclane, leftDsclane);
+        if (!leftCrd.IsValid()) return false;
+
+        double percent = m_cdo[0].dist/myCrdr.GetLength();
+        double offs = m_cdo[0].ofs;
+        double myNewDist  =leftCrd.GetLength()*percent;
+        if (center) offs = 0;
+
+        TCdo tmpCdo;
+        tmpCdo.pCrdr = BindCrdr(m_pIntrsctn->crdrIdx + leftCrd.GetRelativeId()); 
+        tmpCdo.dist = myNewDist;
+        tmpCdo.ofs = offs;
+
+        // Find the control point associated with the 
+        // 	given distance along the crdr.
+        tmpCdo.cntrlPntIdx = Search(tmpCdo.dist, tmpCdo.pCrdr)
+            + tmpCdo.pCrdr->cntrlPntIdx;
+        // Make tmpCdo the only member of the m_cdo vector
+        m_cdo.clear();
+        m_cdo.push_back(tmpCdo);
+
+
+        return true;
 	}
 } // end of ChangeLaneLeft
 
 //////////////////////////////////////////////////////////////////////////////
-//
-// Description: Changes the lane of the current CRoadPos to the lane 
-//   at the right of the current lane.  
-//
-// Remarks: This function will throw an exception if the current 
-//   CRoadPos is invalid.
-//
-// 	 The lane is changed with respect to the direction of the current lane.
-//
-// Arguments:
-//
-// Returns: 
-// 	 If the current CRoadPos instance is on a road:
-// 		If the current lane is the leftmost lane, then the function returns 
-// 		false and no change is made.  Otherwise, the lane is changed and the 
-// 		function returns true.
-// 	 If the current CRoadPos instance is on an intersection:
-//		Nothing is changed and the function returns false.
-//
+///
+/// Description: Changes the lane of the current CRoadPos to the lane 
+///   at the right of the current lane.  
+///
+/// Remarks: This function will throw an exception if the current 
+///   CRoadPos is invalid.
+///
+/// 	 The lane is changed with respect to the direction of the current lane.
+///
+/// Arguments:
+///
+/// Returns: 
+/// 	 If the current CRoadPos instance is on a road:
+/// 		If the current lane is the leftmost lane, then the function returns 
+/// 		false and no change is made.  Otherwise, the lane is changed and the 
+/// 		function returns true.
+/// 	 If the current road is in an intersection, it will return the crdr to 
+///         the right if, a crdr exist that has that connect to and from the 
+///         lane to the right of the src lane, and to the right of the dst lane
 //////////////////////////////////////////////////////////////////////////////
 bool
 CRoadPos::ChangeLaneRight(bool center) 
@@ -3864,7 +3915,55 @@ CRoadPos::ChangeLaneRight(bool center)
 		return true;
 	}
 	else {
-		return false;
+        //m_cdo[0].pCrdr.le
+        CCrdr myCrdr(GetCved(), m_cdo[0].pCrdr);
+        int roadId = m_cdo[0].pCrdr->srcRdIdx;
+        int laneId = m_cdo[0].pCrdr->srcLnIdx;
+        
+        CRoad srcRoad(GetCved(), roadId);
+        CLane srclane( srcRoad, laneId - srcRoad.GetLaneIdx() );
+        if ( srclane.IsRightMost() )  return false;
+        CLane rightSrclane = srclane.GetRight();
+
+
+        int dstroadId = m_cdo[0].pCrdr->dstRdIdx;
+        int dstlaneId = m_cdo[0].pCrdr->dstLnIdx;
+
+        CRoad dstRoad(GetCved(), dstroadId);
+        CLane dstlane( dstRoad, dstlaneId - dstRoad.GetLaneIdx() );
+        if ( dstlane.IsRightMost() )  return false;
+        CLane rightDsclane = dstlane.GetRight();
+
+
+        auto RightLaneId = rightDsclane.GetIndex();
+
+        CIntrsctn intr(GetCved(), m_pIntrsctn->myId);
+        int crdrcnt = intr.GetNumCrdrs();
+        TU32b targetId = (TU32b)-1; 
+        
+        auto rightCrd = intr.GetCrdr(rightSrclane, rightDsclane);
+        if (!rightCrd.IsValid()) return false;
+
+        double percent = m_cdo[0].dist/myCrdr.GetLength();
+        double offs = m_cdo[0].ofs;
+        double myNewDist  =rightCrd.GetLength()*percent;
+        if (center) offs = 0;
+
+        TCdo tmpCdo;
+        tmpCdo.pCrdr = BindCrdr(m_pIntrsctn->crdrIdx + rightCrd.GetRelativeId()); 
+        tmpCdo.dist = myNewDist;
+        tmpCdo.ofs = offs;
+
+        // Find the control point associated with the 
+        // 	given distance along the crdr.
+        tmpCdo.cntrlPntIdx = Search(tmpCdo.dist, tmpCdo.pCrdr)
+            + tmpCdo.pCrdr->cntrlPntIdx;
+        // Make tmpCdo the only member of the m_cdo vector
+        m_cdo.clear();
+        m_cdo.push_back(tmpCdo);
+
+
+		return true;
 	}
 } // end of ChangeLaneRight
 
@@ -4136,13 +4235,21 @@ CRoadPos::Travel(double dist, const CLane* cpDstLane, const ETravelTurnDir eTurn
 				return eERROR;
 			}
 
-			CIntrsctn intr = lane.GetNextIntrsctn();
+			CIntrsctn intr;
+            if (m_dist > 0){
+               intr = lane.GetNextIntrsctn();
+            }else{
+                intr = lane.GetPrevIntrsctn();
+            }
 			if (!intr.IsValid()){
 				return eERROR;
 			}
 
 			TCrdrVec crdrVec;
+            if (m_dist > 0)
 			intr.GetCrdrsStartingFrom(lane, crdrVec);
+            else
+                intr.GetCrdrsLeadingTo(lane, crdrVec);
 			int index = 0;
 
 			if (crdrVec.size() > 0){
@@ -4178,8 +4285,16 @@ CRoadPos::Travel(double dist, const CLane* cpDstLane, const ETravelTurnDir eTurn
 			m_cdo.clear();
 			TCdo tmpCdo;
 			tmpCdo.pCrdr = pCrdr;
+            if (m_dist > 0){
 			tmpCdo.ofs = m_ofs;
 			tmpCdo.dist = m_dist > m_pRoad->roadLengthLinear ? m_dist - m_pRoad->roadLengthLinear : -(m_dist);	// change to 0 to start at beginning of intersection
+            }else{
+                CVED::CCrdr crd(GetCved(),pCrdr);
+                tmpCdo.dist =crd.GetLength() + m_dist;
+                if (tmpCdo.dist < 0)
+                    tmpCdo.dist = 0;
+                m_dist= tmpCdo.dist;
+            }
 			tmpCdo.cntrlPntIdx = Search(tmpCdo.dist, tmpCdo.pCrdr)
 				+ tmpCdo.pCrdr->cntrlPntIdx;
 			m_cdo.push_back(tmpCdo);
@@ -4548,6 +4663,7 @@ CRoadPos::TravelDir(double dist, const ETravelTurnDir eTurnDir, const int idx)
 			else {
 #ifdef _DEBUG
 				cvTCrdr tcvtcrd; //for the benifit of the debugger
+                tcvtcrd.attrIdx = 0;
 #endif
 				m_dist = cdo->dist - length;
 
@@ -5575,6 +5691,7 @@ CRoadPos::Search(double dist,
 {
 #ifdef _DEBUG
 	cvTRoad tempcv; //for the debugger
+    tempcv.attrIdx = 0;
 #endif
 	// Search road if on road.
 	if (m_isRoad) {

@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:		$Id: dynserv.cxx,v 1.65 2016/08/18 17:06:07 IOWA\dheitbri Exp $
+// Version:		$Id: dynserv.cxx,v 1.68 2018/07/16 14:06:26 IOWA\dheitbri Exp $
 //
 // Author(s):	Yiannis Papelis
 // Date:		January, 1999
@@ -892,9 +892,9 @@ TrajFollowerDynamics(
 			float frontRightTireRot = cpCurState->tireRot[1];
 			float rearTireRot = cpCurState->tireRot[2];
 
-			frontLeftTireRot = fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[0]),360);
-			frontRightTireRot = fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[1]),360);
-			rearTireRot = fmod((((tireDist/tireCircumference)*360) + pFutState->tireRot[2]),360);
+			frontLeftTireRot = (float)fmod((((tireDist/tireCircumference)*360.0f) + pFutState->tireRot[0]),360.0f);
+			frontRightTireRot =(float)fmod((((tireDist/tireCircumference)*360.0f) + pFutState->tireRot[1]),360.0f);
+			rearTireRot = (float)fmod((((tireDist/tireCircumference)*360.0) + pFutState->tireRot[2]),360);
 
 			pFutState->tireRot[0] = frontLeftTireRot;
 			pFutState->tireRot[1] = frontRightTireRot;
@@ -1337,5 +1337,6 @@ CCved::SetupVehODEObject( const cvTObjAttr* cpAttr,
 			initVel[0], initVel[1], initVel[2],
 			initVel[3], initVel[4], initVel[5] );*/
 }
+
 
 } // namespace CVED

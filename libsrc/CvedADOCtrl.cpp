@@ -4,12 +4,10 @@
 #include "objreflistUtl.h"
 #include "EnvVar.h"
 #include <algorithm>
-#include "hcsmobject.h"
 #include "ExternalControlInterface.h"
 #include "polygon2d.h"
 
 #include <filename.h>
-#include "hcsmobject.h"
 #include "odeDynamics.h"
 namespace CVED {
 
@@ -126,7 +124,6 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 				}
 				else{
 					CVED::CCved &me = *this;
-					CVED::CObj* obj = BindObjIdToClass2(id);
 					if ( !remoteObj
 					 ||	(NULL == ctrl
 					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
@@ -150,7 +147,6 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 			else
 			{
 				CVED::CCved &me = *this;
-				CVED::CObj* obj = BindObjIdToClass2(id);
 				if ( !remoteObj
 					 ||	(NULL == ctrl
 					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))

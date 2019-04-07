@@ -6,7 +6,7 @@
  * Author(s):	Yiannis Papelis
  * Date:		August, 1998
  *
- * $Id: cvedstrc.h,v 1.68 2007/07/23 17:17:05 dheitbri Exp $
+ * $Id: cvedstrc.h,v 1.69 2019/02/05 16:45:05 IOWA\dheitbri Exp $
  *
  * Description:	Contains all C/C++ structures used in the memory
  * block.  This file MUST maintain C & C++ compilation because
@@ -190,6 +190,7 @@ typedef struct cvTHeader {
 	TU32b           numClients;
 } cvTHeader;
 
+const size_t gcCVED_HeaderSize = sizeof(cvTHeader);
 
 /* 
  * This structure represents the road structure of lri file 
@@ -216,6 +217,8 @@ typedef struct cvTRoad{
 	int						numOfLanes;		/* number of lanes */
 }cvTRoad;
 
+const size_t gcCVED_TRoadSize = sizeof(cvTRoad);
+
 typedef struct cvTRoadPiece{
 	TRoadPoolIdx			roadId;			/* id of the road the     */ 
 											/* roadpiece belongs to   */
@@ -227,10 +230,14 @@ typedef struct cvTRoadPiece{
 	double					x2, y2;			/* upper right	*/
 }cvTRoadPiece;
 
+const size_t gcCVED_TRoadPieceSize = sizeof(cvTRoadPiece);
+
 typedef struct cvTObjRef{
 	TObjectPoolIdx			objId;			/* object id it refer to */
 	TObjRefPoolIdx			next;			/* next object id */
 }cvTObjRef;
+
+const size_t gcCVED_TObjRefSize = sizeof(cvTObjRef);
 
 typedef struct cvTRoadRef{
 	TObjectPoolIdx	objIdx;					/* Index into the dynamic object*/
@@ -238,11 +245,15 @@ typedef struct cvTRoadRef{
 											/*	object in the list.         */ 
 }cvTRoadRef;
 
+const size_t gcCVED_TRoadRefSize = sizeof(cvTRoadRef);
+
 typedef struct cvTIntrsctnRef{
 	TObjectPoolIdx	objIdx;					/* Index into the dynamic object*/
 											/*  reference pool of the first */
 											/*	object in the list.         */ 
 }cvTIntrsctnRef;
+
+const size_t gcCVED_TIntrsctnRefSize = sizeof(cvTIntrsctnRef);
 
 typedef enum {eTERR_NONE = 0, eTERR_ROAD, eTERR_ISEC} ETerrainCode;
 typedef struct cvTDynObjRef{
@@ -285,6 +296,8 @@ typedef struct cvTDynObjRef{
 											/*	the center of object        */
 }cvTDynObjRef;
 
+const size_t gcCVED_TDynObjRefSize = sizeof(cvTDynObjRef);
+
 typedef struct cvTRepObj{
 	TObjectPoolIdx			objId;			/* object id it refer to */
 	double					latdist;		/* lateral distance of obj */
@@ -298,7 +311,7 @@ typedef struct cvTRepObj{
 											/* with road */
 }cvTRepObj;
 
-
+const size_t gcCVED_TRepObjSize = sizeof(cvTRepObj);
 /*
  * This structure represents lane structure of the lri file 
  */
@@ -315,6 +328,8 @@ typedef struct cvTLane{
 	char					passInfo;	/* ?????? */
 }cvTLane;
 
+const size_t gcCVED_TLaneSize = sizeof(cvTLane);
+
 /*
  * This structure represnets attribute structure of the lri file
  */
@@ -329,9 +344,13 @@ typedef struct cvTAttr{
 	TAttrPoolIdx			next;		/* index to the next attribute */
 }cvTAttr;
 
+const size_t gcCVED_TAttrSize = sizeof(cvTAttr);
+
 typedef struct cvTSurfaceProp{
 	int						id;
 }cvTSurfaceProp;
+
+const size_t gcCVED_TSurfacePropSize = sizeof(cvTSurfaceProp);
 
 /*
  * This structure represents the lateral control pont of the lri file
@@ -344,6 +363,9 @@ typedef struct cvTLatCntrlPnt{
 	double					normIntrepScale;
 }cvTLatCntrlPnt;
 
+
+const size_t gcCVED_TLatCntrlPntSize = sizeof(cvTLatCntrlPnt);
+
 /* cubic spline coefficient */
 typedef struct cvTSplCoef{
 	double					A;
@@ -351,6 +373,8 @@ typedef struct cvTSplCoef{
 	double					C;
 	double					D;
 }cvTSplCoef;
+
+const size_t gcCVED_TSplCoefSize = sizeof(cvTSplCoef);
 
 /* 
  * this structure represents longitudinal control point of the lri file
@@ -391,7 +415,7 @@ typedef struct cvTCntrlPnt{
 	TCharPoolIdx			nameIdx;			/* index of the point name */
 } cvTCntrlPnt;
 
-
+const size_t gcCVED_TCntrlPntSize = sizeof(cvTCntrlPnt);
 /*
  * this structure represents an elevation post.  Elevation posts
  * are used by intersection elevation maps and elevation maps
@@ -402,6 +426,7 @@ typedef struct cvTElevPost {
 	TU32b          flags;					/* additional info */
 } cvTElevPost;
 
+const size_t gcCVED_TElevPostSize = sizeof(cvTElevPost);
 
 /*
  * this structure represents an elevation map.  An elevation map
@@ -418,6 +443,8 @@ typedef struct cvTElevMap {
 	int               numPosts;   /* total number of elevation posts */
 } cvTElevMap;
 
+const size_t gcCVED_TElevMapSize = sizeof(cvTElevMap);
+
 #if 1
 /* 
  * These two structs are for intersection grids
@@ -428,6 +455,8 @@ typedef struct cvTCrdrInfo {
 	int						endCntrlPtIdx;
 } cvTCrdrInfo;
 
+const size_t gcCVED_TCrdrInfoSize = sizeof(cvTCrdrInfo);
+
 typedef struct cvTGrid {
 	int						gridId;
 	double					minX;			
@@ -436,6 +465,9 @@ typedef struct cvTGrid {
 	double					maxY;
 	cvTCrdrInfo				intrsctingCrdrs[cCV_MAX_CRDRS];
 } cvTGrid;
+
+
+const size_t gcCVED_TGridSize = sizeof(cvTGrid);
 
 #endif
 
@@ -472,6 +504,8 @@ typedef struct cvTIntrsctn{
 
 }cvTIntrsctn;
 
+const size_t gcCVED_TIntrsctnSize = sizeof(cvTIntrsctn);
+
 /*
  * this structure represents the corridor of the lri file 
  */
@@ -506,6 +540,8 @@ typedef struct cvTCrdr{
 											 */
 }cvTCrdr;
 
+const size_t gcCVED_TCrdrSize = sizeof(cvTCrdr);
+
 /*
  * this structure represents the corridor control points of the lri  
  */
@@ -520,6 +556,8 @@ typedef struct cvTCrdrCntrlPnt{
 										/* eRIGHT_DOTTED, eNO_FLAG */	
 }cvTCrdrCntrlPnt;
 
+const size_t gcCVED_TCrdrCntrlPntSize = sizeof(cvTCrdrCntrlPnt);
+
 /*
  * this structure represents the distances of the merge point and
  * the exit point with other corridors in the same intersection.
@@ -531,6 +569,8 @@ typedef struct cvTCrdrMrgDst{
 	double	lastDist;
 } cvTCrdrMrgDst;
 
+const size_t gcCVED_TCrdrMrgDstSize = sizeof(cvTCrdrMrgDst);
+
 /*
  * this structures represent the border segment of the lri file
  */
@@ -539,6 +579,8 @@ typedef struct cvTBorderSeg{
 	double					y;
 	char					lineFlag;
 }cvTBorderSeg;
+
+const size_t gcCVED_TBorderSegSize = sizeof(cvTBorderSeg);
 
 /*
  * this strcture represents the hold offset of the lri file
@@ -551,13 +593,16 @@ typedef struct cvTHldOfs{
 	double					orientation;
 	double					thickness;
 }cvTHldOfs;
-	
+
+const size_t gcCVED_THldOfsSize = sizeof(cvTHldOfs);
+
 typedef enum cvEObjPhase { 
 	eDEAD,
 	eBORN,
 	eALIVE,
 	eDYING
 } cvEObjPhase;
+
 
 typedef struct cvTEnviroArea {
 	TEnviroAreaPoolIdx      id;
@@ -569,6 +614,8 @@ typedef struct cvTEnviroArea {
 	int                     maxNumOfInfo;
 } cvTEnviroArea;
 
+const size_t gcCVED_TEnviroAreaSize = sizeof(cvTEnviroArea);
+
 #include "objlayout.h"
 
 /*
@@ -579,6 +626,8 @@ typedef struct cvTObjStateBuf {
 	cvTObjState		state;
 	cvTObjContInp	contInp;
 } cvTObjStateBuf;
+
+const size_t gcCVED_TObjStateBufSize = sizeof(cvTObjStateBuf);
 
 /*
  * The object structure.  Used to represent objects in the virtual 
@@ -620,10 +669,13 @@ typedef struct cvTObj {
 
 
 
+const size_t gcCVED_TObjSize = sizeof(cvTObj);
 
+//cvTObjState
+const size_t gcCVED_TObjStateSize = sizeof(cvTObj);
 
-
-
+//cvTObjContInp	
+const size_t gcCVED_TObjContInpSize = sizeof(cvTObj);
 
 #ifdef __cplusplus
 }		// extern "C"

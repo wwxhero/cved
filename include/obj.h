@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version: 		$Id: obj.h,v 1.34 2015/12/17 21:21:21 IOWA\dheitbri Exp $
+// Version: 		$Id: obj.h,v 1.35 2018/01/22 18:42:03 IOWA\dheitbri Exp $
 //
 // Obj.h: interface for the CObj class.
 //
@@ -61,6 +61,8 @@ public:
 	int						GetNumOfOptions(void) const;
 	const vector<CSolOption>& GetAllOptions() const;	
 
+    virtual COrientation    GetEulerAngles(void) const;
+    virtual COrientation    GetEulerAnglesImm(void) const;
 	virtual CPoint3D		GetPos(void) const;
     virtual CPoint3D		GetPosTarget(void) const;
     virtual double		    GetVelTarget(void) const;

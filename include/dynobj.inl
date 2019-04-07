@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:     $Id: dynobj.inl,v 1.8 2011/07/08 22:35:40 iowa\dheitbri Exp $
+// Version:     $Id: dynobj.inl,v 1.9 2018/03/23 20:41:19 IOWA\dheitbri Exp $
 //
 // Author(s):   Yiannis Papelis
 // Date:        August, 1998
@@ -835,6 +835,10 @@ CExternalDriverObj::~CExternalDriverObj()
 {}
 
 
+
+inline CExternalVehObj::CExternalVehObj(){};
+inline CExternalVehObj::~CExternalVehObj(){};
+inline CExternalVehObj::CExternalVehObj( const CExternalVehObj& obj ):CVehicleObj(obj){};
 /////////////////////////////////////////////////////////////////////////
 //
 // Description:

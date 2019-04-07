@@ -413,6 +413,59 @@ CObj::GetPos(void) const
 //////////////////////////////////////////////////////////////////////////////
 ///
 ///\brief 
+/// 	Get the target orientation in Yaw Pitch Roll
+///
+///\remark This function will cause a failed assertion if it is called on an
+/// 	invalid CObj instance. The Value from this function is only valid of
+///     ADOs
+///
+///\return a current Target Position in feet
+///
+//////////////////////////////////////////////////////////////////////////////
+COrientation CObj::GetEulerAngles(void) const{
+    cvTObjState::AnyObjState *cpCurState;
+	cvTHeader*	pH = static_cast<cvTHeader*>(GetInst());
+	if ( (pH->frame & 1) == 0 ) {		// even frame
+		cpCurState = &m_pObj->stateBufA.state.anyState;
+	}
+	else {							// odd frame
+		cpCurState = &m_pObj->stateBufB.state.anyState;
+	}
+    COrientation ret;
+    ret.SetUnitVectors(cpCurState->tangent,cpCurState->lateral);
+    return ret;
+}
+//////////////////////////////////////////////////////////////////////////////
+///
+///\brief 
+/// 	Get the target position of the vehicle
+///
+///\remark This function will cause a failed assertion if it is called on an
+/// 	invalid CObj instance. The Value from this function is only valid of
+///     ADOs
+///
+///\return a current Target Position in feet
+///
+//////////////////////////////////////////////////////////////////////////////
+COrientation CObj::GetEulerAnglesImm(void) const{
+    cvTObjState::AnyObjState *cpCurState;
+	cvTHeader*	pH = static_cast<cvTHeader*>(GetInst());
+	if ( (pH->frame & 1) == 0 ) {		// even frame
+		cpCurState = &m_pObj->stateBufB.state.anyState;
+	}
+	else {							// odd frame
+		cpCurState = &m_pObj->stateBufA.state.anyState;
+	}
+    COrientation ret;
+    ret.SetUnitVectors(cpCurState->tangent,cpCurState->lateral);
+    return ret;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+///
+///\brief 
 /// 	Get the target position of the vehicle
 ///
 ///\remark This function will cause a failed assertion if it is called on an

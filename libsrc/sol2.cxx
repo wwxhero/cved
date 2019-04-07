@@ -3,7 +3,7 @@
 // (C) Copyright 2004 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:     $Id: sol2.cxx,v 1.58 2016/11/01 15:11:58 IOWA\dheitbri Exp $
+// Version:     $Id: sol2.cxx,v 1.59 2018/03/27 15:01:39 IOWA\dheitbri Exp $
 //
 // Author(s):	Matt Schikore
 // Date:		Feb 2004
@@ -217,7 +217,6 @@ int CSol::GetAllVehicles(vector<int>& ids, int canBeMask, int typeMask, bool sor
 
 	int j = 0;
 	int k = 0;
-	int temp;
 	string str1;
 	string str2;
 	int tempID = -1;

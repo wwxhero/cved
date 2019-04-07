@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: intrsctn.cxx,v 1.42 2016/10/28 15:58:21 IOWA\dheitbri Exp $
+// Version: 	$Id: intrsctn.cxx,v 1.44 2018/12/07 20:58:57 IOWA\dheitbri Exp $
 //
 // Author(s):	Li-Jen Tsao
 // Date:		September, 1998
@@ -392,7 +392,7 @@ CIntrsctn::GetCrdr(const CLane& cSrc, const CLane& cDst) const
 	if (found)
 		return (*i);
 	else {
-		CCrdr	bound(GetCved(), 0);
+		CCrdr	bound(GetCved());
 		return	bound;
 	}
 } // end of GetCrdr
@@ -523,6 +523,7 @@ void CIntrsctn::GetCrdrsControlledByLight( int TrafLightId, TCrdrVec& out) const
         i->GetAllHldOfs(hldOfsVec);
 #ifdef _DEBUG
         cvTHldOfs temp; //for the debugger
+        temp.distance = 0;
 #endif
 		vector<CVED::CHldOfs>::iterator hIter = hldOfsVec.begin();
         for (; hIter != hldOfsVec.end(); hIter++){
@@ -554,6 +555,7 @@ CIntrsctn::IsControlled() const{
         i->GetAllHldOfs(hldOfsVec);
 #ifdef _DEBUG
         cvTHldOfs temp; //for the debugger
+        temp.distance =0;
 #endif
 		vector<CVED::CHldOfs>::iterator hIter = hldOfsVec.begin();
         for (; hIter != hldOfsVec.end(); hIter++){

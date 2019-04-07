@@ -3,7 +3,7 @@
  * (C) Copyright 1998 by NADS & Simulation Center, The University of
  *     Iowa.  All rights reserved.
  *
- * Version: 		$Id: objtypes.h,v 1.18 2011/07/08 22:35:02 iowa\dheitbri Exp $
+ * Version: 		$Id: objtypes.h,v 1.19 2018/03/23 20:41:19 IOWA\dheitbri Exp $
  *
  * Author(s):  Yiannis Papelis
  * Date:       November, 1998
@@ -50,6 +50,7 @@ typedef enum cvEObjType {
 	eCV_VIRTUAL_OBJECT,
 	eCV_AVATAR,
 	eCV_EXTERNAL_AVATAR,
+	eCV_EXTERNAL_VEH_OBJECT,
 	eCV_OBJ_TYPE_END
 } cvEObjType;
 

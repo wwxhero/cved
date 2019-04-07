@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 		$Id: road.h,v 1.45 2013/05/08 15:17:50 IOWA\vhorosewski Exp $
+// Version: 		$Id: road.h,v 1.46 2018/12/07 21:14:44 IOWA\dheitbri Exp $
 //
 // Author(s):	Yiannis Papelis
 // Date:		October, 1998
@@ -135,7 +135,8 @@ public:
 
 	CRoad( const CCved&, TU32b id );
 	CRoad( const CCved&, const string& );
-
+    CLane       GetLeftMostLaneInSameDir(const CLane&) const;
+    CLane       GetRightMostLaneInSameDir(const CLane&) const;
 	double		GetLinearLength(void) const;
 	double		GetCubicLength(void) const;
 

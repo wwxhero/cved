@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 		$Id: lanemask.cxx,v 1.13 2001/09/18 20:34:00 yiannis Exp $
+// Version: 		$Id: lanemask.cxx,v 1.14 2018/07/16 14:04:35 IOWA\dheitbri Exp $
 //
 // Author(s):	Yiannis Papelis
 // Date:		August, 1998
@@ -214,7 +214,7 @@ void CLaneMask::SelfTest(void)
 {
 	CLaneMask  lm;
 
-	printf("Size of lane mask is %d\n", sizeof(lm));
+	printf("Size of lane mask is %zu\n", sizeof(lm));
 
 	lm.SetAllLanes();
 

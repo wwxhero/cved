@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 	$Id: pathpoint.cxx,v 1.67 2015/05/21 19:37:32 IOWA\dheitbri Exp $
+// Version: 	$Id: pathpoint.cxx,v 1.68 2018/09/13 19:31:00 IOWA\dheitbri Exp $
 //
 // Author(s):	Jillian Vogel
 // Date:		October, 1999
@@ -2431,7 +2431,10 @@ CPathPoint::SetString(const string& point)
 		m_isRoad = false;
 		m_intrsctn = GetCved().GetIntersection(strName);		
 	}
-	else return false;
+	else{
+	    delete[] pBuf;
+	    return false;
+	}
 
 	// Clear out the current lane/crdr mask
 	m_laneCrdrMask.reset();

@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 		$Id: lane.cxx,v 1.48 2015/07/31 17:02:07 IOWA\dheitbri Exp $
+// Version: 		$Id: lane.cxx,v 1.49 2018/12/07 21:05:19 IOWA\dheitbri Exp $
 //
 // Author(s):   Yiannis Papelis
 // Date:		September, 1998
@@ -360,6 +360,67 @@ CLane::IsLeftMostAlongDir( void ) const
 
 } // end of IsLeftMostAlongDir
 
+
+  /////////////////////////////////////////////////////////////////////////////
+  //
+  // Description: Determine if this is the left-most lane traveling in
+  //   this direction on the road.
+  //
+  // Remarks: If the current lane is not bound, the function throws an 
+  // 	exception of type TBD.
+  //
+  // Arguments:
+  //
+  // Returns: If the lane is the left-most, the function returns true, 
+  // 	 otherwise it returns false.
+  //
+  //////////////////////////////////////////////////////////////////////////////
+bool
+CLane::IsRightMostAlongDir( void ) const
+{
+
+    AssertValid();
+
+    //
+    // I can use the IsLeftOpposite function to figure out if I'm the
+    // right-most lane moving in my direction.  However, I have to right
+    // check to see if there even exists to my left.
+    //
+    cvELnDir dir = GetDirection();
+    bool moreLanesToRight = false;
+    if ( dir == ePOS ) {
+
+        moreLanesToRight = ( m_pLane->laneNo != 0 );             
+
+    }
+    else {
+
+        int numOfLanes = GetRoad().GetNumLanes();
+        moreLanesToRight = !( m_pLane->laneNo == ( numOfLanes - 1 ) );
+
+    }
+
+    if ( moreLanesToRight ) {
+
+        //
+        // If the lane to my right is moving in the opposite direction
+        // then I'm the right-most lane.
+        //
+        
+        return IsRightOpposite();
+
+    }
+    else {
+
+        //
+        // This is already the left-most lane.
+        //
+        return true;
+
+    }
+
+} // end of IsLeftMostAlongDir
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Description: Determine if this is the right most lane on the road.
@@ -415,6 +476,32 @@ CLane::IsLeftOpposite(void) const
 		return true;
 	else
 		return false;
+} // end of IsLeftOpposite
+///////////////////////////////////////////////////////////////////////////////
+///
+/// Description: IsLeftOpposite
+/// 	Determine if this lane to the right is opposite direction
+///
+/// Remarks: If the current lane is not bound, the function throws an 
+/// 	exception of type TBD.
+///
+/// Arguments:
+///
+/// Returns: If the lane to the right is opposite direction, the function 
+/// 	returns true else it returns false.
+///
+///////////////////////////////////////////////////////////////////////////////
+bool
+CLane::IsRightOpposite(void) const
+{
+    AssertValid();
+    if (GetRoad().GetNumLanes() == 1) {
+        return false;
+    }
+    if(	GetRight().GetDirection()!=GetDirection() )
+        return true;
+    else
+        return false;
 } // end of IsLeftOpposite
 
 //////////////////////////////////////////////////////////////////////////////
@@ -641,20 +728,20 @@ CLane::IsOnRamp( void ) const
 	// No matching attribute found
 	return false;
 } // end of IsTurnLane
-//////////////////////////////////////////////////////////////////////////////
-//
-// Description: IsOnRamp
-// 	Is this a lane that leads onto an interstate?
-//
-// Remarks: Checks the attributes to see if this has been tagged as an 
-//  interstate on ramp.  This function doesn't check distance along the road
-//  and assumes that the entire lane has been marked as a ramp.
-//
-// Arguments:
-//
-// Returns: A boolean indicating if it's an on ramp.
-//
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///
+/// Description: IsOnRamp
+/// 	Is this a lane that leads onto an interstate?
+///
+/// Remarks: Checks the attributes to see if this has been tagged as an 
+///  interstate on ramp.  This function doesn't check distance along the road
+///  and assumes that the entire lane has been marked as a ramp.
+///
+/// Arguments:
+///
+/// Returns: A boolean indicating if it's an on ramp.
+///
+///////////////////////////////////////////////////////////////////////////////
 bool
 CLane::IsOffRamp( void ) const
 {
@@ -690,6 +777,52 @@ CLane::IsOffRamp( void ) const
 	return false;
 } // end of IsTurnLane
 
+ ///////////////////////////////////////////////////////////////////////////////
+ ///
+ /// Description: IsInterstate
+ /// 	Is this a lane on a interstate
+ ///
+ /// Remarks: Checks the attributes to see if this has been tagged as an 
+ ///  interstate  This function doesn't check distance along the road
+ ///  and assumes that the entire lane as interstate
+ ///
+ /// Arguments:
+ ///
+ /// Returns: A boolean indicating if it's an on interstate.
+ ///
+ ///////////////////////////////////////////////////////////////////////////////
+bool CLane::IsInterstate(void) const {
+    AssertValid();
+
+    cvTHeader* pH    = static_cast<cvTHeader*>  ( GetInst() );
+    char*      pOfs  = static_cast<char*>       ( GetInst() ) + pH->attrOfs;
+    cvTAttr*   pAttr = (reinterpret_cast<cvTAttr*>(pOfs)) +	m_pLane->attrIdx;
+
+    // First check the road attributes
+    CAttr attr;
+    int laneMask = 1 << (m_pLane->laneNo % cCV_MAX_LANES);
+    bool foundAttrOnRoad = GetRoad().QryAttr( 
+        cCV_INTERSTATE_ATTR, attr, laneMask 
+    );
+    if( foundAttrOnRoad )
+    {
+        return true;
+    }
+    else
+    {
+        // For each attribute on the lane
+        int i;
+        for( i = 0; i < m_pLane->numAttr; i++, pAttr++ )
+        {
+            // If the attr ids match ...
+            bool match = pAttr->myId == cCV_INTERSTATE_OFF_RAMP;
+            if( match )  return true;
+        }
+    }
+
+    // No matching attribute found
+    return false;
+}
 //////////////////////////////////////////////////////////////////////////////
 //
 // Description: IsDrivingLane

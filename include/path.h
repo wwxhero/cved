@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:		$Id: path.h,v 1.47 2015/11/11 01:23:11 iowa\oahmad Exp $
+// Version:		$Id: path.h,v 1.49 2018/05/18 22:20:41 IOWA\dheitbri Exp $
 //
 // Author(s):	Jillian Vogel, Omar Ahmad
 // Date:		October, 1999
@@ -50,6 +50,7 @@ class CPath : public CCvedItem {
 		// Useful types
 		typedef	int cTPathIterator;
 		typedef int cTPathReverseIterator;
+        typedef std::vector<int> TCrds;
 		typedef enum {	
 			eCV_TRAVEL_ERROR = -2,		// miscelaneous error
 			eCV_TRAVEL_NOT_FOUND = -1,	// initial point not found 
@@ -69,6 +70,7 @@ class CPath : public CCvedItem {
 		int				GetNumRoads( const CRoadPos* cpStart=0 ) const;
 		int				GetCurLaneId() const;
 		void			GetString( vector<string>& ) const;
+        string			GetString() const;
 		CRoadPos		GetStart( int id = -1 ) const;
 		CRoadPos		GetRoadPos( int num, int id = -1 ) const;
 		CRoadPos		GetEnd( int id = -1 ) const;
@@ -104,6 +106,7 @@ class CPath : public CCvedItem {
 		void			Clear();
 
 		bool			SetString( const vector<string>& );
+        bool			SetString( const string& );
 
 		bool			SetLaneMask( const bitset<cCV_MAX_CRDRS>& cMask );
 		bool			SetLaneMask( const CRoadPos& cRoadPos, const bitset<cCV_MAX_CRDRS>& cMask );
@@ -168,6 +171,11 @@ class CPath : public CCvedItem {
 									int srcLaneId = -1
 									) const;
 		
+        bool            GetCrdrsFromIntrscn(
+            int cIntrsctnId,
+            TCrds& res
+        ) const;
+
 		int 			GetOncomingPath(
 									const CRoadPos&, 
 									vector<CPath>&

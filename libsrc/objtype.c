@@ -1,9 +1,9 @@
 /*****************************************************************************
  *
  * (C) Copyright 1998 by NADS & Simulation Center, The University of
- *     Iowa.  All rights reserved.
+ *      Iowa.  All rights reserved.
  *
- * Version:		$Id: objtype.c,v 1.23 2011/07/08 22:36:31 iowa\dheitbri Exp $
+ * Version:		$Id: objtype.c,v 1.24 2018/04/03 15:59:23 IOWA\dheitbri Exp $
  *
  * Author(s):	Yiannis Papelis
  * Date:		September, 1998
@@ -31,23 +31,24 @@
 cvEObjType
 cvString2ObjType( const char* cpStr )
 {
-	if( !strcmp( cpStr, "TrajFollower") ) return eCV_TRAJ_FOLLOWER;
-	if( !strcmp( cpStr, "Vehicle") ) return eCV_VEHICLE;
-	if( !strcmp( cpStr, "Trailer") ) return eCV_TRAILER;
-	if( !strcmp( cpStr, "RailVeh") ) return eCV_RAIL_VEH;
-	if( !strcmp( cpStr, "Terrain") ) return eCV_TERRAIN;
-	if( !strcmp( cpStr,  "TrafLight") ) return eCV_TRAFFIC_LIGHT;
-	if( !strcmp( cpStr,  "TrafSign") ) return eCV_TRAFFIC_SIGN;
-	if( !strcmp( cpStr, "Composite" ) ) return eCV_COMPOSITE_SIGN;
-	if( !strcmp( cpStr,  "Obstacle") ) return eCV_OBSTACLE;
-	if( !strcmp( cpStr,  "Poi") ) return eCV_POI;
-	if( !strcmp( cpStr,  "SpecialEffect") ) return eCV_POI;
-	if( !strcmp( cpStr,  "Coordinator") ) return eCV_COORDINATOR;
-	if( !strcmp( cpStr,  "ExternalDriver") ) return eCV_EXTERNAL_DRIVER;
-	if( !strcmp( cpStr, "ExternalTrailer") ) return eCV_EXTERNAL_TRAILER;
-	if( !strcmp( cpStr,  "Walker") ) return eCV_WALKER;
-	if( !strcmp( cpStr, "VirtualObject") ) return eCV_VIRTUAL_OBJECT;
+	if( !strcmp( cpStr,  "TrajFollower"))     return eCV_TRAJ_FOLLOWER;
+	if( !strcmp( cpStr,  "Vehicle"))          return eCV_VEHICLE;
+	if( !strcmp( cpStr,  "Trailer"))          return eCV_TRAILER;
+	if( !strcmp( cpStr,  "RailVeh"))          return eCV_RAIL_VEH;
+	if( !strcmp( cpStr,  "Terrain"))          return eCV_TERRAIN;
+	if( !strcmp( cpStr,  "TrafLight"))        return eCV_TRAFFIC_LIGHT;
+	if( !strcmp( cpStr,  "TrafSign"))         return eCV_TRAFFIC_SIGN;
+	if( !strcmp( cpStr,  "Composite" ))       return eCV_COMPOSITE_SIGN;
+	if( !strcmp( cpStr,  "Obstacle"))         return eCV_OBSTACLE;
+	if( !strcmp( cpStr,  "Poi"))              return eCV_POI;
+	if( !strcmp( cpStr,  "SpecialEffect"))    return eCV_POI;
+	if( !strcmp( cpStr,  "Coordinator"))      return eCV_COORDINATOR;
+	if( !strcmp( cpStr,  "ExternalDriver"))   return eCV_EXTERNAL_DRIVER;
+	if( !strcmp( cpStr,  "ExternalTrailer"))  return eCV_EXTERNAL_TRAILER;
+	if( !strcmp( cpStr,  "Walker"))           return eCV_WALKER;
+	if( !strcmp( cpStr,  "VirtualObject"))    return eCV_VIRTUAL_OBJECT;
 	if( !strcmp( cpStr, "Avatar") ) return eCV_EXTERNAL_AVATAR;
+	if( !strcmp( cpStr,  "ExternalVehicle"))  return eCV_EXTERNAL_VEH_OBJECT;
 
 	return eCV_INVALID;
 } /* end of cvString2ObjType */
@@ -70,24 +71,25 @@ cvString2ObjType( const char* cpStr )
 const char*
 cvObjType2String(cvEObjType type)
 {
-	switch ( type ) {
-		case eCV_TRAJ_FOLLOWER	: return "TrajFollower";
-		case eCV_VEHICLE		: return "Vehicle";
-		case eCV_TRAILER		: return "Trailer";
-		case eCV_RAIL_VEH		: return "RailVeh";
-		case eCV_TERRAIN		: return "Terrain";
-		case eCV_TRAFFIC_LIGHT	: return "TrafLight";
-		case eCV_TRAFFIC_SIGN	: return "TrafSign";
-		case eCV_COMPOSITE_SIGN : return "Composite";
-		case eCV_OBSTACLE		: return "Obstacle";
-		case eCV_POI            : return "Poi";
-		case eCV_COORDINATOR	: return "Coordinator";
-		case eCV_EXTERNAL_DRIVER: return "ExternalDriver";
-		case eCV_EXTERNAL_TRAILER: return "ExternalTrailer";
-		case eCV_WALKER         : return "Walker";
-		case eCV_VIRTUAL_OBJECT  : return "VirtualObject";
+	switch ( type ) {    
+		case eCV_TRAJ_FOLLOWER	     : return "TrajFollower";
+		case eCV_VEHICLE		     : return "Vehicle";
+		case eCV_TRAILER		     : return "Trailer";
+		case eCV_RAIL_VEH		     : return "RailVeh";
+		case eCV_TERRAIN		     : return "Terrain";
+		case eCV_TRAFFIC_LIGHT	     : return "TrafLight";
+		case eCV_TRAFFIC_SIGN	     : return "TrafSign";
+		case eCV_COMPOSITE_SIGN      : return "Composite";
+		case eCV_OBSTACLE		     : return "Obstacle";
+		case eCV_POI                 : return "Poi";
+		case eCV_COORDINATOR	     : return "Coordinator";
+		case eCV_EXTERNAL_DRIVER     : return "ExternalDriver";
+		case eCV_EXTERNAL_TRAILER    : return "ExternalTrailer";
+		case eCV_WALKER              : return "Walker";
+		case eCV_VIRTUAL_OBJECT      : return "VirtualObject";
 		case eCV_EXTERNAL_AVATAR			: return "Avatar";
-		default					: return "Invalid";
+		case eCV_EXTERNAL_VEH_OBJECT : return "ExternalVehicle";
+		default					     : return "Invalid";
 	}
 } /* end of cvObjType2String */
 

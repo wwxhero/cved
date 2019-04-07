@@ -10,7 +10,7 @@ class CCvedEDOCtrl :
 public:
 	CCvedEDOCtrl(IExternalObjectControl* pCtrl);
 	virtual ~CCvedEDOCtrl(void);
-	virtual void ExecuteDynamicModels(void);
+	virtual void ExecuteDynamicModels(void) override;
 	virtual CDynObj*	DistriCreateADO(const string&		cName,
 								const cvTObjAttr&	cAttr,
 								const CPoint3D*		cpInitPos=0,

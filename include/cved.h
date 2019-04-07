@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version:    $Id: cved.h,v 1.163 2016/08/16 22:20:37 IOWA\dheitbri Exp $
+// Version:    $Id: cved.h,v 1.164 2018/04/03 16:01:41 IOWA\dheitbri Exp $
 //
 // Author(s):
 // Date:       September, 1998
@@ -45,6 +45,7 @@ class CODEObject;
 class CVED::CCved;
 
 namespace CVED {
+
 // the CVED shared memory key
 #define cCVED_SHARED_MEM_KEY_ENV  "CvedMem"
 	class CTrafLightData;
@@ -82,7 +83,6 @@ public:
 	typedef vector<CLane>		TLaneVec;
 	typedef vector<int>			TIntVec;
 	typedef vector<CIntrsctn>	TIntrsctnVec;
-
 	typedef struct {
 		int objId;
 		double dist;
@@ -127,7 +127,7 @@ public:
 	bool		Init(const string& cLriName, string& errMsg);
 	void		ReInit(void);
 	virtual void Maintainer(void);
-	virtual void ExecuteDynamicModels(void);
+	virtual void ExecuteDynamicModels();
 	void		SetDebug(int level);
 
 	// SOL related
@@ -171,7 +171,7 @@ public:
 
 			friend class CCved;
 
-		protected:
+		private:
 			EHintState				m_hintState;
 			TRoadPoolIdx 			m_roadId;
 			TLongCntrlPntPoolIdx	m_roadPiece;
@@ -643,6 +643,8 @@ public:
 						 TVehicleState*,
 						 bool);
 
+    //int AddExternalController(TExternalObjectControlRef ref);
+
 protected:
 	// these components are declared private to disallow their use
 	CCved(const CCved&);
@@ -685,7 +687,6 @@ protected:
 	vector<CTerrainGridPtr> m_intrsctnGrids;	// intersection elev maps
 
 	// functions that help access internal pools
-public:
 	cvTObj*			BindObj(TObjectPoolIdx) const;
 	cvTObjRef*		BindObjRef(TObjRefPoolIdx) const;
 	cvTRepObj*		BindRepObj(TRepObjPoolIdx) const;
@@ -702,6 +703,7 @@ public:
 	cvTDynObjRef*	BindDynObjRef(TObjectPoolIdx) const;
 	cvTRoadRef*		BindRoadRef(TRoadPoolIdx) const;
 	cvTIntrsctnRef*	BindIntrsctnRef(TIntrsctnPoolIdx) const;
+public:
 	static void __cdecl Logoutf(const TCHAR* format, ...);
 protected:
 
@@ -746,7 +748,7 @@ protected:
 			const cvTObjState*,
 			const cvTObjContInp*,
 			cvTObjState*);
-
+    void ProcessExternalCreatesandDeletes();
 	// help with object types
 	const type_info &GetRunTimeDynObjType(cvEObjType type);
 
@@ -770,12 +772,16 @@ protected:
 
 	// ode world
 	std::unique_ptr<CODE>		m_pOde;
+
 	//traffic light data
 	bool m_FirstTimeLightsNear; //<First
 	vector<CTrafLightData> m_tlData;
+    int m_currentExternalCntlId;
+    //CExternalObjectMap m_ExternalControllers;
 #ifdef _WIN32
 	HANDLE	m_MUTEX_LightsNear; //only one thread at time can access GetTrafLightsNear
 #endif
+
 };
 
 
@@ -979,7 +985,6 @@ CCved::GetSol()
 		m_sSol.Init();
 	return m_sSol;
 } // end of GetSol
-
 
 } // namespace CVED
 

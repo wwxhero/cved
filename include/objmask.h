@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 		$Id: objmask.h,v 1.11 1999/12/30 18:25:18 jvogel Exp $
+// Version: 		$Id: objmask.h,v 1.12 2018/12/10 16:01:15 IOWA\dheitbri Exp $
 //
 // Author(s):
 // Date:		September, 1998
@@ -36,7 +36,7 @@ public:
 	virtual ~CObjTypeMask();
 	const CObjTypeMask&	operator=(const CObjTypeMask&);
 	CObjTypeMask(TU32b bits);
-
+    CObjTypeMask(cvEObjType type);
 	static TU32b 	m_all;				// represents a full set
 
 	void			SetAll(void);		// sets the set
