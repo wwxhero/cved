@@ -1036,11 +1036,11 @@ CCved::SetExternalDriverHcsmId( int hcsmId )
 ///    Pull all of the create and delete commands from our ExternalControlers
 ///
 ///This function should only be called between the time PreUpdateDynamicModels();
-///and PostUpdateDynamicModels is called.  
-///  
-///  
-///  
-void 
+///and PostUpdateDynamicModels is called.
+///
+///
+///
+void
 CCved::ProcessExternalCreatesandDeletes(){
     //m_ExternalControllers.HandleExternalCreateAndDeletes(*this);
 }
@@ -1108,18 +1108,18 @@ CCved::ExecuteDynamicModels(  )
 			    const cvTObjState* pCurrState = &currState;
 			    cvTObjState* pFutState;
 			    const cvTObjContInp* pCurrContInp;
-                bool exCreateType = pO->type == eCV_TRAJ_FOLLOWER || 
+                bool exCreateType = pO->type == eCV_TRAJ_FOLLOWER ||
                                     pO->type == eCV_VEHICLE;
 
                 if (exCreateType){
-                if( (m_pHdr->frame & 1) == 0 ) 
+                if( (m_pHdr->frame & 1) == 0 )
 			    {
 			    	// even frame
 			    	pCurrContInp = &pO->stateBufA.contInp;
 			    	currState    = pO->stateBufB.state;
 			    	pFutState    = &pO->stateBufB.state;
 			    }
-			    else 
+			    else
 			    {
 			    	// odd frame
 			    	pCurrContInp = &pO->stateBufB.contInp;
@@ -3698,7 +3698,7 @@ CCved::CreateDynObj(
 	{
 		gout << "->Exit CCved::CreateDynObj, ptr is"  <<std::hex<< (size_t)pTheObj << endl;
 	}
-    
+
 	return pTheObj;
 } // end of CreateDynObj
 
@@ -4074,7 +4074,7 @@ CCved::CreateTypedObject(cvEObjType type, int id)
 		"eCV_EXTERNAL_TRAILER",
 		"eCV_VIRTUAL_OBJECT",
 		"eCV_EXTERNAL_AVATAR",
-		"eCV_OBJ_TYPE_EN"
+		"eCV_OBJ_TYPE_END"
 	};
 
 	CCved::Logoutf("CCved::CreateTypedObject(%s, %d)\n", typeStr[type], id);
@@ -8159,7 +8159,7 @@ CCved::BuildBackObjList(
 				gout << " with dist = " << node.distFromOwner;
 				gout << endl;
 #endif
-			
+
 				backObjs.push_back( node );
 			}
 		}
@@ -12644,7 +12644,7 @@ void __cdecl CCved::Logoutf(const TCHAR* format, ...)
 ///\brief add External Controller, callback mech for object controller/syncing
 ///
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//int 
+//int
 //CCved::AddExternalController(TExternalObjectControlRef ref){
 //    m_ExternalControllers[m_currentExternalCntlId] = ref;
 //    m_currentExternalCntlId++;

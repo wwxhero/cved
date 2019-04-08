@@ -131,8 +131,8 @@ typedef struct TAvatarJoint {
 	TVector3D       angleRate;
 	TVector3D		offset;
 	TVector3D		offsetRate;
-	TAvatarJoint*	child_first;
-	TAvatarJoint*	sibling_next;
+	struct TAvatarJoint*	child_first;
+	struct TAvatarJoint*	sibling_next;
 } TAvatarJoint;
 
 #define VIRTUAL_ROOT(childjoint)\
