@@ -4057,24 +4057,24 @@ CDynObj *
 CCved::CreateTypedObject(cvEObjType type, int id)
 {
 	const char* typeStr[] = {
-		"eCV_INVALID",
-		"eCV_TRAJ_FOLLOWER",
-		"eCV_VEHICLE",
-		"eCV_TRAILER",
-		"eCV_RAIL_VEH",
-		"eCV_TERRAIN",
-		"eCV_TRAFFIC_LIGHT",
-		"eCV_TRAFFIC_SIGN",
-		"eCV_COMPOSITE_SIGN",
-		"eCV_OBSTACLE",
-		"eCV_POI",
-		"eCV_COORDINATOR",
-		"eCV_EXTERNAL_DRIVER",
-		"eCV_WALKER",
-		"eCV_EXTERNAL_TRAILER",
-		"eCV_VIRTUAL_OBJECT",
-		"eCV_EXTERNAL_AVATAR",
-		"eCV_OBJ_TYPE_END"
+		  "eCV_TRAJ_FOLLOWER   "
+		, "eCV_VEHICLE         "
+		, "eCV_TRAILER         "
+		, "eCV_RAIL_VEH        "
+		, "eCV_TERRAIN         "
+		, "eCV_TRAFFIC_LIGHT   "
+		, "eCV_TRAFFIC_SIGN    "
+		, "eCV_COMPOSITE_SIGN  "
+		, "eCV_OBSTACLE        "
+		, "eCV_POI             "
+		, "eCV_COORDINATOR     "
+		, "eCV_EXTERNAL_DRIVER "
+		, "eCV_EXTERNAL_TRAILER"
+		, "eCV_WALKER          "
+		, "eCV_VIRTUAL_OBJECT  "
+		, "eCV_AVATAR          "
+		, "eCV_EXTERNAL_AVATAR "
+		, "eCV_OBJ_TYPE_END    "
 	};
 
 	CCved::Logoutf("CCved::CreateTypedObject(%s, %d)\n", typeStr[type], id);
