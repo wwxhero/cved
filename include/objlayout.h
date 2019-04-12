@@ -126,7 +126,7 @@ typedef enum {
 
 typedef struct TAvatarJoint {
 	const char*		name;
-	int				type;			//joint vrlink articulated type
+	unsigned int	type;			//joint vrlink articulated type
 	TVector3D		angle; 			//taitbryan euler
 	TVector3D       angleRate;
 	TVector3D		offset;
@@ -169,7 +169,7 @@ typedef struct TVehicleState {
 	int               braking;		/* when set, dec below threshold */
 	int               brakeLightOnCount; /* how long in 'braking' mode */
 	int               brakeLightOffCount;/* how long not in 'braking' mode */
-	
+
 
 	/*double          horsepower;*/
 	double            velLat;       /* lateral velocity       */

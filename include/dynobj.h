@@ -491,7 +491,7 @@ private:
 	{
 		const char*		name;
 		const char*		name_diguy;
-		int				type;			//joint vrlink articulated type
+		unsigned int	type;			//joint vrlink articulated type
 		TVector3D		angle; 			//taitbryan euler
 		int				child_first;
 		int				sibling_next;
