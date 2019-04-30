@@ -68,13 +68,15 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 					(
 						pO->type == eCV_TRAJ_FOLLOWER ||
 						pO->type == eCV_VEHICLE ||
-						pO->type == eCV_EXTERNAL_DRIVER
+						pO->type == eCV_EXTERNAL_DRIVER ||
+						pO->type == eCV_AVATAR
 						)
 					&&
 					( pO->phase == eALIVE || pO->phase == eDYING )
 					);
 		bool localObj = (pO->type == eCV_VEHICLE);
-		bool remoteObj = (pO->type == eCV_EXTERNAL_DRIVER);
+		bool remoteVeh = (pO->type == eCV_EXTERNAL_DRIVER);
+		bool remotePed = (pO->type == eCV_AVATAR);
 
 //		if ( pO->type == eCV_TRAJ_FOLLOWER )
 //			fprintf(stdout, " traj follower %d phase %d\n", id, pO->phase);
@@ -124,12 +126,14 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 				}
 				else{
 					CVED::CCved &me = *this;
-					if ( !remoteObj
-					 ||	(NULL == ctrl
-					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+
+					bool received = ( !remoteVeh || ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState))
+								 && ( !remotePed || ctrl->OnGetUpdateArt(id, pFutState));
+					if (!received)
+						*pFutState = *pCurrState;
+					if (localObj)
 					{
-						if (localObj)
-							DynamicModel(
+						DynamicModel(
 								id,
 								pO->type,
 								&pO->attr,
@@ -137,33 +141,31 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 								pCurrContInp,
 								pFutState
 								);
-					}
-					if (localObj
-						&& NULL != ctrl)
 						ctrl->OnPushUpdate(id, pCurrContInp, pFutState);
+					}
 
 				}
 			}
 			else
 			{
 				CVED::CCved &me = *this;
-				if ( !remoteObj
-					 ||	(NULL == ctrl
-					 ||	!ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+				bool received = ( !remoteVeh || ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState))
+							 && ( !remotePed || ctrl->OnGetUpdateArt(id, pFutState));
+				if (!received)
+					*pFutState = *pCurrState;
+
+				if (localObj) //local simulator has its own dynamic
 				{
-					if (localObj) //local simulator has its own dynamic
-						DynamicModel(
-							id,
-							pO->type,
-							&pO->attr,
-							pCurrState,
-							pCurrContInp,
-							pFutState
-							);
+					DynamicModel(
+								id,
+								pO->type,
+								&pO->attr,
+								pCurrState,
+								pCurrContInp,
+								pFutState
+								);
+					ctrl->OnPushUpdate(id, pCurrContInp, pFutState);
 				}
-				if (localObj
-					&& NULL != ctrl)
-						ctrl->OnPushUpdate(id, pCurrContInp, pFutState);
 			}
 
 			// This is an optimization.
@@ -215,14 +217,19 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 
 		CVED::CCved &me = *this;
 		bool localObj = (0 == attachedObjIds[i]);
-		bool remoteObj = (0 != attachedObjIds[i]
+		bool remoteVeh = (0 != attachedObjIds[i]
 					&& pO->type == eCV_EXTERNAL_DRIVER);
-		if ( !remoteObj
-		||	(NULL == ctrl
-		||	!ctrl->OnGetUpdate(attachedObjIds[i], const_cast<cvTObjContInp*>(pCurrContInp), pFutState)))
+		bool remotePed = (0 != attachedObjIds[i]
+					&& pO->type == eCV_AVATAR);
+
+		bool received = ( !remoteVeh || ctrl->OnGetUpdate(id, const_cast<cvTObjContInp*>(pCurrContInp), pFutState))
+					 && ( !remotePed || ctrl->OnGetUpdateArt(id, pFutState));
+		if (!received)
+			*pFutState = *pCurrState;
+
+		if (localObj) //local simulator has its own dynamic
 		{
-			if (localObj) //local simulator has its own dynamic
-				DynamicModel(
+			DynamicModel(
 					attachedObjIds[i],
 					pO->type,
 					&pO->attr,
@@ -230,10 +237,8 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 					pCurrContInp,
 					pFutState
 					);
-		}
-		if (localObj
-		&& NULL != ctrl)
 			ctrl->OnPushUpdate(id, pCurrContInp, pFutState);
+		}
 	}
 
 	// execute ode dynamics from objects in free motion mode
