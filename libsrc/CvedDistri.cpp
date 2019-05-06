@@ -293,8 +293,6 @@ CDynObj* CCvedDistri::LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own)
 						, &lat
 		);
 
-
-
 	//
 	// Set the initial velocity.
 	//
@@ -310,6 +308,50 @@ CDynObj* CCvedDistri::LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own)
 	return pObj;
 }
 
+void CCvedDistri::PeggingPair(const string& cParent, const string& cChild)
+{
+	std::pair<string, string> peg(cParent, cChild);
+	m_lstPeggings.push_back(peg);
+}
+
+void CCvedDistri::PegPDOs()
+{
+	CCved::TIntVec id_vehi;
+	CObjTypeMask mask;
+	mask.Clear();
+	mask.Set(eCV_VEHICLE);
+	mask.Set(eCV_EXTERNAL_DRIVER);
+	GetAllDynamicObjs(id_vehi, mask);
+	std::map<string, CVehicleObj*> mapParents;
+	for (CCved::TIntVec::iterator it = id_vehi.begin(); it != id_vehi.end(); it++)
+	{
+		CVehicleObj* vehicle = static_cast<CVehicleObj*>(BindObjIdToClass2(*it));
+		mapParents[vehicle->GetName()] = vehicle;
+	}
+
+	CCved::TIntVec id_pdos;
+	mask.Clear();
+	mask.Set(eCV_AVATAR);
+	mask.Set(eCV_EXTERNAL_AVATAR);
+	GetAllDynamicObjs(id_pdos, mask);
+	std::map<string, CAvatarObj*> mapChildren;
+	for (CCved::TIntVec::iterator it = id_pdos.begin(); it != id_pdos.end(); it ++)
+	{
+		CAvatarObj* avatar = static_cast<CAvatarObj*>(BindObjIdToClass2(*it));
+		mapChildren[avatar->GetName()] = avatar;
+	}
+	
+	for (NamePairs::const_iterator it = m_lstPeggings.begin(); it != m_lstPeggings.end(); it++)
+	{
+		const NamePair& pair = *it;
+		const std::string& child = pair.second;
+		const std::string& parent = pair.first;
+		std::map<string, CAvatarObj*>::iterator itChild = mapChildren.find(child);
+		std::map<string, CVehicleObj*>::iterator itParent = mapParents.find(parent);
+		assert(itChild != mapChildren.end() && itParent != mapParents.end());
+		itChild->second->PegTo(itParent->second->GetId());
+	}
+}
 
 void CCvedDistri::Maintainer(void)
 {
