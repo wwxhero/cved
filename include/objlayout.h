@@ -467,7 +467,7 @@ typedef union cvTObjState {
 		//....new elements should be added after here.
 
 		TVector3D         angularVel;   /* object's angular velocity */
-		int           parentId;		/* the id of a dynamic object (vehicle) to which it pegs */
+		int               parentId;		/* the id of a dynamic object (vehicle) to which it pegs */
 		TAvatarJoint*     child_first;		/* the memory it points to will be located in heap */
 	} avatarState;
 

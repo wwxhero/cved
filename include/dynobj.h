@@ -516,6 +516,7 @@ public:
 	CAvatarObj& operator=( const CAvatarObj& );
 	unsigned int BFTGetJointsDiGuy(const char** names, TVector3D* angles, TVector3D* offsets, unsigned int num) const;
 	void PegTo(int vehiId);
+	int PegTo();
 };
 
 typedef CAvatarObj CExternalAvatarObj;

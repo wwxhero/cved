@@ -13,7 +13,7 @@ CCvedDistri::~CCvedDistri(void)
 }
 
 //it creates a mock edo
-CDynObj* CCvedDistri::LocalCreateEDO(CHeaderDistriParseBlock& blk)
+CDynObj* CCvedDistri::LocalCreateEDO(CHeaderDistriParseBlock& blk, bool own)
 {
 	const double cMETER_TO_FEET = 3.2808; // feet
 	//
@@ -64,7 +64,8 @@ CDynObj* CCvedDistri::LocalCreateEDO(CHeaderDistriParseBlock& blk)
 		// Create the CVED object.
 		//
 		pObj = LocalCreateEDO(
-							blk.GetSimName()
+							own
+							, blk.GetSimName()
 							, attr
 							, &cartPos
 							, &tan
@@ -134,7 +135,8 @@ CDynObj* CCvedDistri::LocalCreateEDO(CHeaderDistriParseBlock& blk)
 		// Create the CVED object.
 		//
 		pObj = LocalCreateEDO(
-							blk.GetSimName()
+							own
+							, blk.GetSimName()
 							, attr
 							, &cartPos
 							, &tan
@@ -317,11 +319,24 @@ void CCvedDistri::PeggingPair(const string& cParent, const string& cChild)
 void CCvedDistri::PegPDOs()
 {
 	CCved::TIntVec id_vehi;
-	CObjTypeMask mask;
-	mask.Clear();
-	mask.Set(eCV_VEHICLE);
-	mask.Set(eCV_EXTERNAL_DRIVER);
-	GetAllDynamicObjs(id_vehi, mask);
+	CObjTypeMask maskVeh;
+	maskVeh.Clear();
+	maskVeh.Set(eCV_VEHICLE);
+	maskVeh.Set(eCV_EXTERNAL_DRIVER);
+
+	CCved::TIntVec id_pdos;
+	CObjTypeMask maskPed;
+	maskPed.Clear();
+	maskPed.Set(eCV_AVATAR);
+	maskPed.Set(eCV_EXTERNAL_AVATAR);
+
+	cvTObj  *pO = BindObj(0);
+	int i = 0;
+	for (; i<cNUM_DYN_OBJS; i++, pO++) {
+		if ( maskVeh.Has(pO->type) ) id_vehi.push_back(i);
+		if ( maskPed.Has(pO->type) ) id_pdos.push_back(i);
+	}
+
 	std::map<string, CVehicleObj*> mapParents;
 	for (CCved::TIntVec::iterator it = id_vehi.begin(); it != id_vehi.end(); it++)
 	{
@@ -329,18 +344,13 @@ void CCvedDistri::PegPDOs()
 		mapParents[vehicle->GetName()] = vehicle;
 	}
 
-	CCved::TIntVec id_pdos;
-	mask.Clear();
-	mask.Set(eCV_AVATAR);
-	mask.Set(eCV_EXTERNAL_AVATAR);
-	GetAllDynamicObjs(id_pdos, mask);
 	std::map<string, CAvatarObj*> mapChildren;
 	for (CCved::TIntVec::iterator it = id_pdos.begin(); it != id_pdos.end(); it ++)
 	{
 		CAvatarObj* avatar = static_cast<CAvatarObj*>(BindObjIdToClass2(*it));
 		mapChildren[avatar->GetName()] = avatar;
 	}
-	
+
 	for (NamePairs::const_iterator it = m_lstPeggings.begin(); it != m_lstPeggings.end(); it++)
 	{
 		const NamePair& pair = *it;

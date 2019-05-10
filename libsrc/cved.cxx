@@ -4233,12 +4233,10 @@ CDynObj *
 CCved::BindObjIdToClass2(int objId)
 {
 	if ( objId < 0 || objId > cNUM_DYN_OBJS )
-		return 0;
+		return NULL;
 
 	TObj  *pO = BindObj(objId);
 
-	if ( (pO->phase == eDEAD ) || (pO->phase == eBORN) )
-		return 0;
 
 	// if it exists, use it.  We check that the existing object match
 	// the type of the object to cover the case of a client CVED
@@ -4252,13 +4250,8 @@ CCved::BindObjIdToClass2(int objId)
 		m_dynObjCache[objId]->MakeReadOnly(); //make read only prevents the object from deleting
 		return m_dynObjCache[objId];
 	}
-
-	// if it doesn't exist, delete old, create a new one
-	// note that if it is 0, delete still works
-	delete m_dynObjCache[objId];
-	m_dynObjCache[objId] = CreateTypedObject(pO->type, objId);
-	m_dynObjCache[objId]->MakeReadOnly(); //make read only prevents the object from deleting
-	return m_dynObjCache[objId];
+	else
+		return NULL;
 } // end of BinObjIdToClass
 
 //////////////////////////////////////////////////////////////////////////////

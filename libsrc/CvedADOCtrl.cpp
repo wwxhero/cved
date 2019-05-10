@@ -300,6 +300,7 @@ void CCvedADOCtrl::ExecuteDynamicModels(void)
 }
 
 CDynObj* CCvedADOCtrl::LocalCreateEDO(
+					bool				own,
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos,

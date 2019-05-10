@@ -3895,6 +3895,14 @@ void CAvatarObj::PegTo(int vehiId)
 	m_pObj->stateBufB.state.avatarState.parentId = vehiId;
 }
 
+int CAvatarObj::PegTo()
+{
+	AssertValid();
+	assert(m_pObj->stateBufA.state.avatarState.parentId
+		== m_pObj->stateBufB.state.avatarState.parentId);
+	return m_pObj->stateBufA.state.avatarState.parentId;
+}
+
 CArtiJoints::CArtiJoints(bool init)
 			: m_jointsA(NULL)
 			, m_jointsB(NULL)
