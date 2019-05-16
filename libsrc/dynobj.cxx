@@ -3895,7 +3895,7 @@ void CAvatarObj::PegTo(int vehiId)
 	m_pObj->stateBufB.state.avatarState.parentId = vehiId;
 }
 
-int CAvatarObj::PegTo()
+int CAvatarObj::PegTo() const
 {
 	AssertValid();
 	assert(m_pObj->stateBufA.state.avatarState.parentId
