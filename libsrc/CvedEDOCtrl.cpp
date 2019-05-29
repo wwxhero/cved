@@ -318,13 +318,14 @@ void CCvedEDOCtrl::ExecuteDynamicModels(void)
 }
 
 CDynObj* CCvedEDOCtrl::LocalCreateEDO(
+					bool				own,
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos,
 					const CVector3D*	cpInitTan,
 					const CVector3D*	cpInitLat)
 {
-	return CCvedDistri::CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
+	return CCvedDistri::CreateDynObj(cName, own?eCV_EXTERNAL_DRIVER:eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
 CDynObj* CCvedEDOCtrl::LocalCreatePDO(

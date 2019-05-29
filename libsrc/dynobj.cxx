@@ -3865,9 +3865,10 @@ CAvatarObj::CAvatarObj ( const CCved& cved, TObj* pObj)
 	: CDynObj(cved, pObj)
 	, CArtiJoints(true)
 {
-
 	pObj->stateBufA.state.avatarState.child_first = m_jointsA;
+	pObj->stateBufA.state.avatarState.parentId = -1; //by default, it doesn't have a parent
 	pObj->stateBufB.state.avatarState.child_first = m_jointsB;
+	pObj->stateBufB.state.avatarState.parentId = -1; //by default, it doesn't have a parent
 }
 
 unsigned int CAvatarObj::BFTGetJointsDiGuy(const char** names, TVector3D* angles, TVector3D* offsets, unsigned int num) const
@@ -3885,6 +3886,21 @@ CAvatarObj& CAvatarObj::operator=(const CAvatarObj& src)
 	m_jointsA = src.m_jointsA;
 	m_jointsB = src.m_jointsB;
 	return *this;
+}
+
+void CAvatarObj::PegTo(int vehiId)
+{
+	AssertValid();
+	m_pObj->stateBufA.state.avatarState.parentId = vehiId;
+	m_pObj->stateBufB.state.avatarState.parentId = vehiId;
+}
+
+int CAvatarObj::PegTo() const
+{
+	AssertValid();
+	assert(m_pObj->stateBufA.state.avatarState.parentId
+		== m_pObj->stateBufB.state.avatarState.parentId);
+	return m_pObj->stateBufA.state.avatarState.parentId;
 }
 
 CArtiJoints::CArtiJoints(bool init)

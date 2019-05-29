@@ -19,6 +19,7 @@ public:
 	virtual void		DistriDeleteADO( CDynObj* );
 private:
 	virtual CDynObj* LocalCreateEDO(
+					bool				own,
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,

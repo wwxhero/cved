@@ -8,7 +8,7 @@ class IExternalObjectControl;
 class ICvedDistri
 {
 public:
-	virtual CDynObj* LocalCreateEDO(CHeaderDistriParseBlock& blk) = 0;
+	virtual CDynObj* LocalCreateEDO(CHeaderDistriParseBlock& blk, bool own) = 0;
 	virtual CDynObj* LocalCreateADO(
 					const string&		cName,
 					const cvTObjAttr&	cAttr,
@@ -26,6 +26,8 @@ public:
 
 	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own) = 0;
 	virtual void LocalDeletePDO(CDynObj* ) = 0;
+	virtual void PeggingPair(const string& cParent, const string& cChild) = 0;
+	virtual void PegPDOs() = 0;
 };
 
 class CCvedDistri :	public ICvedDistri
@@ -41,11 +43,15 @@ public:
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
 					const CVector3D*	cpInitLat=0);
-	virtual CDynObj* LocalCreateEDO(CHeaderDistriParseBlock& blk);
+	virtual CDynObj* LocalCreateEDO(CHeaderDistriParseBlock& blk, bool own);
 	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own);
 	virtual void Maintainer(void);
+	virtual void PeggingPair(const string& cParent, const string& cChild);
+	virtual void PegPDOs();
 protected:
-	virtual CDynObj* LocalCreateEDO(const string&		cName,
+	virtual CDynObj* LocalCreateEDO(
+					bool				own,
+					const string&		cName,
 					const cvTObjAttr&	cAttr,
 					const CPoint3D*		cpInitPos=0,
 					const CVector3D*	cpInitTan=0,
@@ -70,6 +76,9 @@ public:
 	virtual void LocalDeletePDO(CDynObj* );
 protected:
 	IExternalObjectControl* m_pCtrl;
+	typedef std::pair<std::string, std::string> NamePair;
+	typedef std::list<NamePair> NamePairs;
+	NamePairs m_lstPeggings;
 };
 
 
