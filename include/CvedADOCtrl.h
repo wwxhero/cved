@@ -19,6 +19,7 @@ public:
 								const CVector3D*	cpInitLat=0);
 	virtual void		DistriDeleteADO( CDynObj* );
 private:
+	virtual void Maintainer(void);
 	virtual CDynObj* LocalCreateEDO(
 					bool				own,
 					const string&		cName,
