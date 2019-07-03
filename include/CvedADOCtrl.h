@@ -18,6 +18,7 @@ public:
 								const CVector3D*	cpInitTan=0,
 								const CVector3D*	cpInitLat=0);
 	virtual void		DistriDeleteADO( CDynObj* );
+	virtual void		DistriTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan);
 private:
 	virtual void Maintainer(void);
 	virtual CDynObj* LocalCreateEDO(

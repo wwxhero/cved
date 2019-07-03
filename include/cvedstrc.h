@@ -600,6 +600,7 @@ typedef enum cvEObjPhase {
 	eDEAD,
 	eBORN,
 	eALIVE,
+	eTELP,
 	eDYING
 } cvEObjPhase;
 

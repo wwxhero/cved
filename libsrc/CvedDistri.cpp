@@ -769,5 +769,9 @@ CDynObj* CCvedDistri::LocalCreateADO(
 	return CreateDynObj(cName, eCV_VEHICLE, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
+void CCvedDistri::DistriTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan)
+{
+	assert(0); //only ado controller (scenario server) is supposed for activating teleport pdo event
+}
 
 };

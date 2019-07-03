@@ -34,6 +34,7 @@ namespace CVED {
 							, const CVector3D& t
 							, const CVector3D& l) = 0;
 		virtual void OnDeleteADO(TObjectPoolIdx id_local) = 0;
+		virtual void OnTelePDO(TObjContInpPoolIdx id_local, const CPoint3D& pos, const CVector3D& tan, const CVector3D& lat) = 0;
 		virtual bool Initialize(CHeaderDistriParseBlock& blk, CVED::ICvedDistri* pCvedDistri) = 0;
 		virtual void UnInitialize() = 0;
 	};
