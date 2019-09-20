@@ -25,6 +25,7 @@ CDynObj* CCvedDistri::LocalCreateEDO(CHeaderDistriParseBlock& blk, bool own)
 	if( !cpSolObj )
 	{
 		assert(0);
+		cerr<<"Failed to get SOL Object:"<<cSolName<<" "<<__FILE__<<":"<<__LINE__<<endl;
 		return NULL;
 	}
 
@@ -170,6 +171,7 @@ CDynObj* CCvedDistri::LocalCreateEDO(CHeaderDistriParseBlock& blk, bool own)
 	if( !cpSolVeh )
 	{
 		assert(0);
+		cerr<<"Failed Sol Object is Not CSolObjVehicle:"<<cSolName<<" "<<__FILE__<<":"<<__LINE__<<endl;
 		this->DeleteDynObj(pObj);
 		return NULL;
 	}
@@ -772,6 +774,11 @@ CDynObj* CCvedDistri::LocalCreateADO(
 void CCvedDistri::DistriTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan)
 {
 	assert(0); //only ado controller (scenario server) is supposed for activating teleport pdo event
+}
+
+void CCvedDistri::LocalTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan, const CVector3D* lat)
+{
+	assert(0); //only pdo controller (scenario server) is supposed for responding teleport pdo event
 }
 
 };
