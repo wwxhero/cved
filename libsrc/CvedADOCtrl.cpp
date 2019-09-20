@@ -310,6 +310,26 @@ CDynObj* CCvedADOCtrl::LocalCreateEDO(
 	return CCvedDistri::CreateDynObj(cName, eCV_EXTERNAL_DRIVER, cAttr, cpInitPos, cpInitTan, cpInitLat);
 }
 
+void CCvedADOCtrl::DistriTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan)
+{
+	const CVector3D up(0, 0, 1);
+	const CVector3D l_prime = tan->CrossP(up);
+	const CVector3D t_prime = up.CrossP(l_prime);
+	obj->SetPos(*pos);
+	obj->SetTan(t_prime);
+	obj->SetLat(l_prime);
+	TRACE(TEXT("\nCCvedADOCtrl::DistriTeleportPDO:")
+			TEXT("\n\tpos:[%10.2f %10.2f %10.2f]")
+			TEXT("\n\ttan:[%10.2f %10.2f %10.2f]=>[%10.2f %10.2f %10.2f]")
+		, pos->m_x, pos->m_y, pos->m_z
+		, tan->m_i, tan->m_j, tan->m_k,  t_prime.m_i, t_prime.m_j, t_prime.m_k);
+	LockObjectPool();
+	TObj *pO = BindObj(obj->GetId());
+	pO->phase = eTELP;
+	UnlockObjectPool();
+}
+
+
 
 void CCvedADOCtrl::Maintainer(void)
 {
@@ -319,9 +339,16 @@ void CCvedADOCtrl::Maintainer(void)
 	if ( m_debug > 0 ) {
 		gout << "->Enter CCved::Maintainer, frm=" << m_pHdr->frame << endl;
 	}
-
+	struct Teleport
+	{
+		CAvatarObj* avatar;
+		CPoint3D p;
+		CVector3D t;
+		CVector3D l;
+	};
 	// implement the object phase transition diagram
 	LockObjectPool();
+	std::list<Teleport> lstTeleports;
 	for (i=0, pO = BindObj(0); i<cNUM_DYN_OBJS; i++, pO++) {
 		if ( pO->phase == eBORN ) {
 			if ( m_debug > 2 ) {
@@ -338,8 +365,7 @@ void CCvedADOCtrl::Maintainer(void)
 			}
 
 		}
-		else
-		if ( pO->phase == eDYING ) {
+		else if ( pO->phase == eDYING ) {
 			if (eCV_VEHICLE == pO->type) //an ado object has state transfered from eDYING->eDEAD
 				m_pCtrl->OnDeleteADO(i);
 
@@ -349,6 +375,19 @@ void CCvedADOCtrl::Maintainer(void)
 			pO->phase = eDEAD;
 			m_pHdr->dynObjectCount--;
 
+		}
+		else if ( pO->phase == eTELP )
+		{
+			pO->phase = eALIVE;
+			assert(eCV_AVATAR == pO->type);
+			CAvatarObj* avatar = static_cast<CAvatarObj*>(BindObjIdToClass2(i));
+			Teleport tel = {
+						  avatar
+						, avatar->GetPos()
+						, avatar->GetTan()
+						, avatar->GetLat()
+					}; //it stores the previous fame p t l
+			lstTeleports.push_back(tel); //postpone teleporting until famenumber switches
 		}
 	}
 
@@ -384,6 +423,21 @@ void CCvedADOCtrl::Maintainer(void)
 		}
 	}
 	m_pHdr->frame++;
+
+	for (std::list<Teleport>::iterator it = lstTeleports.begin()
+		; it != lstTeleports.end()
+		; it ++)
+	{
+		Teleport tele = *it;
+		CPoint3D pos = tele.avatar->GetPos();
+		CVector3D tan = tele.avatar->GetTan();
+		CVector3D lat = tele.avatar->GetLat();
+		m_pCtrl->OnTelePDO(tele.avatar->GetId(), pos, tan, lat); //eTELP, pos, tan, lat: indicating a teleport request
+		tele.avatar->SetPos(tele.p, false);
+		tele.avatar->SetTan(tele.t, false);
+		tele.avatar->SetLat(tele.l, false);
+	}
+
 	UnlockObjectPool();
 
 	FillByRoadDynObjList();

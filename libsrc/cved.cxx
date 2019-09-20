@@ -4257,7 +4257,8 @@ CCved::BindObjIdToClass2(int objId)
 		// note that if it is 0, delete still works
 		delete m_dynObjCache[objId];
 		m_dynObjCache[objId] = CreateTypedObject(pO->type, objId);
-		m_dynObjCache[objId]->MakeReadOnly();
+		if (NULL != m_dynObjCache[objId])
+			m_dynObjCache[objId]->MakeReadOnly();
 		ret = m_dynObjCache[objId];
 	}
 	return ret;

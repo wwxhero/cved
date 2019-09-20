@@ -26,6 +26,8 @@ public:
 
 	virtual CDynObj* LocalCreatePDO(CHeaderDistriParseBlock& blk, bool own) = 0;
 	virtual void LocalDeletePDO(CDynObj* ) = 0;
+	virtual void DistriTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan) = 0;
+	virtual void LocalTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan, const CVector3D* lat) = 0;
 	virtual void PeggingPair(const string& cParent, const string& cChild) = 0;
 	virtual void PegPDOs() = 0;
 };
@@ -48,6 +50,8 @@ public:
 	virtual void Maintainer(void);
 	virtual void PeggingPair(const string& cParent, const string& cChild);
 	virtual void PegPDOs();
+	virtual void DistriTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan);
+	virtual void LocalTeleportPDO(CAvatarObj* obj, const CPoint3D* pos, const CVector3D* tan, const CVector3D* lat);
 protected:
 	virtual CDynObj* LocalCreateEDO(
 					bool				own,
