@@ -177,6 +177,7 @@ public:
     void   SetExternalDynaControlIdImm(int);
 
 	float  GetTireRotation( int ) const;
+    void  SetTireRotation(int, float) ;
 };
 
 
@@ -387,6 +388,7 @@ public:
 	void SetStateIndex(TU16b, bool doublebuffer = true);
 	void SetPrecreateId(TU16b, bool doublebuffer = true);
 	void SetLightTarget(TS8b, bool doublebuffer = true);
+    void SetText(const std::string& str);
 
 	void GetColor(float &R,float &G, float &B, float &A) const;
 	void GetDrawSize(float &x, float &y) const;
@@ -399,6 +401,7 @@ public:
 	TU16b GetStateIndex() const;
 	TU16b GetPrecreateId() const;
 	TS8b GetLightTarget() const;
+    string GetText() const;
 };
 /////////////////////////////////////////////////////////////////////////
 //

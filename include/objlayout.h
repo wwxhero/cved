@@ -411,6 +411,8 @@ typedef union cvTObjState {
 		TU8b              DrawScreen;         /*predef shape ID */
 		TU16b             ParseBlockID;       /*predef shape ID */
         TS8b              lightID;
+        TU8b              TextLength;
+        TS8b              Text[128];
 	} virtualObjectState;
 
 	struct ExternalDriverState {

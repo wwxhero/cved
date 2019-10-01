@@ -3,7 +3,7 @@
 // (C) Copyright 1998 by NADS & Simulation Center, The University of
 //     Iowa.  All rights reserved.
 //
-// Version: 		$Id: attr.h,v 1.20 2014/07/31 14:57:02 IOWA\dheitbri Exp $
+// Version: 		$Id: attr.h,v 1.21 2019/07/10 15:27:48 IOWA\dheitbri Exp $
 //
 // Author(s):	
 // Date:		September, 1998
@@ -83,7 +83,7 @@ inline
 CAttr::~CAttr() {}
 
 inline 
-CAttr::CAttr(const CCved& cCved) : CCvedItem(&cCved) {}
+CAttr::CAttr(const CCved& cCved) : CCvedItem(&cCved),m_pAttr(nullptr) {}
 
 inline 
 CAttr::CAttr(const CAttr& cRhs) { *this = cRhs; }

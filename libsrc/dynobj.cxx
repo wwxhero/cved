@@ -787,7 +787,6 @@ CTrajFollowerObj::SetInitPosRotVel( const double initPosRot[6], const double ini
 void
 CTrajFollowerObj::SetModeType(cvEObjMode mode)
 {
-	int i;
 
 	AssertValid();
 
@@ -806,7 +805,6 @@ CTrajFollowerObj::SetModeType(cvEObjMode mode)
 cvEObjMode
 CTrajFollowerObj::GetModeType()
 {
-	int i;
 
 	AssertValid();
 
@@ -819,10 +817,8 @@ CTrajFollowerObj::GetModeType()
 	else
 	{
 		// odd frame
-		for (i = 0; i < 6; ++i)
-		{
 			return (cvEObjMode)m_pObj->stateBufB.state.trajFollowerState.classType;
-		}
+		
 	}
 }
 //////////////////////////////////////////////////////////////////////////////
@@ -2108,6 +2104,17 @@ CVehicleObj::GetTireRotation( int tire ) const
 		return m_pObj->stateBufA.state.vehicleState.vehState.tireRot[tire];
 	}
 } // end of GetTireRotation
+
+
+void  CVehicleObj::SetTireRotation(int tire, float rotation) {
+    cvTHeader* pH = static_cast<cvTHeader*>(GetInst());
+    if ((pH->frame & 1) == 1) {		// odd frame
+        m_pObj->stateBufB.state.vehicleState.vehState.tireRot[tire] = rotation;
+    }
+    else {							// event frame
+         m_pObj->stateBufA.state.vehicleState.vehState.tireRot[tire] = rotation;
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -3475,6 +3482,31 @@ void  CVisualObjectObj::SetLightTarget(TS8b id, bool doublebuffer) {
 		m_pObj->stateBufA.state.virtualObjectState.lightID = id;
 	}
 }
+void CVisualObjectObj::SetText(const std::string& str) {
+    cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+    unsigned char tsize = min(str.size(), sizeof(cvTObjState::VirtualObjectState::Text)-1); 
+    if( ( pH->frame & 1 ) == 0 ) 
+    {
+        // even frame
+        
+        m_pObj->stateBufB.state.virtualObjectState.TextLength = tsize;
+            
+        memcpy(
+            m_pObj->stateBufB.state.virtualObjectState.Text,
+            str.data(),tsize);
+        m_pObj->stateBufB.state.virtualObjectState.Text[tsize] = 0;
+    }
+    if(( pH->frame & 1 ) > 0 ) 
+    {
+        // odd frame
+        m_pObj->stateBufA.state.virtualObjectState.TextLength = tsize;
+
+        memcpy(
+            m_pObj->stateBufA.state.virtualObjectState.Text,
+            str.data(),tsize);
+        m_pObj->stateBufA.state.virtualObjectState.Text[tsize] = 0;
+    }
+}
 
 void CVisualObjectObj::SetBoarderColor(float R,float G, float B, float A, bool doublebuffer){
 	AssertValid();
@@ -3518,6 +3550,25 @@ CPoint3D CVisualObjectObj::GetDrawPosition() const{
 		ret.m_z = m_pObj->stateBufB.state.virtualObjectState.overlayPosition.z ;
 	}
 	return ret;
+}
+
+string CVisualObjectObj::GetText() const{
+    AssertValid();
+
+    cvTHeader* pH = static_cast<cvTHeader*>( GetInst() );
+    string ret;
+    if( ( pH->frame & 1 ) == 0 ) 
+    {
+        // even frame
+        ret = m_pObj->stateBufA.state.virtualObjectState.Text;
+
+    }
+    else 
+    {
+        // odd frame
+        ret = m_pObj->stateBufB.state.virtualObjectState.Text;
+    }
+    return ret;
 }
 
 void CVisualObjectObj::GetColor(float &R,float &G, float &B, float &A) const{

@@ -550,7 +550,9 @@ call ..\mcopy include\*.inl ..\include</Command>
     </Lib>
     <PostBuildEvent>
       <Message>Copying library file and headers</Message>
-      <Command>call ..\mcopy "$(OutDir)"\CvedLibd.lib ..\lib
+      <Command>call xcopy /y include\*.h ..\include
+call xcopy /y include\*.inl ..\include
+call xcopy /y "$(OutDir)"\CvedLibd.lib ..\lib
 </Command>
     </PostBuildEvent>
     <PreBuildEvent>
@@ -798,9 +800,9 @@ call ..\mcopy include\*.inl ..\include
     </Lib>
     <PostBuildEvent>
       <Message>Copying library file and headers</Message>
-      <Command>call ..\mcopy include\*.h ..\include
-call ..\mcopy include\*.inl ..\include
-</Command>
+      <Command>call xcopy include\*.h ..\include /Y
+call xcopy include\*.inl ..\include /Y
+call xcopy include\*.hpp ..\include /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_EDOCtrl|x64'">
@@ -880,9 +882,7 @@ call ..\mcopy include\*.inl ..\include
     </Lib>
     <PostBuildEvent>
       <Message>Copying library file and headers</Message>
-      <Command>call ..\mcopy include\*.h ..\include
-call ..\mcopy include\*.inl ..\include
-</Command>
+      <Command>call xcopy /y include\*.h ..\include</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_Small_BLI|x64'">
