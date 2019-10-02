@@ -1,4 +1,5 @@
-#include "StdAfx.h"
+#include "cvedpub.h"
+#include "cvedstrc.h"	// private CVED data structs
 #include "RoadTraveler.h"
 using namespace CVED;
 using namespace std;
@@ -129,13 +130,13 @@ CVED::CRoadTraveler::TravelPrivRoad(float& dist,float& cumulativeDist, CVED::CRo
         sign = -1;
     }
     double myDist = pos.GetDistance();
-    float laneDistance = lane.GetRoad().GetCubicLength();
-    float distMax = pos.GetDistance() + dist*sign;
+	double laneDistance = lane.GetRoad().GetCubicLength();
+	double distMax = pos.GetDistance() + dist*sign;
     auto dir = lane.GetDirection();
     if (dir == eNEG) {
         for (auto itr = res.rbegin(); itr != res.rend(); ++itr) {
             if (itr->objId == ignoreId) continue;
-            float dist = myDist - itr->dist ;
+			double dist = myDist - itr->dist ;
             if (itr->dist > distMax && dist > 0) {
                 objects.push_back(itr->objId);
                 dists.push_back(fabs(dist) + cumulativeDist);
@@ -145,7 +146,7 @@ CVED::CRoadTraveler::TravelPrivRoad(float& dist,float& cumulativeDist, CVED::CRo
     else {
         for (auto itr = res.begin(); itr != res.end(); ++itr) {
             if (itr->objId == ignoreId) continue;
-            float dist = itr->dist - myDist;
+			double dist = itr->dist - myDist;
             if ((dist)*sign < fabs(distMax)*sign && dist*sign > 0) {
                 objects.push_back(itr->objId);
                 dists.push_back(dist + cumulativeDist);
@@ -281,7 +282,7 @@ CVED::CRoadTraveler::TravelPrivRoadNeg(float& dist,float& cumulativeDist, CVED::
     float initDist = dist;
     float deltaD = 0;
     CVED::CLane lane = pos.GetLane();
-    float roadDist = lane.GetRoad().GetCubicLength();
+	double roadDist = lane.GetRoad().GetCubicLength();
     int id = lane.GetId();
     vector<CCved::TObjWithDist> res;
     m_cCved.GetAllDynObjsOnLane(lane, res, eCV_VEHICLE);
